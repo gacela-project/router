@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GacelaRouter;
+namespace Gacela\Router;
 
 final class Request
 {

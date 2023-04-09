@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace GacelaRouter;
+namespace Gacela\Router;
 
 use ReflectionClass;
 use ReflectionNamedType;
 
 use function is_object;
 
-final class Route
+final class RouteEntity
 {
     private static bool $isResponded = false;
 

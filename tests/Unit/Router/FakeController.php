@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GacelaRouterTest\Unit;
+namespace GacelaTest\Unit\Router;
 
 final class FakeController
 {

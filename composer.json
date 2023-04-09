@@ -22,12 +22,12 @@
     },
     "autoload": {
         "psr-4": {
-            "GacelaRouter\\": "src/"
+            "Gacela\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "GacelaRouterTest\\": "tests/"
+            "GacelaTest\\": "tests/"
         }
     },
     "scripts": {

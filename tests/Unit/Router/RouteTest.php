@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace GacelaRouterTest\Unit;
+namespace GacelaTest\Unit\Router;
 
-use GacelaRouter\Route;
-use GacelaRouter\Router;
+use Gacela\Router\Route;
+use Gacela\Router\RouteEntity;
 use Generator;
 use PHPUnit\Framework\TestCase;
 
-final class RouterTest extends TestCase
+final class RouteTest extends TestCase
 {
     private const PROVIDER_TRIES = 10;
 
     protected function tearDown(): void
     {
-        Route::reset();
+        RouteEntity::reset();
     }
 
     public function test_it_should_respond_if_everything_matches(): void
@@ -25,7 +25,7 @@ final class RouterTest extends TestCase
 
         $this->expectOutputString('Expected!');
 
-        Router::get('expected/uri', FakeController::class, 'basicAction');
+        Route::get('expected/uri', FakeController::class, 'basicAction');
     }
 
     public function test_it_should_not_respond_if_the_uri_does_not_matches(): void
@@ -35,7 +35,7 @@ final class RouterTest extends TestCase
 
         $this->expectOutputString('');
 
-        Router::get('other/uri', FakeController::class, 'basicAction');
+        Route::get('other/uri', FakeController::class, 'basicAction');
     }
 
     public function test_it_should_not_respond_if_the_method_does_not_matches(): void
@@ -45,7 +45,7 @@ final class RouterTest extends TestCase
 
         $this->expectOutputString('');
 
-        Router::post('expected/uri', FakeController::class, 'basicAction');
+        Route::post('expected/uri', FakeController::class, 'basicAction');
     }
 
     public function test_it_should_pass_many_params_to_the_action(): void
@@ -58,7 +58,7 @@ final class RouterTest extends TestCase
 
         $this->expectOutputString("The params are '{$params[0]}', '{$params[1]}' and '{$params[2]}'!");
 
-        Router::get('{firstParam}/{secondParam}/{thirdParam}', FakeController::class, 'manyParamsAction');
+        Route::get('{firstParam}/{secondParam}/{thirdParam}', FakeController::class, 'manyParamsAction');
     }
 
     public function test_it_should_pass_associated_params_by_name_to_the_action(): void
@@ -71,7 +71,7 @@ final class RouterTest extends TestCase
 
         $this->expectOutputString("The params are '{$params[1]}', '{$params[0]}' and '{$params[2]}'!");
 
-        Router::get('{secondParam}/{firstParam}/{thirdParam}', FakeController::class, 'manyParamsAction');
+        Route::get('{secondParam}/{firstParam}/{thirdParam}', FakeController::class, 'manyParamsAction');
     }
 
     /**
@@ -84,7 +84,7 @@ final class RouterTest extends TestCase
 
         $this->expectOutputString("The 'string' param is '{$string}'!");
 
-        Router::get('expected/string/is/{param}', FakeController::class, 'stringParamAction');
+        Route::get('expected/string/is/{param}', FakeController::class, 'stringParamAction');
     }
 
     public function stringProvider(): Generator
@@ -105,7 +105,7 @@ final class RouterTest extends TestCase
 
         $this->expectOutputString("The 'int' param is '{$int}'!");
 
-        Router::get('expected/integer/is/{param}', FakeController::class, 'intParamAction');
+        Route::get('expected/integer/is/{param}', FakeController::class, 'intParamAction');
     }
 
     public function intProvider(): Generator
@@ -126,7 +126,7 @@ final class RouterTest extends TestCase
 
         $this->expectOutputString("The 'float' param is '{$float}'!");
 
-        Router::get('expected/float/is/{param}', FakeController::class, 'floatParamAction');
+        Route::get('expected/float/is/{param}', FakeController::class, 'floatParamAction');
     }
 
     public function floatProvider(): Generator
@@ -147,7 +147,7 @@ final class RouterTest extends TestCase
 
         $this->expectOutputString("The 'bool' param is '{$expected}'!");
 
-        Router::get('expected/bool/is/{param}', FakeController::class, 'boolParamAction');
+        Route::get('expected/bool/is/{param}', FakeController::class, 'boolParamAction');
     }
 
     public function boolProvider(): iterable
@@ -165,7 +165,7 @@ final class RouterTest extends TestCase
 
         $this->expectOutputString('Expected!');
 
-        Router::get('expected/uri', FakeController::class, 'basicAction');
-        Router::get('expected/{param}', FakeController::class, 'stringParamAction');
+        Route::get('expected/uri', FakeController::class, 'basicAction');
+        Route::get('expected/{param}', FakeController::class, 'stringParamAction');
     }
 }

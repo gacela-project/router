@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GacelaRouter;
+namespace Gacela\Router;
 
-final class Router
+final class Route
 {
     /**
      * @param object|class-string $controller
@@ -116,7 +116,7 @@ final class Router
     ): void {
         $path = ($path === '/') ? '' : $path;
 
-        $route = new Route($method, $path, $controller, $action);
+        $route = new RouteEntity($method, $path, $controller, $action);
 
         if ($route->requestMatches()) {
             echo $route->run();
