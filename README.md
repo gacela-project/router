@@ -1,6 +1,14 @@
 # Gacela Router
 
-A minimalistic, proof-of-concept, HTTP router.
+A minimalistic HTTP router ideal for your proof-of-concept projects.
+
+## Why?
+
+There are many other routers out there. Eg: using Symfony Framework, Laravel, etc... however, these are really rich in features which means they add a lot of accidental complexity and dependencies to your vendor, that you might want to avoid. At least for your proof-of-concept project.
+
+Gacela Router doesn't aim to be the best router that can do everything, but a light router to have the bare minimum code, ideal for your simple ideas to emerge.
+
+For a POC, we simply value simplicity over a rich-feature library.
 
 ## Example
 
