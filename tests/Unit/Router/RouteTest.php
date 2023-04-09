@@ -168,4 +168,14 @@ final class RouteTest extends TestCase
         Route::get('expected/uri', FakeController::class, 'basicAction');
         Route::get('expected/{param}', FakeController::class, 'stringParamAction');
     }
+
+    public function test_optional_argument(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/optional';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+
+        $this->expectOutputString('Expected!');
+
+        Route::get('optional/{param?}', FakeController::class, 'basicAction');
+    }
 }
