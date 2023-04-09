@@ -7,6 +7,7 @@ namespace Gacela\Router;
 use ReflectionClass;
 use ReflectionNamedType;
 
+use function count;
 use function is_object;
 
 final class RouteEntity
@@ -71,12 +72,21 @@ final class RouteEntity
 
     private function pathMatches(): bool
     {
-        return (bool)preg_match($this->getPathPattern(), Request::path());
+        return (bool)preg_match($this->getPathPattern(), Request::path())
+            || (bool)preg_match($this->getPathPatternWithoutOptionals(), Request::path());
     }
 
     private function getPathPattern(): string
     {
         $pattern = preg_replace('#({.*})#U', '(.*)', $this->path);
+
+        return '#^/' . $pattern . '$#';
+    }
+
+    private function getPathPatternWithoutOptionals(): string
+    {
+        $pattern = preg_replace('#/({.*\?})#U', '(/(.*))?', $this->path);
+
         return '#^/' . $pattern . '$#';
     }
 
@@ -91,6 +101,10 @@ final class RouteEntity
 
         unset($pathParamValues[0], $pathParamKeys[0]);
         $pathParamKeys = array_map(static fn ($key) => trim($key, '{}'), $pathParamKeys);
+
+        if (count($pathParamValues) !== count($pathParamKeys)) {
+            array_shift($pathParamKeys);
+        }
 
         $pathParams = array_combine($pathParamKeys, $pathParamValues);
         $actionParams = (new ReflectionClass($this->controller))
