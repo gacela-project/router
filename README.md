@@ -2,6 +2,25 @@
 
 A minimalistic HTTP router ideal for your proof-of-concept projects.
 
+
+<p align="center">
+  <a href="https://github.com/c/actions">
+    <img src="https://github.com/gacela-project/router/workflows/CI/badge.svg" alt="GitHub Build Status">
+  </a>
+  <a href="https://scrutinizer-ci.com/g/gacela-project/router/?branch=main">
+    <img src="https://scrutinizer-ci.com/g/gacela-project/router/badges/quality-score.png?b=main" alt="Scrutinizer Code Quality">
+  </a>
+  <a href="https://scrutinizer-ci.com/g/gacela-project/router/?branch=main">
+    <img src="https://scrutinizer-ci.com/g/gacela-project/router/badges/coverage.png?b=main" alt="Scrutinizer Code Coverage">
+  </a>
+  <a href="https://shepherd.dev/github/gacela-project/router">
+    <img src="https://shepherd.dev/github/gacela-project/router/coverage.svg" alt="Psalm Type-coverage Status">
+  </a>
+  <a href="https://github.com/gacela-project/router/blob/master/LICENSE">
+    <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="MIT Software License">
+  </a>
+</p>
+
 ## Why?
 
 There are many other routers out there. Eg: using Symfony Framework, Laravel, etc... however, these are really rich in features which means they add a lot of accidental complexity and dependencies to your vendor, that you might want to avoid. At least for your proof-of-concept project.
