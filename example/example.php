@@ -2,33 +2,36 @@
 
 declare(strict_types=1);
 
-require_once dirname(__DIR__) . '/vendor/autoload.php';
+require_once \dirname(__DIR__) . '/vendor/autoload.php';
 
 use GacelaRouter\Router;
 
-final class CustomController
-{
-    public function __invoke(
-        string $name = 'DefaultName',
-        int $amount = 0
-    ): string
+# php -S localhost:8081 example/example.php
+
+$controller = new class() {
+    public function __invoke(): string
     {
-        return "Hello, $name. Amount=$amount";
+        $request = \GacelaRouter\Request::fromGlobals();
+        $number = $request->get('number');
+
+        if ($number !== 0) {
+            return "__invoke with GET 'number'={$number}";
+        }
+
+        return '__invoke';
     }
-}
 
-$router = Router::withServer([
-    'REQUEST_METHOD' => 'GET',
-    'REQUEST_URI' => '/foo/?amount=123000',
-]);
+    public function customAction(int $number = 0): string
+    {
+        return "customAction(number: {$number})";
+    }
+};
 
-$router->get('/', static function () {
-    echo (new CustomController)->__invoke();
-});
+# localhost:8081/custom/123
+Router::get('custom/{number}', $controller, 'customAction');
 
-$router->get('/$name', static function (string $name = '') {
-    $amount = (int)($_GET['amount'] ?? 0);
-    echo (new CustomController)->__invoke($name, $amount);
-});
+# localhost:8081/custom
+Router::get('custom', $controller);
 
-$router->listen();
+# localhost:8081?number=456
+Router::get('/', $controller);

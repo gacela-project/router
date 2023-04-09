@@ -4,102 +4,122 @@ declare(strict_types=1);
 
 namespace GacelaRouter;
 
-use function count;
-
 final class Router
 {
     /**
-     * Eg: [method -> url -> [action, args]]
-     *
-     * @var array<string, array<string, array{
-     *     action: callable,
-     *     args?: array
-     * }>>
+     * @param object|class-string $controller
      */
-    private array $routes = [];
-
-    private function __construct(
-        private string $requestMethod,
-        private string $requestUri,
-    ) {
-    }
-
-    public static function withServer(array $server = []): self
-    {
-        return new self(
-            (string)($server['REQUEST_METHOD'] ?? ''),
-            (string)($server['REQUEST_URI'] ?? ''),
-        );
-    }
-
-    public function listen(): void
-    {
-        $requestUrl = $this->requestUrl();
-
-        $notFoundFn = static fn (): string => "404: route '{$requestUrl}' not found";
-
-        $current = $this->routes[$this->requestMethod][$requestUrl]
-            ?? ['action' => $notFoundFn, 'args' => []];
-
-        /** @psalm-suppress TooManyArguments */
-        echo (string)$current['action'](...$current['args'] ?? []);
-    }
-
-    public function get(string $route, callable $callback): void
-    {
-        $this->route('GET', $route, $callback);
-    }
-
-    private function route(string $method, string $route, callable $callback): void
-    {
-        $requestUrl = $this->requestUrl();
-        $routeParts = explode('/', $route);
-        $requestUrlParts = explode('/', $requestUrl);
-        array_shift($routeParts);
-        array_shift($requestUrlParts);
-
-        if ($routeParts[0] === '' && count($requestUrlParts) === 0) {
-            $this->routes[$method][$requestUrl] = [
-                'action' => $callback,
-                'args' => [],
-            ];
-            return;
-        }
-
-        if (count($routeParts) !== count($requestUrlParts)) {
-            return;
-        }
-
-        $parameters = $this->parameters($routeParts, $requestUrlParts);
-        $this->routes[$method][$requestUrl] = [
-            'action' => $callback,
-            'args' => $parameters,
-        ];
-    }
-
-    private function requestUrl(): string
-    {
-        $requestUrl = (string)filter_var($this->requestUri, FILTER_SANITIZE_URL);
-        $requestUrl = (string)strtok($requestUrl, '?');
-
-        return rtrim($requestUrl, '/');
+    public static function get(
+        string $path,
+        object|string $controller,
+        string $action = '__invoke',
+    ): void {
+        self::runRoute(Request::METHOD_GET, $path, $controller, $action);
     }
 
     /**
-     * @psalm-suppress MixedAssignment,MixedArgument
+     * @param object|class-string $controller
      */
-    private function parameters(array $routeParts, array $requestUrlParts): array
-    {
-        $parameters = [];
-        for ($i = 0, $iMax = count($routeParts); $i < $iMax; ++$i) {
-            $routePart = $routeParts[$i];
-            if (preg_match('/^[$]/', $routePart)) {
-                $parameters[] = $requestUrlParts[$i];
-            } elseif ($routeParts[$i] !== $requestUrlParts[$i]) {
-                return [];
-            }
-        }
+    public static function head(
+        string $path,
+        object|string $controller,
+        string $action = '__invoke',
+    ): void {
+        self::runRoute(Request::METHOD_HEAD, $path, $controller, $action);
+    }
 
-        return $parameters;
+    /**
+     * @param object|class-string $controller
+     */
+    public static function connect(
+        string $path,
+        object|string $controller,
+        string $action = '__invoke',
+    ): void {
+        self::runRoute(Request::METHOD_CONNECT, $path, $controller, $action);
+    }
+
+    /**
+     * @param object|class-string $controller
+     */
+    public static function delete(
+        string $path,
+        object|string $controller,
+        string $action = '__invoke',
+    ): void {
+        self::runRoute(Request::METHOD_DELETE, $path, $controller, $action);
+    }
+
+    /**
+     * @param object|class-string $controller
+     */
+    public static function options(
+        string $path,
+        object|string $controller,
+        string $action = '__invoke',
+    ): void {
+        self::runRoute(Request::METHOD_OPTIONS, $path, $controller, $action);
+    }
+
+    /**
+     * @param object|class-string $controller
+     */
+    public static function patch(
+        string $path,
+        object|string $controller,
+        string $action = '__invoke',
+    ): void {
+        self::runRoute(Request::METHOD_PATCH, $path, $controller, $action);
+    }
+
+    /**
+     * @param object|class-string $controller
+     */
+    public static function post(
+        string $path,
+        object|string $controller,
+        string $action = '__invoke',
+    ): void {
+        self::runRoute(Request::METHOD_POST, $path, $controller, $action);
+    }
+
+    /**
+     * @param object|class-string $controller
+     */
+    public static function put(
+        string $path,
+        object|string $controller,
+        string $action = '__invoke',
+    ): void {
+        self::runRoute(Request::METHOD_PUT, $path, $controller, $action);
+    }
+
+    /**
+     * @param object|class-string $controller
+     */
+    public static function trace(
+        string $path,
+        object|string $controller,
+        string $action = '__invoke',
+    ): void {
+        self::runRoute(Request::METHOD_TRACE, $path, $controller, $action);
+    }
+
+    /**
+     * @param object|class-string $controller
+     */
+    private static function runRoute(
+        string $method,
+        string $path,
+        object|string $controller,
+        string $action = '__invoke',
+    ): void {
+        $path = ($path === '/') ? '' : $path;
+
+        $route = new Route($method, $path, $controller, $action);
+
+        if ($route->requestMatches()) {
+            echo $route->run();
+        }
     }
 }
