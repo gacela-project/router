@@ -102,7 +102,7 @@ final class RouteEntity
         unset($pathParamValues[0], $pathParamKeys[0]);
         $pathParamKeys = array_map(static fn ($key) => trim($key, '{}'), $pathParamKeys);
 
-        if (count($pathParamValues) !== count($pathParamKeys)) {
+        while (count($pathParamValues) !== count($pathParamKeys)) {
             array_shift($pathParamKeys);
         }
 
