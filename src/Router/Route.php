@@ -65,7 +65,25 @@ final class Route
         self::$request = null;
     }
 
-    public function requestMatches(): bool
+    /**
+     * @param object|class-string $controller
+     */
+    private static function route(
+        string $method,
+        string $path,
+        object|string $controller,
+        string $action = '__invoke',
+    ): void {
+        $path = ($path === '/') ? '' : $path;
+
+        $route = new self($method, $path, $controller, $action);
+
+        if ($route->requestMatches()) {
+            echo $route->run();
+        }
+    }
+
+    private function requestMatches(): bool
     {
         if (self::$isResponded) {
             return false;
@@ -85,7 +103,7 @@ final class Route
     /**
      * @psalm-suppress MixedMethodCall
      */
-    public function run(): string
+    private function run(): string
     {
         self::$isResponded = true;
 
@@ -95,24 +113,6 @@ final class Route
         }
         return (string)(new $this->controller())
             ->{$this->action}(...$this->getParams());
-    }
-
-    /**
-     * @param object|class-string $controller
-     */
-    private static function route(
-        string $method,
-        string $path,
-        object|string $controller,
-        string $action = '__invoke',
-    ): void {
-        $path = ($path === '/') ? '' : $path;
-
-        $route = new self($method, $path, $controller, $action);
-
-        if ($route->requestMatches()) {
-            echo $route->run();
-        }
     }
 
     private function methodMatches(): bool
