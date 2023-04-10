@@ -23,6 +23,8 @@ use function is_object;
  */
 final class Route
 {
+    private static ?Request $request = null;
+
     private static bool $isResponded = false;
 
     /**
@@ -60,6 +62,7 @@ final class Route
     public static function reset(): void
     {
         self::$isResponded = false;
+        self::$request = null;
     }
 
     public function requestMatches(): bool
@@ -93,6 +96,7 @@ final class Route
         return (string)(new $this->controller())
             ->{$this->action}(...$this->getParams());
     }
+
     /**
      * @param object|class-string $controller
      */
@@ -113,13 +117,13 @@ final class Route
 
     private function methodMatches(): bool
     {
-        return Request::method() === $this->method;
+        return $this->request()->isMethod($this->method);
     }
 
     private function pathMatches(): bool
     {
-        return (bool)preg_match($this->getPathPattern(), Request::path())
-            || (bool)preg_match($this->getPathPatternWithoutOptionals(), Request::path());
+        return (bool)preg_match($this->getPathPattern(), $this->request()->path())
+            || (bool)preg_match($this->getPathPatternWithoutOptionals(), $this->request()->path());
     }
 
     private function getPathPattern(): string
@@ -143,7 +147,7 @@ final class Route
         $pathParamValues = [];
 
         preg_match($this->getPathPattern(), '/' . $this->path, $pathParamKeys);
-        preg_match($this->getPathPattern(), Request::path(), $pathParamValues);
+        preg_match($this->getPathPattern(), $this->request()->path(), $pathParamValues);
 
         unset($pathParamValues[0], $pathParamKeys[0]);
         $pathParamKeys = array_map(static fn ($key) => trim($key, '{}'), $pathParamKeys);
@@ -178,5 +182,10 @@ final class Route
         }
 
         return $params;
+    }
+
+    private function request(): Request
+    {
+        return self::$request ??= Request::fromGlobals();
     }
 }

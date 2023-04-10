@@ -19,28 +19,26 @@ final class Request
     public function __construct(
         private array $query,
         private array $request,
+        private array $server,
     ) {
     }
 
     public static function fromGlobals(): self
     {
-        return new self($_GET, $_POST);
+        return new self($_GET, $_POST, $_SERVER);
     }
 
-    /**
-     * @return self::METHOD_*
-     */
-    public static function method(): string
+    public function isMethod(string $method): bool
     {
         /** @psalm-suppress PossiblyUndefinedArrayOffset */
-        return $_SERVER['REQUEST_METHOD'];
+        return (string)$this->server['REQUEST_METHOD'] === $method;
     }
 
-    public static function path(): string
+    public function path(): string
     {
         /** @psalm-suppress PossiblyUndefinedArrayOffset */
         return (string)parse_url(
-            $_SERVER['REQUEST_URI'],
+            (string)$this->server['REQUEST_URI'],
             PHP_URL_PATH,
         );
     }
