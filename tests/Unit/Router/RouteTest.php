@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace GacelaTest\Unit\Router;
 
 use Gacela\Router\Route;
-use Gacela\Router\RouteEntity;
 use Generator;
 use PHPUnit\Framework\TestCase;
 
@@ -15,7 +14,7 @@ final class RouteTest extends TestCase
 
     protected function tearDown(): void
     {
-        RouteEntity::reset();
+        Route::reset();
     }
 
     public function test_it_should_respond_if_everything_matches(): void

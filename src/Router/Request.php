@@ -17,13 +17,14 @@ final class Request
     public const METHOD_TRACE = 'TRACE';
 
     public function __construct(
-        private array $globalGet,
+        private array $query,
+        private array $request,
     ) {
     }
 
     public static function fromGlobals(): self
     {
-        return new self($_GET);
+        return new self($_GET, $_POST);
     }
 
     /**
@@ -46,6 +47,8 @@ final class Request
 
     public function get(string $key): mixed
     {
-        return $this->globalGet[$key] ?? null;
+        return $this->request[$key]
+            ?? $this->query[$key]
+            ?? null;
     }
 }
