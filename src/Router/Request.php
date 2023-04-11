@@ -15,17 +15,26 @@ final class Request
     public const METHOD_POST = 'POST';
     public const METHOD_PUT = 'PUT';
     public const METHOD_TRACE = 'TRACE';
+    private static ?self $instance = null;
 
-    public function __construct(
+    private function __construct(
         private array $query,
         private array $request,
         private array $server,
     ) {
     }
 
-    public static function fromGlobals(): self
+    public static function resetCache(): void
     {
-        return new self($_GET, $_POST, $_SERVER);
+        self::$instance = null;
+    }
+
+    public static function instance(): self
+    {
+        if (self::$instance === null) {
+            self::$instance = new self($_GET, $_POST, $_SERVER);
+        }
+        return self::$instance;
     }
 
     public function isMethod(string $method): bool

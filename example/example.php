@@ -6,13 +6,14 @@ require_once \dirname(__DIR__) . '/vendor/autoload.php';
 
 use Gacela\Router\Request;
 use Gacela\Router\Route;
+use Gacela\Router\RoutingConfigurator;
 
 # php -S localhost:8081 example/example.php
 
 $controller = new class() {
     public function __invoke(): string
     {
-        $request = Request::fromGlobals();
+        $request = Request::instance();
         $number = $request->get('number');
 
         if (!empty($number)) {
@@ -28,11 +29,13 @@ $controller = new class() {
     }
 };
 
-# localhost:8081/custom/123
-Route::get('custom/{number}', $controller, 'customAction');
+Route::configure(static function (RoutingConfigurator $routes) use ($controller): void {
+    # localhost:8081/custom/123
+    $routes->get('custom/{number}', $controller, 'customAction');
 
-# localhost:8081/custom
-Route::get('custom', $controller);
+    # localhost:8081/custom
+    $routes->get('custom', $controller);
 
-# localhost:8081?number=456
-Route::get('/', $controller);
+    # localhost:8081?number=456
+    $routes->get('/', $controller);
+});
