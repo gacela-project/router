@@ -27,7 +27,7 @@ There are many other routers out there. Eg: using Symfony Framework, Laravel, et
 
 Gacela Router doesn't aim to be the best router that can do everything, but a light router to have the bare minimum code, ideal for your simple ideas to emerge.
 
-For a POC, we simply value simplicity over a rich-feature library.
+For a POC, we value simplicity over a rich-feature library.
 
 ## Example
 
@@ -38,13 +38,15 @@ php -S localhost:8081 example/example.php
 
 You can access the example routes:
 ```php
-# localhost:8081/custom/123
-Route::get('custom/{number}', $controller, 'customAction');
+Route::configure(static function (RoutingConfigurator $routes): void {
+    # localhost:8081/custom/123
+    $routes->get('custom/{number}', CustomController::class, 'customAction');
 
-# localhost:8081/custom
-Route::get('custom', $controller);
+    # localhost:8081/custom
+    $routes->get('custom', CustomController::class);
 
-# localhost:8081?number=456
-Route::get('/', $controller);
+    # localhost:8081?number=456
+    $routes->get('/', CustomController::class);
+});
 ```
 
