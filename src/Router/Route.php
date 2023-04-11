@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace Gacela\Router;
 
-use ReflectionClass;
-use ReflectionNamedType;
-
-use function count;
 use function is_object;
 
 /**
@@ -23,8 +19,6 @@ use function is_object;
  */
 final class Route
 {
-    private static ?Request $request = null;
-
     /**
      * @param object|class-string $controller
      */
@@ -34,11 +28,6 @@ final class Route
         private object|string $controller,
         private string $action = '__invoke',
     ) {
-    }
-
-    public static function resetCache(): void
-    {
-        self::$request = null;
     }
 
     /**
@@ -62,16 +51,40 @@ final class Route
      */
     public function run(): string
     {
+        $params = (new RouteParams($this))->asArray();
+
         if (is_object($this->controller)) {
             return (string)$this->controller
-                ->{$this->action}(
-                    ...$this->getParams()
-                );
+                ->{$this->action}(...$params);
         }
+
         return (string)(new $this->controller())
-            ->{$this->action}(
-                ...$this->getParams()
-            );
+            ->{$this->action}(...$params);
+    }
+
+    public function path(): string
+    {
+        return $this->path;
+    }
+
+    /**
+     * @return object|class-string
+     */
+    public function controller(): object|string
+    {
+        return $this->controller;
+    }
+
+    public function action(): string
+    {
+        return $this->action;
+    }
+
+    public function getPathPattern(): string
+    {
+        $pattern = preg_replace('#({.*})#U', '(.*)', $this->path);
+
+        return '#^/' . $pattern . '$#';
     }
 
     private function requestMatches(): bool
@@ -89,20 +102,15 @@ final class Route
 
     private function methodMatches(): bool
     {
-        return $this->request()->isMethod($this->method);
+        return Request::instance()->isMethod($this->method);
     }
 
     private function pathMatches(): bool
     {
-        return (bool)preg_match($this->getPathPattern(), $this->request()->path())
-            || (bool)preg_match($this->getPathPatternWithoutOptionals(), $this->request()->path());
-    }
+        $path = Request::instance()->path();
 
-    private function getPathPattern(): string
-    {
-        $pattern = preg_replace('#({.*})#U', '(.*)', $this->path);
-
-        return '#^/' . $pattern . '$#';
+        return preg_match($this->getPathPattern(), $path)
+            || preg_match($this->getPathPatternWithoutOptionals(), $path);
     }
 
     private function getPathPatternWithoutOptionals(): string
@@ -110,54 +118,5 @@ final class Route
         $pattern = preg_replace('#/({.*\?})#U', '(/(.*))?', $this->path);
 
         return '#^/' . $pattern . '$#';
-    }
-
-    private function getParams(): array
-    {
-        $params = [];
-        $pathParamKeys = [];
-        $pathParamValues = [];
-
-        preg_match($this->getPathPattern(), '/' . $this->path, $pathParamKeys);
-        preg_match($this->getPathPattern(), $this->request()->path(), $pathParamValues);
-
-        unset($pathParamValues[0], $pathParamKeys[0]);
-        $pathParamKeys = array_map(static fn ($key) => trim($key, '{}'), $pathParamKeys);
-
-        while (count($pathParamValues) !== count($pathParamKeys)) {
-            array_shift($pathParamKeys);
-        }
-
-        $pathParams = array_combine($pathParamKeys, $pathParamValues);
-        $actionParams = (new ReflectionClass($this->controller))
-            ->getMethod($this->action)
-            ->getParameters();
-
-        foreach ($actionParams as $actionParam) {
-            $paramName = $actionParam->getName();
-            /** @var string|null $paramType */
-            $paramType = null;
-
-            if ($actionParam->getType() && is_a($actionParam->getType(), ReflectionNamedType::class)) {
-                $paramType = $actionParam->getType()->getName();
-            }
-
-            $value = match ($paramType) {
-                'string' => $pathParams[$paramName] ?? '',
-                'int' => (int)($pathParams[$paramName] ?? 0),
-                'float' => (float)($pathParams[$paramName] ?? 0.0),
-                'bool' => (bool)json_decode($pathParams[$paramName] ?? '0'),
-                null => null,
-            };
-
-            $params[$paramName] = $value;
-        }
-
-        return $params;
-    }
-
-    private function request(): Request
-    {
-        return self::$request ??= Request::fromGlobals();
     }
 }

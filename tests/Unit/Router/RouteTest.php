@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace GacelaTest\Unit\Router;
 
+use Gacela\Router\Request;
 use Gacela\Router\Route;
 use Gacela\Router\RoutingConfigurator;
 use Generator;
@@ -15,7 +16,7 @@ final class RouteTest extends TestCase
 
     protected function tearDown(): void
     {
-        Route::resetCache();
+        Request::resetCache();
     }
 
     public function test_it_should_respond_if_everything_matches(): void
