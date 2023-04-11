@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace GacelaTest\Unit\Router;
 
 use Gacela\Router\Route;
+use Gacela\Router\RoutingConfigurator;
 use Generator;
 use PHPUnit\Framework\TestCase;
 
@@ -14,7 +15,7 @@ final class RouteTest extends TestCase
 
     protected function tearDown(): void
     {
-        Route::reset();
+        Route::resetCache();
     }
 
     public function test_it_should_respond_if_everything_matches(): void
@@ -24,7 +25,9 @@ final class RouteTest extends TestCase
 
         $this->expectOutputString('Expected!');
 
-        Route::get('expected/uri', FakeController::class, 'basicAction');
+        Route::configure(static function (RoutingConfigurator $routes): void {
+            $routes->get('expected/uri', FakeController::class, 'basicAction');
+        });
     }
 
     public function test_it_should_not_respond_if_the_uri_does_not_matches(): void
@@ -34,7 +37,9 @@ final class RouteTest extends TestCase
 
         $this->expectOutputString('');
 
-        Route::get('other/uri', FakeController::class, 'basicAction');
+        Route::configure(static function (RoutingConfigurator $routes): void {
+            $routes->get('other/uri', FakeController::class, 'basicAction');
+        });
     }
 
     public function test_it_should_not_respond_if_the_method_does_not_matches(): void
@@ -44,7 +49,9 @@ final class RouteTest extends TestCase
 
         $this->expectOutputString('');
 
-        Route::post('expected/uri', FakeController::class, 'basicAction');
+        Route::configure(static function (RoutingConfigurator $routes): void {
+            $routes->post('expected/uri', FakeController::class, 'basicAction');
+        });
     }
 
     public function test_it_should_pass_many_params_to_the_action(): void
@@ -57,7 +64,9 @@ final class RouteTest extends TestCase
 
         $this->expectOutputString("The params are '{$params[0]}', '{$params[1]}' and '{$params[2]}'!");
 
-        Route::get('{firstParam}/{secondParam}/{thirdParam}', FakeController::class, 'manyParamsAction');
+        Route::configure(static function (RoutingConfigurator $routes): void {
+            $routes->get('{firstParam}/{secondParam}/{thirdParam}', FakeController::class, 'manyParamsAction');
+        });
     }
 
     public function test_it_should_pass_associated_params_by_name_to_the_action(): void
@@ -70,7 +79,9 @@ final class RouteTest extends TestCase
 
         $this->expectOutputString("The params are '{$params[1]}', '{$params[0]}' and '{$params[2]}'!");
 
-        Route::get('{secondParam}/{firstParam}/{thirdParam}', FakeController::class, 'manyParamsAction');
+        Route::configure(static function (RoutingConfigurator $routes): void {
+            $routes->get('{secondParam}/{firstParam}/{thirdParam}', FakeController::class, 'manyParamsAction');
+        });
     }
 
     /**
@@ -83,7 +94,9 @@ final class RouteTest extends TestCase
 
         $this->expectOutputString("The 'string' param is '{$string}'!");
 
-        Route::get('expected/string/is/{param}', FakeController::class, 'stringParamAction');
+        Route::configure(static function (RoutingConfigurator $routes): void {
+            $routes->get('expected/string/is/{param}', FakeController::class, 'stringParamAction');
+        });
     }
 
     public function stringProvider(): Generator
@@ -104,7 +117,9 @@ final class RouteTest extends TestCase
 
         $this->expectOutputString("The 'int' param is '{$int}'!");
 
-        Route::get('expected/integer/is/{param}', FakeController::class, 'intParamAction');
+        Route::configure(static function (RoutingConfigurator $routes): void {
+            $routes->get('expected/integer/is/{param}', FakeController::class, 'intParamAction');
+        });
     }
 
     public function intProvider(): Generator
@@ -125,7 +140,9 @@ final class RouteTest extends TestCase
 
         $this->expectOutputString("The 'float' param is '{$float}'!");
 
-        Route::get('expected/float/is/{param}', FakeController::class, 'floatParamAction');
+        Route::configure(static function (RoutingConfigurator $routes): void {
+            $routes->get('expected/float/is/{param}', FakeController::class, 'floatParamAction');
+        });
     }
 
     public function floatProvider(): Generator
@@ -146,7 +163,9 @@ final class RouteTest extends TestCase
 
         $this->expectOutputString("The 'bool' param is '{$expected}'!");
 
-        Route::get('expected/bool/is/{param}', FakeController::class, 'boolParamAction');
+        Route::configure(static function (RoutingConfigurator $routes): void {
+            $routes->get('expected/bool/is/{param}', FakeController::class, 'boolParamAction');
+        });
     }
 
     public function boolProvider(): iterable
@@ -164,8 +183,10 @@ final class RouteTest extends TestCase
 
         $this->expectOutputString('Expected!');
 
-        Route::get('expected/uri', FakeController::class, 'basicAction');
-        Route::get('expected/{param}', FakeController::class, 'stringParamAction');
+        Route::configure(static function (RoutingConfigurator $routes): void {
+            $routes->get('expected/uri', FakeController::class, 'basicAction');
+            $routes->get('expected/{param}', FakeController::class, 'stringParamAction');
+        });
     }
 
     public function test_optional_argument(): void
@@ -175,7 +196,9 @@ final class RouteTest extends TestCase
 
         $this->expectOutputString('Expected!');
 
-        Route::get('optional/{param?}', FakeController::class, 'basicAction');
+        Route::configure(static function (RoutingConfigurator $routes): void {
+            $routes->get('optional/{param?}', FakeController::class, 'basicAction');
+        });
     }
 
     public function test_multiple_optional_argument(): void
@@ -185,6 +208,8 @@ final class RouteTest extends TestCase
 
         $this->expectOutputString('Expected!');
 
-        Route::get('optional/{param1?}/{param2?}', FakeController::class, 'basicAction');
+        Route::configure(static function (RoutingConfigurator $routes): void {
+            $routes->get('optional/{param1?}/{param2?}', FakeController::class, 'basicAction');
+        });
     }
 }

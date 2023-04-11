@@ -25,12 +25,10 @@ final class Route
 {
     private static ?Request $request = null;
 
-    private static bool $isResponded = false;
-
     /**
      * @param object|class-string $controller
      */
-    private function __construct(
+    public function __construct(
         private string $method,
         private string $path,
         private object|string $controller,
@@ -38,57 +36,46 @@ final class Route
     ) {
     }
 
-    /**
-     * @psalm-suppress MixedArgument
-     */
-    public static function __callStatic(string $name, array $arguments): void
+    public static function resetCache(): void
     {
-        match ($name) {
-            'head' => self::route(Request::METHOD_HEAD, ...$arguments),
-            'connect' => self::route(Request::METHOD_CONNECT, ...$arguments),
-            'post' => self::route(Request::METHOD_POST, ...$arguments),
-            'delete' => self::route(Request::METHOD_DELETE, ...$arguments),
-            'options' => self::route(Request::METHOD_OPTIONS, ...$arguments),
-            'patch' => self::route(Request::METHOD_PATCH, ...$arguments),
-            'put' => self::route(Request::METHOD_PUT, ...$arguments),
-            'trace' => self::route(Request::METHOD_TRACE, ...$arguments),
-            default => self::route(Request::METHOD_GET, ...$arguments),
-        };
-    }
-
-    /**
-     * @internal for testing
-     */
-    public static function reset(): void
-    {
-        self::$isResponded = false;
         self::$request = null;
     }
 
     /**
-     * @param object|class-string $controller
+     * @param callable(RoutingConfigurator):void $fn
      */
-    private static function route(
-        string $method,
-        string $path,
-        object|string $controller,
-        string $action = '__invoke',
-    ): void {
-        $path = ($path === '/') ? '' : $path;
+    public static function configure(callable $fn): void
+    {
+        $routingConfigurator = new RoutingConfigurator();
+        $fn($routingConfigurator);
 
-        $route = new self($method, $path, $controller, $action);
-
-        if ($route->requestMatches()) {
-            echo $route->run();
+        foreach ($routingConfigurator->routes() as $route) {
+            if ($route->requestMatches()) {
+                echo $route->run();
+                break;
+            }
         }
+    }
+
+    /**
+     * @psalm-suppress MixedMethodCall
+     */
+    public function run(): string
+    {
+        if (is_object($this->controller)) {
+            return (string)$this->controller
+                ->{$this->action}(
+                    ...$this->getParams()
+                );
+        }
+        return (string)(new $this->controller())
+            ->{$this->action}(
+                ...$this->getParams()
+            );
     }
 
     private function requestMatches(): bool
     {
-        if (self::$isResponded) {
-            return false;
-        }
-
         if (!$this->methodMatches()) {
             return false;
         }
@@ -98,21 +85,6 @@ final class Route
         }
 
         return true;
-    }
-
-    /**
-     * @psalm-suppress MixedMethodCall
-     */
-    private function run(): string
-    {
-        self::$isResponded = true;
-
-        if (is_object($this->controller)) {
-            return (string)$this->controller
-                ->{$this->action}(...$this->getParams());
-        }
-        return (string)(new $this->controller())
-            ->{$this->action}(...$this->getParams());
     }
 
     private function methodMatches(): bool
