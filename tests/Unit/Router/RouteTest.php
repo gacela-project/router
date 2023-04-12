@@ -7,6 +7,7 @@ namespace GacelaTest\Unit\Router;
 use Gacela\Router\Request;
 use Gacela\Router\Route;
 use Gacela\Router\RoutingConfigurator;
+use Gacela\Router\UnsupportedHttpMethodException;
 use Generator;
 use PHPUnit\Framework\TestCase;
 
@@ -211,6 +212,15 @@ final class RouteTest extends TestCase
 
         Route::configure(static function (RoutingConfigurator $routes): void {
             $routes->get('optional/{param1?}/{param2?}', FakeController::class, 'basicAction');
+        });
+    }
+
+    public function test_it_should_thrown_exception_if_method_does_not_exist(): void
+    {
+        $this->expectException(UnsupportedHttpMethodException::class);
+
+        Route::configure(static function (RoutingConfigurator $routes): void {
+            $routes->invalidName('', FakeController::class);
         });
     }
 }
