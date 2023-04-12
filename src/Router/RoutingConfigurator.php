@@ -14,6 +14,7 @@ namespace Gacela\Router;
  * @method delete(string $path, object|string $controller, string $action = '__invoke')
  * @method options(string $path, object|string $controller, string $action = '__invoke')
  * @method trace(string $path, object|string $controller, string $action = '__invoke')
+ * @method any(string $path, object|string $controller, string $action = '__invoke')
  */
 final class RoutingConfigurator
 {
@@ -25,18 +26,24 @@ final class RoutingConfigurator
      */
     public function __call(string $name, array $arguments): void
     {
-        $this->routes[] = match ($name) {
-            'head' => $this->route(Request::METHOD_HEAD, ...$arguments),
-            'connect' => $this->route(Request::METHOD_CONNECT, ...$arguments),
-            'get' => $this->route(Request::METHOD_GET, ...$arguments),
-            'post' => $this->route(Request::METHOD_POST, ...$arguments),
-            'put' => $this->route(Request::METHOD_PUT, ...$arguments),
-            'patch' => $this->route(Request::METHOD_PATCH, ...$arguments),
-            'delete' => $this->route(Request::METHOD_DELETE, ...$arguments),
-            'options' => $this->route(Request::METHOD_OPTIONS, ...$arguments),
-            'trace' => $this->route(Request::METHOD_TRACE, ...$arguments),
-            default => throw new UnsupportedHttpMethodException($name),
-        };
+        if ($name === 'any') {
+            foreach (Request::ALL_METHODS as $methodName) {
+                $this->routes[] = $this->route($methodName, ...$arguments);
+            }
+        } else {
+            $this->routes[] =  match ($name) {
+                'head' => $this->route(Request::METHOD_HEAD, ...$arguments),
+                'connect' => $this->route(Request::METHOD_CONNECT, ...$arguments),
+                'get' => $this->route(Request::METHOD_GET, ...$arguments),
+                'post' => $this->route(Request::METHOD_POST, ...$arguments),
+                'put' => $this->route(Request::METHOD_PUT, ...$arguments),
+                'patch' => $this->route(Request::METHOD_PATCH, ...$arguments),
+                'delete' => $this->route(Request::METHOD_DELETE, ...$arguments),
+                'options' => $this->route(Request::METHOD_OPTIONS, ...$arguments),
+                'trace' => $this->route(Request::METHOD_TRACE, ...$arguments),
+                default => throw new UnsupportedHttpMethodException($name),
+            };
+        }
     }
 
     /**

@@ -15,7 +15,7 @@ final class RouteTest extends TestCase
 {
     private const PROVIDER_TRIES = 10;
 
-    protected function tearDown(): void
+    protected function setUp(): void
     {
         Request::resetCache();
     }
@@ -211,7 +211,7 @@ final class RouteTest extends TestCase
         $this->expectOutputString('Expected!');
 
         Route::configure(static function (RoutingConfigurator $routes): void {
-            $routes->get('optional/{param1?}/{param2?}', FakeController::class, 'basicAction');
+            $routes->any('optional/{param1?}/{param2?}', FakeController::class, 'basicAction');
         });
     }
 
@@ -222,5 +222,33 @@ final class RouteTest extends TestCase
         Route::configure(static function (RoutingConfigurator $routes): void {
             $routes->invalidName('', FakeController::class);
         });
+    }
+
+    /**
+     * @dataProvider anyHttpMethodProvider
+     */
+    public function test_any_http_method(string $httpMethod): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
+        $_SERVER['REQUEST_METHOD'] = $httpMethod;
+
+        $this->expectOutputString('Expected!');
+
+        Route::configure(static function (RoutingConfigurator $routes): void {
+            $routes->any('expected/uri', FakeController::class, 'basicAction');
+        });
+    }
+
+    public function anyHttpMethodProvider(): Generator
+    {
+        yield ['METHOD_GET' => Request::METHOD_GET];
+        yield ['METHOD_CONNECT' => Request::METHOD_CONNECT];
+        yield ['METHOD_DELETE' => Request::METHOD_DELETE];
+        yield ['METHOD_HEAD' => Request::METHOD_HEAD];
+        yield ['METHOD_OPTIONS' => Request::METHOD_OPTIONS];
+        yield ['METHOD_PATCH' => Request::METHOD_PATCH];
+        yield ['METHOD_POST' => Request::METHOD_POST];
+        yield ['METHOD_PUT' => Request::METHOD_PUT];
+        yield ['METHOD_TRACE' => Request::METHOD_TRACE];
     }
 }
