@@ -8,6 +8,8 @@ use Gacela\Router\Request;
 use Gacela\Router\Route;
 use Gacela\Router\RoutingConfigurator;
 use Gacela\Router\UnsupportedHttpMethodException;
+use GacelaTest\Unit\Router\Fake\Name;
+use GacelaTest\Unit\Router\Fake\NameInterface;
 use Generator;
 use PHPUnit\Framework\TestCase;
 
@@ -250,5 +252,18 @@ final class RouteTest extends TestCase
         yield ['METHOD_POST' => Request::METHOD_POST];
         yield ['METHOD_PUT' => Request::METHOD_PUT];
         yield ['METHOD_TRACE' => Request::METHOD_TRACE];
+    }
+
+    public function test_inject_dependencies_in_controllers(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+
+        $this->expectOutputString('default-Expected!');
+
+        Route::configure(static function (RoutingConfigurator $routes): void {
+            $routes->get('expected/uri', FakeControllerWithDependencies::class);
+            $routes->setMappingInterfaces([NameInterface::class => new Name('Expected!')]);
+        });
     }
 }
