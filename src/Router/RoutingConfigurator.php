@@ -27,22 +27,9 @@ final class RoutingConfigurator
     public function __call(string $name, array $arguments): void
     {
         if ($name === 'any') {
-            foreach (Request::ALL_METHODS as $methodName) {
-                $this->routes[] = $this->route($methodName, ...$arguments);
-            }
+            $this->addRoutesForAllMethods($arguments);
         } else {
-            $this->routes[] =  match ($name) {
-                'head' => $this->route(Request::METHOD_HEAD, ...$arguments),
-                'connect' => $this->route(Request::METHOD_CONNECT, ...$arguments),
-                'get' => $this->route(Request::METHOD_GET, ...$arguments),
-                'post' => $this->route(Request::METHOD_POST, ...$arguments),
-                'put' => $this->route(Request::METHOD_PUT, ...$arguments),
-                'patch' => $this->route(Request::METHOD_PATCH, ...$arguments),
-                'delete' => $this->route(Request::METHOD_DELETE, ...$arguments),
-                'options' => $this->route(Request::METHOD_OPTIONS, ...$arguments),
-                'trace' => $this->route(Request::METHOD_TRACE, ...$arguments),
-                default => throw new UnsupportedHttpMethodException($name),
-            };
+            $this->addRouteByName($name, $arguments);
         }
     }
 
@@ -55,9 +42,38 @@ final class RoutingConfigurator
     }
 
     /**
+     * @psalm-suppress MixedArgument
+     */
+    private function addRoutesForAllMethods(array $arguments): void
+    {
+        foreach (Request::ALL_METHODS as $methodName) {
+            $this->routes[] = $this->createRoute($methodName, ...$arguments);
+        }
+    }
+
+    /**
+     * @psalm-suppress MixedArgument
+     */
+    private function addRouteByName(string $name, array $arguments): void
+    {
+        $this->routes[] = match ($name) {
+            'head' => $this->createRoute(Request::METHOD_HEAD, ...$arguments),
+            'connect' => $this->createRoute(Request::METHOD_CONNECT, ...$arguments),
+            'get' => $this->createRoute(Request::METHOD_GET, ...$arguments),
+            'post' => $this->createRoute(Request::METHOD_POST, ...$arguments),
+            'delete' => $this->createRoute(Request::METHOD_DELETE, ...$arguments),
+            'options' => $this->createRoute(Request::METHOD_OPTIONS, ...$arguments),
+            'patch' => $this->createRoute(Request::METHOD_PATCH, ...$arguments),
+            'put' => $this->createRoute(Request::METHOD_PUT, ...$arguments),
+            'trace' => $this->createRoute(Request::METHOD_TRACE, ...$arguments),
+            default => throw new UnsupportedHttpMethodException($name),
+        };
+    }
+
+    /**
      * @param object|class-string $controller
      */
-    private function route(
+    private function createRoute(
         string $method,
         string $path,
         object|string $controller,

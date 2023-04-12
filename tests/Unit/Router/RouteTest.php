@@ -211,7 +211,7 @@ final class RouteTest extends TestCase
         $this->expectOutputString('Expected!');
 
         Route::configure(static function (RoutingConfigurator $routes): void {
-            $routes->any('optional/{param1?}/{param2?}', FakeController::class, 'basicAction');
+            $routes->get('optional/{param1?}/{param2?}', FakeController::class, 'basicAction');
         });
     }
 
