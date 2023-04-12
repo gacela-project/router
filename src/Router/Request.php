@@ -15,6 +15,18 @@ final class Request
     public const METHOD_POST = 'POST';
     public const METHOD_PUT = 'PUT';
     public const METHOD_TRACE = 'TRACE';
+    public const ALL_METHODS = [
+        self::METHOD_CONNECT,
+        self::METHOD_DELETE,
+        self::METHOD_GET,
+        self::METHOD_HEAD,
+        self::METHOD_OPTIONS,
+        self::METHOD_PATCH,
+        self::METHOD_POST,
+        self::METHOD_PUT,
+        self::METHOD_TRACE,
+    ];
+
     private static ?self $instance = null;
 
     private function __construct(
