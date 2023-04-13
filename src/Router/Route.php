@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Gacela\Router;
 
+use Gacela\Resolver\InstanceCreator;
+
 use function is_object;
 
 /**
@@ -40,7 +42,7 @@ final class Route
 
         foreach ($routingConfigurator->routes() as $route) {
             if ($route->requestMatches()) {
-                echo $route->run();
+                echo $route->run($routingConfigurator);
                 break;
             }
         }
@@ -49,7 +51,7 @@ final class Route
     /**
      * @psalm-suppress MixedMethodCall
      */
-    public function run(): string
+    public function run(RoutingConfigurator $routingConfigurator): string
     {
         $params = (new RouteParams($this))->asArray();
 
@@ -58,8 +60,10 @@ final class Route
                 ->{$this->action}(...$params);
         }
 
-        return (string)(new $this->controller())
-            ->{$this->action}(...$params);
+        $creator = new InstanceCreator($routingConfigurator->getMappingInterfaces());
+        $controller = $creator->createByClassName($this->controller);
+
+        return (string)$controller->{$this->action}(...$params);
     }
 
     public function path(): string
