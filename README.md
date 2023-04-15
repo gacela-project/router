@@ -38,7 +38,7 @@ php -S localhost:8081 example/example.php
 
 You can access the example routes:
 ```php
-Route::configure(static function (RoutingConfigurator $routes): void {
+Routing::configure(static function (RoutingConfigurator $routes): void {
     # localhost:8081/custom/123
     $routes->get('custom/{number}', CustomController::class, 'customAction');
 
