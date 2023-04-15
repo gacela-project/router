@@ -40,28 +40,10 @@ final class Route
         $routingConfigurator = new RoutingConfigurator();
         $fn($routingConfigurator);
 
-        /** @var Route|null $foundRoute */
-        $foundRoute = null;
+        $route = self::findRoute($routingConfigurator);
 
-        foreach ($routingConfigurator->routes() as $route) {
-            $redirect = $routingConfigurator->redirects()[$route->path()] ?? null;
-            if ($redirect !== null) {
-                foreach ($routingConfigurator->routes() as $r2) {
-                    if ($r2->path === $redirect->destination) {
-                        $foundRoute = $r2;
-                        break 2;
-                    }
-                }
-            }
-
-            if ($route->requestMatches()) {
-                $foundRoute = $route;
-                break;
-            }
-        }
-
-        if ($foundRoute) {
-            echo $foundRoute->run($routingConfigurator);
+        if ($route) {
+            echo $route->run($routingConfigurator);
         }
     }
 
@@ -105,6 +87,32 @@ final class Route
         $pattern = preg_replace('#({.*})#U', '(.*)', $this->path);
 
         return '#^/' . $pattern . '$#';
+    }
+
+    private static function findRoute(RoutingConfigurator $routingConfigurator): ?self
+    {
+        foreach ($routingConfigurator->routes() as $route) {
+            $redirect = $routingConfigurator->redirects()[$route->path()] ?? null;
+            if ($redirect !== null) {
+                return self::findRedirectRoute($redirect, $routingConfigurator);
+            }
+
+            if ($route->requestMatches()) {
+                return $route;
+            }
+        }
+
+        return null;
+    }
+
+    private static function findRedirectRoute(Redirect $redirect, RoutingConfigurator $routingConfigurator): ?self
+    {
+        foreach ($routingConfigurator->routes() as $route) {
+            if ($route->path() === $redirect->destination()) {
+                return $route;
+            }
+        }
+        return null;
     }
 
     private function requestMatches(): bool
