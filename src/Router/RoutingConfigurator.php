@@ -76,13 +76,11 @@ final class RoutingConfigurator
         string $uri,
         string $destination,
         string $method = 'GET',
-        int $status = 302,
     ): void {
         $this->redirects[$destination] = new Redirect(
             $uri,
             $destination,
             $method,
-            $status,
         );
     }
 
