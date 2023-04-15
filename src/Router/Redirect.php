@@ -9,8 +9,8 @@ final class Redirect
     public function __construct(
         private string $uri,
         private string $destination,
-        private int $status = 302,
         private string $method = Request::METHOD_GET,
+        private int $status = 302,
     ) {
     }
 

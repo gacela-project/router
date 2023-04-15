@@ -43,6 +43,11 @@ final class Route
         return $this->path;
     }
 
+    public function method(): string
+    {
+        return $this->method;
+    }
+
     /**
      * @return object|class-string
      */
@@ -76,7 +81,7 @@ final class Route
         return true;
     }
 
-    private function methodMatches(): bool
+    public function methodMatches(): bool
     {
         return Request::instance()->isMethod($this->method);
     }
@@ -87,6 +92,12 @@ final class Route
 
         return preg_match($this->getPathPattern(), $path)
             || preg_match($this->getPathPatternWithoutOptionals(), $path);
+    }
+
+    public function isRedirected(Redirect $redirect): bool
+    {
+        return $this->path() === $redirect->destination()
+            && $this->method() === $redirect->method();
     }
 
     private function getPathPatternWithoutOptionals(): string

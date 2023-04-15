@@ -35,9 +35,11 @@ final class Routing
     private static function findRoute(RoutingConfigurator $routingConfigurator): ?Route
     {
         foreach ($routingConfigurator->routes() as $route) {
-            $redirect = $routingConfigurator->redirects()[$route->path()] ?? null;
-            if ($redirect !== null) {
-                return self::findRedirectRoute($redirect, $routingConfigurator);
+            if ($route->methodMatches()) {
+                $redirect = $routingConfigurator->redirects()[$route->path()] ?? null;
+                if ($redirect !== null) {
+                    return self::findRedirectRoute($redirect, $routingConfigurator);
+                }
             }
 
             if ($route->requestMatches()) {
@@ -51,7 +53,7 @@ final class Routing
     private static function findRedirectRoute(Redirect $redirect, RoutingConfigurator $routingConfigurator): ?Route
     {
         foreach ($routingConfigurator->routes() as $route) {
-            if ($route->path() === $redirect->destination()) {
+            if ($route->isRedirected($redirect)) {
                 return $route;
             }
         }

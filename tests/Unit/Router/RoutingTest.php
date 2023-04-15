@@ -267,7 +267,7 @@ final class RoutingTest extends TestCase
         });
     }
 
-    public function test_redirect(): void
+    public function test_redirect_same_method(): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
         $_SERVER['REQUEST_METHOD'] = 'GET';
@@ -276,7 +276,32 @@ final class RoutingTest extends TestCase
 
         Routing::configure(static function (RoutingConfigurator $routes): void {
             $routes->redirect('optional/uri', 'expected/uri');
+            $routes->get('expected/uri', FakeController::class, 'basicAction');
+        });
+    }
 
+    public function test_redirect_different_method(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+
+        $this->expectOutputString('');
+
+        Routing::configure(static function (RoutingConfigurator $routes): void {
+            $routes->redirect('optional/uri', 'expected/uri', 'POST');
+            $routes->get('expected/uri', FakeController::class, 'basicAction');
+        });
+    }
+
+    public function test_redirect_different_method_get_by_default(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+
+        $this->expectOutputString('');
+
+        Routing::configure(static function (RoutingConfigurator $routes): void {
+            $routes->redirect('optional/uri', 'expected/uri');
             $routes->get('expected/uri', FakeController::class, 'basicAction');
         });
     }
