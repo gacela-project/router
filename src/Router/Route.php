@@ -88,8 +88,8 @@ final class Route
 
     public function isRedirected(Redirect $redirect): bool
     {
-        return $this->path() === $redirect->destination()
-            && $this->method() === $redirect->method();
+        return $this->path() === $redirect->destination
+            && $this->method() === $redirect->method;
     }
 
     private function pathMatches(): bool

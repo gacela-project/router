@@ -10,7 +10,6 @@ final class Redirect
         public string $uri,
         public string $destination,
         public string $method = Request::METHOD_GET,
-        public int $status = 302,
     ) {
     }
 }
