@@ -40,11 +40,28 @@ final class Route
         $routingConfigurator = new RoutingConfigurator();
         $fn($routingConfigurator);
 
+        /** @var Route|null $foundRoute */
+        $foundRoute = null;
+
         foreach ($routingConfigurator->routes() as $route) {
+            $redirect = $routingConfigurator->redirects()[$route->path()] ?? null;
+            if ($redirect !== null) {
+                foreach ($routingConfigurator->routes() as $r2) {
+                    if ($r2->path === $redirect->destination) {
+                        $foundRoute = $r2;
+                        break 2;
+                    }
+                }
+            }
+
             if ($route->requestMatches()) {
-                echo $route->run($routingConfigurator);
+                $foundRoute = $route;
                 break;
             }
+        }
+
+        if ($foundRoute) {
+            echo $foundRoute->run($routingConfigurator);
         }
     }
 
@@ -56,8 +73,7 @@ final class Route
         $params = (new RouteParams($this))->asArray();
 
         if (is_object($this->controller)) {
-            return (string)$this->controller
-                ->{$this->action}(...$params);
+            return (string)$this->controller->{$this->action}(...$params);
         }
 
         $creator = new InstanceCreator($routingConfigurator->getMappingInterfaces());

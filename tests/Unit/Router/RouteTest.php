@@ -61,7 +61,7 @@ final class RouteTest extends TestCase
     public function test_it_should_pass_many_params_to_the_action(): void
     {
         /** @var list<string> $params */
-        $params = ['foo','bar','baz'];
+        $params = ['foo', 'bar', 'baz'];
 
         $_SERVER['REQUEST_URI'] = "https://example.org/{$params[0]}/{$params[1]}/{$params[2]}";
         $_SERVER['REQUEST_METHOD'] = 'GET';
@@ -76,7 +76,7 @@ final class RouteTest extends TestCase
     public function test_it_should_pass_associated_params_by_name_to_the_action(): void
     {
         /** @var list<string> $params */
-        $params = ['foo','bar','baz'];
+        $params = ['foo', 'bar', 'baz'];
 
         $_SERVER['REQUEST_URI'] = "https://example.org/{$params[0]}/{$params[1]}/{$params[2]}";
         $_SERVER['REQUEST_METHOD'] = 'GET';
@@ -264,6 +264,20 @@ final class RouteTest extends TestCase
         Route::configure(static function (RoutingConfigurator $routes): void {
             $routes->get('expected/uri', FakeControllerWithDependencies::class);
             $routes->setMappingInterfaces([NameInterface::class => new Name('Expected!')]);
+        });
+    }
+
+    public function test_redirect(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+
+        $this->expectOutputString('Expected!');
+
+        Route::configure(static function (RoutingConfigurator $routes): void {
+            $routes->redirect('optional/uri', 'expected/uri');
+
+            $routes->get('expected/uri', FakeController::class, 'basicAction');
         });
     }
 }
