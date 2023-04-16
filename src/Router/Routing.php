@@ -4,17 +4,6 @@ declare(strict_types=1);
 
 namespace Gacela\Router;
 
-/**
- * @method static get(string $path, object|string $controller, string $action = '__invoke')
- * @method static head(string $path, object|string $controller, string $action = '__invoke')
- * @method static connect(string $path, object|string $controller, string $action = '__invoke')
- * @method static post(string $path, object|string $controller, string $action = '__invoke')
- * @method static delete(string $path, object|string $controller, string $action = '__invoke')
- * @method static options(string $path, object|string $controller, string $action = '__invoke')
- * @method static patch(string $path, object|string $controller, string $action = '__invoke')
- * @method static put(string $path, object|string $controller, string $action = '__invoke')
- * @method static trace(string $path, object|string $controller, string $action = '__invoke')
- */
 final class Routing
 {
     /**
