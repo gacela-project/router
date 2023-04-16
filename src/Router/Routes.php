@@ -41,6 +41,20 @@ final class Routes
     }
 
     /**
+     * @psalm-suppress MixedArgument
+     *
+     * @param string[] $httpMethods
+     * @param object|class-string $controller
+     */
+    public function match(array $httpMethods, string $path, object|string $controller, string $action = '__invoke'): void
+    {
+        //        foreach ($httpMethods as $methodName) {
+        //            $this->routes[] = $this->createRoute($methodName, $path, $controller, $action);
+        $this->addRoutesForAllMethods([$path, $controller, $action]);
+        //        }
+    }
+
+    /**
      * @return list<Route>
      */
     public function routes(): array
