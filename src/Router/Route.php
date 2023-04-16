@@ -86,12 +86,6 @@ final class Route
         return Request::instance()->isMethod($this->method);
     }
 
-    public function isRedirected(Redirect $redirect): bool
-    {
-        return $this->path() === $redirect->destination
-            && $this->method() === $redirect->method;
-    }
-
     private function pathMatches(): bool
     {
         $path = Request::instance()->path();
