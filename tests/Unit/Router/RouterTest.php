@@ -13,10 +13,11 @@ use GacelaTest\Unit\Router\Fake\Name;
 use GacelaTest\Unit\Router\Fake\NameInterface;
 use GacelaTest\Unit\Router\Fixtures\FakeController;
 use GacelaTest\Unit\Router\Fixtures\FakeControllerWithDependencies;
+use GacelaTest\Unit\Router\Fixtures\FakeControllerWithRequest;
 use Generator;
 use PHPUnit\Framework\TestCase;
 
-final class RoutingTest extends TestCase
+final class RouterTest extends TestCase
 {
     private const PROVIDER_TRIES = 10;
 
@@ -58,7 +59,6 @@ final class RoutingTest extends TestCase
 
     public function test_it_should_pass_many_params_to_the_action(): void
     {
-        /** @var list<string> $params */
         $params = ['foo', 'bar', 'baz'];
 
         $_SERVER['REQUEST_URI'] = "https://example.org/{$params[0]}/{$params[1]}/{$params[2]}";
@@ -73,7 +73,6 @@ final class RoutingTest extends TestCase
 
     public function test_it_should_pass_associated_params_by_name_to_the_action(): void
     {
-        /** @var list<string> $params */
         $params = ['foo', 'bar', 'baz'];
 
         $_SERVER['REQUEST_URI'] = "https://example.org/{$params[0]}/{$params[1]}/{$params[2]}";
@@ -262,6 +261,19 @@ final class RoutingTest extends TestCase
         Router::configure(static function (Routes $routes, MappingInterfaces $mappingInterfaces): void {
             $routes->get('expected/uri', FakeControllerWithDependencies::class);
             $mappingInterfaces->add(NameInterface::class, new Name('Expected!'));
+        });
+    }
+
+    public function test_inject_controller_with_request_dependency(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/expected';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_GET['name'] = 'Katarn';
+
+        $this->expectOutputString('Katarn');
+
+        Router::configure(static function (Routes $routes): void {
+            $routes->get('expected', FakeControllerWithRequest::class);
         });
     }
 }
