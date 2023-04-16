@@ -25,7 +25,7 @@ class RoutingRedirectTest extends TestCase
     }
 
     /**
-     * @dataProvider provideSimpleRedirect
+     * @dataProvider destinationProvider
      */
     public function test_simple_redirect(string $destination): void
     {
@@ -48,7 +48,7 @@ class RoutingRedirectTest extends TestCase
     }
 
     /**
-     * @dataProvider provideSimpleRedirect
+     * @dataProvider destinationProvider
      */
     public function test_redirect_with_status_code(string $destination, int $statusCode): void
     {
@@ -71,7 +71,7 @@ class RoutingRedirectTest extends TestCase
     }
 
     /**
-     * @dataProvider provideSimpleRedirect
+     * @dataProvider destinationProvider
      */
     public function test_redirect_with_custom_method(string $destination, int $statusCode, string $method): void
     {
@@ -96,7 +96,7 @@ class RoutingRedirectTest extends TestCase
     }
 
     /**
-     * @dataProvider provideSimpleRedirect
+     * @dataProvider destinationProvider
      */
     public function test_not_redirect_non_registered_method(string $destination, int $statusCode, string $method): void
     {
@@ -114,7 +114,7 @@ class RoutingRedirectTest extends TestCase
         self::assertNull($testHeaders);
     }
 
-    public function provideSimpleRedirect(): iterable
+    public function destinationProvider(): iterable
     {
         yield ['https://gacela-project.com/', 301, 'GET'];
         yield ['https://chemaclass.com/', 308, 'POST'];
