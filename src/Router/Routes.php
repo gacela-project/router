@@ -48,10 +48,9 @@ final class Routes
      */
     public function match(array $httpMethods, string $path, object|string $controller, string $action = '__invoke'): void
     {
-        //        foreach ($httpMethods as $methodName) {
-        //            $this->routes[] = $this->createRoute($methodName, $path, $controller, $action);
-        $this->addRoutesForAllMethods([$path, $controller, $action]);
-        //        }
+        foreach ($httpMethods as $methodName) {
+            $this->routes[] = $this->createRoute($methodName, $path, $controller, $action);
+        }
     }
 
     /**
