@@ -32,7 +32,7 @@ class RoutingRedirectTest extends TestCase
         global $testHeaders;
 
         $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
-        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
         Routing::configure(static function (RoutingConfigurator $routes) use ($destination): void {
             $routes->redirect('optional/uri', $destination);
@@ -55,7 +55,7 @@ class RoutingRedirectTest extends TestCase
         global $testHeaders;
 
         $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
-        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
         Routing::configure(static function (RoutingConfigurator $routes) use ($destination, $statusCode): void {
             $routes->redirect('optional/uri', $destination, $statusCode);
@@ -103,7 +103,7 @@ class RoutingRedirectTest extends TestCase
         global $testHeaders;
 
         $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
-        $_SERVER['REQUEST_METHOD'] = 'OPTIONS';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_OPTIONS;
 
         Routing::configure(
             static function (RoutingConfigurator $routes) use ($destination, $statusCode, $method): void {
@@ -116,10 +116,10 @@ class RoutingRedirectTest extends TestCase
 
     public function destinationProvider(): iterable
     {
-        yield ['https://gacela-project.com/', 301, 'GET'];
-        yield ['https://chemaclass.com/', 308, 'POST'];
-        yield ['https://katarn.es/', 302, 'PUT'];
-        yield ['https://jesusvalera.github.io/', 303, 'DELETE'];
-        yield ['https://github.com/ImanolRP', 307, 'PATCH'];
+        yield ['https://gacela-project.com/', 301, Request::METHOD_GET];
+        yield ['https://chemaclass.com/', 308, Request::METHOD_POST];
+        yield ['https://katarn.es/', 302, Request::METHOD_PUT];
+        yield ['https://jesusvalera.github.io/', 303, Request::METHOD_DELETE];
+        yield ['https://github.com/ImanolRP', 307, Request::METHOD_PATCH];
     }
 }

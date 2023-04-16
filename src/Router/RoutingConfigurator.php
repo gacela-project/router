@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Gacela\Router;
 
+use function in_array;
+
 /**
  * @method head(string $path, object|string $controller, string $action = '__invoke')
  * @method connect(string $path, object|string $controller, string $action = '__invoke')
@@ -87,33 +89,27 @@ final class RoutingConfigurator
     /**
      * @psalm-suppress MixedArgument
      */
-    private function addRouteByName(string $name, array $arguments): void
+    private function addRouteByName(string $httpMethod, array $arguments): void
     {
-        $this->routes[] = match (strtolower(trim($name))) {
-            'head' => $this->createRoute(Request::METHOD_HEAD, ...$arguments),
-            'connect' => $this->createRoute(Request::METHOD_CONNECT, ...$arguments),
-            'get' => $this->createRoute(Request::METHOD_GET, ...$arguments),
-            'post' => $this->createRoute(Request::METHOD_POST, ...$arguments),
-            'delete' => $this->createRoute(Request::METHOD_DELETE, ...$arguments),
-            'options' => $this->createRoute(Request::METHOD_OPTIONS, ...$arguments),
-            'patch' => $this->createRoute(Request::METHOD_PATCH, ...$arguments),
-            'put' => $this->createRoute(Request::METHOD_PUT, ...$arguments),
-            'trace' => $this->createRoute(Request::METHOD_TRACE, ...$arguments),
-            default => throw new UnsupportedHttpMethodException($name),
-        };
+        $route = $this->createRoute(strtoupper(trim($httpMethod)), ...$arguments);
+
+        $this->routes[] = $route;
     }
 
     /**
      * @param object|class-string $controller
      */
     private function createRoute(
-        string $method,
+        string $httpMethod,
         string $path,
         object|string $controller,
         string $action = '__invoke',
     ): Route {
+        if (!in_array($httpMethod, Request::ALL_METHODS)) {
+            throw new UnsupportedHttpMethodException($httpMethod);
+        }
         $path = ($path === '/') ? '' : $path;
 
-        return new Route($method, $path, $controller, $action);
+        return new Route($httpMethod, $path, $controller, $action);
     }
 }
