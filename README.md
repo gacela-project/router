@@ -43,13 +43,13 @@ Routing::configure(static function (RoutingConfigurator $routes): void {
     $routes->redirect('docs', 'https://gacela-project.com/');
 
     # localhost:8081/custom/123
-    $routes->get('custom/{number}', $controller, 'customAction');
+    $routes->get('custom/{number}', CustomController::class, 'customAction');
 
     # localhost:8081/custom
-    $routes->get('custom', $controller);
+    $routes->get('custom', CustomController::class);
 
     # localhost:8081?number=456
-    $routes->get('/', $controller);
+    $routes->get('/', CustomController::class);
 });
 ```
 
