@@ -1,46 +1,38 @@
 <?php
 
-namespace Gacela\Router
-{
-    /** @var string $testHeader */
-    $testHeader = '';
+declare(strict_types=1);
 
-    function header(string $header): void {
-        global $testHeader;
-
-        $testHeader = $header;
-    }
-}
-
-namespace GacelaTest\Unit\Router
-{
+namespace GacelaTest\Unit\Router;
 
 use Gacela\Router\Routing;
 use Gacela\Router\RoutingConfigurator;
+use GacelaTest\Unit\Router\Fixtures\HeadersTearDown;
 use PHPUnit\Framework\TestCase;
 
+include_once __DIR__ . '/Fake/header.php';
 
+/**
+ * @runInSeparateProcess
+ */
 class RoutingRedirectTest extends TestCase
 {
-    protected function tearDown(): void
-    {
-        global $testHeader;
-
-        $testHeader = '';
-    }
-
-    /** @runInSeparateProcess */
+    use HeadersTearDown;
     public function test_simple_redirect(): void
     {
-        global $testHeader;
+        global $testHeaders;
+
         $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
         $_SERVER['REQUEST_METHOD'] = 'GET';
 
         Routing::configure(static function (RoutingConfigurator $routes): void {
-            $routes->redirect('optional/uri', 'expected/uri', 'POST');
+            $routes->redirect('optional/uri', 'https://gacela-project.com/');
         });
 
-        $this->assertEquals('hola', $testHeader);
+        $this->assertEquals([[
+            'header' => 'Location: https://gacela-project.com/',
+            'replace' => true,
+            'response_code' => 302,
+        ]], $testHeaders);
     }
 
 //    public function test_redirect_different_method(): void
@@ -84,5 +76,4 @@ class RoutingRedirectTest extends TestCase
 //            $routes->any('expected/uri', FakeController::class, 'basicAction');
 //        });
 //    }
-}
 }

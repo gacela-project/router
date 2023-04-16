@@ -21,9 +21,6 @@ final class RoutingConfigurator
     /** @var list<Route> */
     private array $routes = [];
 
-    /** @var array<string, Redirect> */
-    private array $redirects = [];
-
     /** @var array<class-string, callable|class-string|object> */
     private array $mappingInterfaces = [];
 
@@ -48,14 +45,6 @@ final class RoutingConfigurator
     }
 
     /**
-     * @return array<string, Redirect>
-     */
-    public function redirects(): array
-    {
-        return $this->redirects;
-    }
-
-    /**
      * @param array<class-string, callable|class-string|object> $array
      */
     public function setMappingInterfaces(array $array): self
@@ -75,15 +64,14 @@ final class RoutingConfigurator
     public function redirect(
         string $uri,
         string $destination,
-        string $method = 'GET',
+        int $status = 302,
+        string $method = null,
     ): void {
-        header('hola');
-//        exit;
-//        $this->redirects[$destination] = new Redirect(
-//            $uri,
-//            $destination,
-//            $method,
-//        );
+        if ($method === null) {
+            $this->addRoutesForAllMethods([$uri, static fn () => header('Location: ' . $destination, true, $status)]);
+        } else {
+            $this->addRouteByName($method, [$uri, static fn () => header('Location: ' . $destination, true, $status)]);
+        }
     }
 
     /**
