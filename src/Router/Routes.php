@@ -10,6 +10,7 @@ use Gacela\Router\Entities\Route;
 use Gacela\Router\Exceptions\UnsupportedHttpMethodException;
 
 use function in_array;
+use function is_array;
 
 /**
  * @method head(string $path, object|string $controller, string $action = '__invoke')
@@ -31,25 +32,36 @@ final class Routes
     /**
      * @psalm-suppress MixedArgument
      */
-    public function __call(string $name, array $arguments): void
+    public function __call(string $method, array $arguments): void
     {
-        if ($name === 'any') {
-            $this->addRoutesForAllMethods($arguments);
+        if ($method === 'any') {
+            $this->addRoute(Request::ALL_METHODS, ...$arguments);
         } else {
-            $this->addRouteByName($name, $arguments);
+            $this->addRoute($method, ...$arguments);
         }
     }
 
     /**
      * @psalm-suppress MixedArgument
      *
-     * @param string[] $httpMethods
+     * @param string[] $methods
      * @param object|class-string $controller
      */
-    public function match(array $httpMethods, string $path, object|string $controller, string $action = '__invoke'): void
+    public function match(array $methods, string $path, object|string $controller, string $action = '__invoke'): void
     {
-        foreach ($httpMethods as $methodName) {
-            $this->routes[] = $this->createRoute($methodName, $path, $controller, $action);
+        $this->addRoute($methods, $path, $controller, $action);
+    }
+
+    public function redirect(
+        string $uri,
+        string $destination,
+        int $status = 302,
+        string $method = null,
+    ): void {
+        if ($method === null) {
+            $this->addRoute(Request::ALL_METHODS, $uri, new RedirectController($destination, $status));
+        } else {
+            $this->addRoute([$method], $uri, new RedirectController($destination, $status));
         }
     }
 
@@ -61,53 +73,29 @@ final class Routes
         return $this->routes;
     }
 
-    public function redirect(
-        string $uri,
-        string $destination,
-        int $status = 302,
-        string $method = null,
-    ): void {
-        if ($method === null) {
-            $this->addRoutesForAllMethods([$uri, new RedirectController($destination, $status)]);
-        } else {
-            $this->addRouteByName($method, [$uri, new RedirectController($destination, $status)]);
-        }
-    }
-
     /**
-     * @psalm-suppress MixedArgument
-     */
-    private function addRoutesForAllMethods(array $arguments): void
-    {
-        foreach (Request::ALL_METHODS as $methodName) {
-            $this->routes[] = $this->createRoute($methodName, ...$arguments);
-        }
-    }
-
-    /**
-     * @psalm-suppress MixedArgument
-     */
-    private function addRouteByName(string $httpMethod, array $arguments): void
-    {
-        $route = $this->createRoute(strtoupper(trim($httpMethod)), ...$arguments);
-
-        $this->routes[] = $route;
-    }
-
-    /**
+     * @param string[]|string $methods
      * @param object|class-string $controller
      */
-    private function createRoute(
-        string $httpMethod,
+    private function addRoute(
+        array|string $methods,
         string $path,
         object|string $controller,
         string $action = '__invoke',
-    ): Route {
-        if (!in_array($httpMethod, Request::ALL_METHODS)) {
-            throw new UnsupportedHttpMethodException($httpMethod);
+    ): void {
+        if (!is_array($methods)) {
+            $methods = [$methods];
         }
-        $path = ($path === '/') ? '' : $path;
 
-        return new Route($httpMethod, $path, $controller, $action);
+        $methods = array_map(static fn ($method) => strtoupper(trim($method)), $methods);
+
+        foreach ($methods as $method) {
+            if (!in_array($method, Request::ALL_METHODS, true)) {
+                throw new UnsupportedHttpMethodException($method);
+            }
+            $path = ($path === '/') ? '' : $path;
+
+            $this->routes[] = new Route($method, $path, $controller, $action);
+        }
     }
 }
