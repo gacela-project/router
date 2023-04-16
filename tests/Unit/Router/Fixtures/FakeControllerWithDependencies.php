@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GacelaTest\Unit\Router;
+namespace GacelaTest\Unit\Router\Fixtures;
 
 use GacelaTest\Unit\Router\Fake\NameInterface;
 

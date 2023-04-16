@@ -10,6 +10,8 @@ use Gacela\Router\RoutingConfigurator;
 use Gacela\Router\UnsupportedHttpMethodException;
 use GacelaTest\Unit\Router\Fake\Name;
 use GacelaTest\Unit\Router\Fake\NameInterface;
+use GacelaTest\Unit\Router\Fixtures\FakeController;
+use GacelaTest\Unit\Router\Fixtures\FakeControllerWithDependencies;
 use Generator;
 use PHPUnit\Framework\TestCase;
 
