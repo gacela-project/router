@@ -11,12 +11,17 @@ use PHPUnit\Framework\TestCase;
 
 include_once __DIR__ . '/Fake/header.php';
 
-/**
- * @runInSeparateProcess
- */
 class RoutingRedirectTest extends TestCase
 {
     use HeadersTearDown;
+
+    /**
+     * @runInSeparateProcess
+     */
+    protected function setUp(): void
+    {
+    }
+
     public function test_simple_redirect(): void
     {
         global $testHeaders;
@@ -28,11 +33,13 @@ class RoutingRedirectTest extends TestCase
             $routes->redirect('optional/uri', 'https://gacela-project.com/');
         });
 
-        $this->assertEquals([[
-            'header' => 'Location: https://gacela-project.com/',
-            'replace' => true,
-            'response_code' => 302,
-        ]], $testHeaders);
+        self::assertSame([
+            [
+                'header' => 'Location: https://gacela-project.com/',
+                'replace' => true,
+                'response_code' => 302,
+            ],
+        ], $testHeaders);
     }
 
 //    public function test_redirect_different_method(): void
