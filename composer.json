@@ -34,6 +34,7 @@
         }
     },
     "scripts": {
+        "serve": "php -S localhost:8081 example/example.php",
         "ctal": [
             "@static-clear-cache",
             "@csfix",

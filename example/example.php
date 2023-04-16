@@ -8,13 +8,19 @@ use Gacela\Router\Entities\Request;
 use Gacela\Router\Router;
 use Gacela\Router\Routes;
 
-# php -S localhost:8081 example/example.php
+# To run this example locally, you can run in your terminal:
+# $ composer serve
 
-$controller = new class() {
+class Controller
+{
+    public function __construct(
+        private Request $request,
+    ) {
+    }
+
     public function __invoke(): string
     {
-        $request = Request::fromGlobals();
-        $number = $request->get('number');
+        $number = $this->request->get('number');
 
         if (!empty($number)) {
             return "__invoke with GET 'number'={$number}";
@@ -27,17 +33,18 @@ $controller = new class() {
     {
         return "customAction(number: {$number})";
     }
-};
+}
 
-Router::configure(static function (Routes $routes) use ($controller): void {
+Router::configure(static function (Routes $routes): void {
+    # Try it out: http://localhost:8081/docs
     $routes->redirect('docs', 'https://gacela-project.com/');
 
-    # localhost:8081/custom/123
-    $routes->get('custom/{number}', $controller, 'customAction');
+    # Try it out: http://localhost:8081?number=456
+    $routes->get('/', Controller::class);
 
-    # localhost:8081/custom
-    $routes->get('custom', $controller);
+    # Try it out: http://localhost:8081/custom/123
+    $routes->get('custom/{number}', Controller::class, 'customAction');
 
-    # localhost:8081?number=456
-    $routes->get('/', $controller);
+    # Try it out: http://localhost:8081/custom
+    $routes->any('custom', Controller::class);
 });

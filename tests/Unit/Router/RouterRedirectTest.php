@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
 
 include_once __DIR__ . '/Fake/header.php';
 
-final class RoutingRedirectTest extends TestCase
+final class RouterRedirectTest extends TestCase
 {
     use HeadersTearDown;
 
