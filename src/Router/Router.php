@@ -9,21 +9,23 @@ use Gacela\Router\Entities\Route;
 final class Router
 {
     /**
-     * @param callable(RouterConfigurator):void $fn
+     * @param callable(Routes, MappingInterfaces):void $fn
      */
     public static function configure(callable $fn): void
     {
-        $routerConfigurator = new RouterConfigurator();
-        $fn($routerConfigurator);
+        $routerConfigurator = new Routes();
+        $mappingInterfaces = new MappingInterfaces();
+
+        $fn($routerConfigurator, $mappingInterfaces);
 
         $route = self::findRoute($routerConfigurator);
 
         if ($route) {
-            echo $route->run($routerConfigurator);
+            echo $route->run($mappingInterfaces);
         }
     }
 
-    private static function findRoute(RouterConfigurator $routerConfigurator): ?Route
+    private static function findRoute(Routes $routerConfigurator): ?Route
     {
         foreach ($routerConfigurator->routes() as $route) {
             if ($route->requestMatches()) {

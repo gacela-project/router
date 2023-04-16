@@ -6,8 +6,9 @@ namespace GacelaTest\Unit\Router;
 
 use Gacela\Router\Entities\Request;
 use Gacela\Router\Exceptions\UnsupportedHttpMethodException;
+use Gacela\Router\MappingInterfaces;
 use Gacela\Router\Router;
-use Gacela\Router\RouterConfigurator;
+use Gacela\Router\Routes;
 use GacelaTest\Unit\Router\Fake\Name;
 use GacelaTest\Unit\Router\Fake\NameInterface;
 use GacelaTest\Unit\Router\Fixtures\FakeController;
@@ -26,7 +27,7 @@ final class RoutingTest extends TestCase
 
         $this->expectOutputString('Expected!');
 
-        Router::configure(static function (RouterConfigurator $routes): void {
+        Router::configure(static function (Routes $routes): void {
             $routes->get('expected/uri', FakeController::class, 'basicAction');
         });
     }
@@ -38,7 +39,7 @@ final class RoutingTest extends TestCase
 
         $this->expectOutputString('');
 
-        Router::configure(static function (RouterConfigurator $routes): void {
+        Router::configure(static function (Routes $routes): void {
             $routes->get('other/uri', FakeController::class, 'basicAction');
         });
     }
@@ -50,7 +51,7 @@ final class RoutingTest extends TestCase
 
         $this->expectOutputString('');
 
-        Router::configure(static function (RouterConfigurator $routes): void {
+        Router::configure(static function (Routes $routes): void {
             $routes->post('expected/uri', FakeController::class, 'basicAction');
         });
     }
@@ -65,7 +66,7 @@ final class RoutingTest extends TestCase
 
         $this->expectOutputString("The params are '{$params[0]}', '{$params[1]}' and '{$params[2]}'!");
 
-        Router::configure(static function (RouterConfigurator $routes): void {
+        Router::configure(static function (Routes $routes): void {
             $routes->get('{firstParam}/{secondParam}/{thirdParam}', FakeController::class, 'manyParamsAction');
         });
     }
@@ -80,7 +81,7 @@ final class RoutingTest extends TestCase
 
         $this->expectOutputString("The params are '{$params[1]}', '{$params[0]}' and '{$params[2]}'!");
 
-        Router::configure(static function (RouterConfigurator $routes): void {
+        Router::configure(static function (Routes $routes): void {
             $routes->get('{secondParam}/{firstParam}/{thirdParam}', FakeController::class, 'manyParamsAction');
         });
     }
@@ -95,7 +96,7 @@ final class RoutingTest extends TestCase
 
         $this->expectOutputString("The 'string' param is '{$string}'!");
 
-        Router::configure(static function (RouterConfigurator $routes): void {
+        Router::configure(static function (Routes $routes): void {
             $routes->get('expected/string/is/{param}', FakeController::class, 'stringParamAction');
         });
     }
@@ -118,7 +119,7 @@ final class RoutingTest extends TestCase
 
         $this->expectOutputString("The 'int' param is '{$int}'!");
 
-        Router::configure(static function (RouterConfigurator $routes): void {
+        Router::configure(static function (Routes $routes): void {
             $routes->get('expected/integer/is/{param}', FakeController::class, 'intParamAction');
         });
     }
@@ -141,7 +142,7 @@ final class RoutingTest extends TestCase
 
         $this->expectOutputString("The 'float' param is '{$float}'!");
 
-        Router::configure(static function (RouterConfigurator $routes): void {
+        Router::configure(static function (Routes $routes): void {
             $routes->get('expected/float/is/{param}', FakeController::class, 'floatParamAction');
         });
     }
@@ -164,7 +165,7 @@ final class RoutingTest extends TestCase
 
         $this->expectOutputString("The 'bool' param is '{$expected}'!");
 
-        Router::configure(static function (RouterConfigurator $routes): void {
+        Router::configure(static function (Routes $routes): void {
             $routes->get('expected/bool/is/{param}', FakeController::class, 'boolParamAction');
         });
     }
@@ -184,7 +185,7 @@ final class RoutingTest extends TestCase
 
         $this->expectOutputString('Expected!');
 
-        Router::configure(static function (RouterConfigurator $routes): void {
+        Router::configure(static function (Routes $routes): void {
             $routes->get('expected/uri', FakeController::class, 'basicAction');
             $routes->get('expected/{param}', FakeController::class, 'stringParamAction');
         });
@@ -197,7 +198,7 @@ final class RoutingTest extends TestCase
 
         $this->expectOutputString('Expected!');
 
-        Router::configure(static function (RouterConfigurator $routes): void {
+        Router::configure(static function (Routes $routes): void {
             $routes->get('optional/{param?}', FakeController::class, 'basicAction');
         });
     }
@@ -209,7 +210,7 @@ final class RoutingTest extends TestCase
 
         $this->expectOutputString('Expected!');
 
-        Router::configure(static function (RouterConfigurator $routes): void {
+        Router::configure(static function (Routes $routes): void {
             $routes->get('optional/{param1?}/{param2?}', FakeController::class, 'basicAction');
         });
     }
@@ -218,7 +219,7 @@ final class RoutingTest extends TestCase
     {
         $this->expectException(UnsupportedHttpMethodException::class);
 
-        Router::configure(static function (RouterConfigurator $routes): void {
+        Router::configure(static function (Routes $routes): void {
             $routes->invalidName('', FakeController::class);
         });
     }
@@ -233,7 +234,7 @@ final class RoutingTest extends TestCase
 
         $this->expectOutputString('Expected!');
 
-        Router::configure(static function (RouterConfigurator $routes): void {
+        Router::configure(static function (Routes $routes): void {
             $routes->any('expected/uri', FakeController::class, 'basicAction');
         });
     }
@@ -258,9 +259,9 @@ final class RoutingTest extends TestCase
 
         $this->expectOutputString('default-Expected!');
 
-        Router::configure(static function (RouterConfigurator $routes): void {
+        Router::configure(static function (Routes $routes, MappingInterfaces $mappingInterfaces): void {
             $routes->get('expected/uri', FakeControllerWithDependencies::class);
-            $routes->setMappingInterfaces([NameInterface::class => new Name('Expected!')]);
+            $mappingInterfaces->add(NameInterface::class, new Name('Expected!'));
         });
     }
 }

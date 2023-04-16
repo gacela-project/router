@@ -23,13 +23,10 @@ use function in_array;
  * @method trace(string $path, object|string $controller, string $action = '__invoke')
  * @method any(string $path, object|string $controller, string $action = '__invoke')
  */
-final class RouterConfigurator
+final class Routes
 {
     /** @var list<Route> */
     private array $routes = [];
-
-    /** @var array<class-string, callable|class-string|object> */
-    private array $mappingInterfaces = [];
 
     /**
      * @psalm-suppress MixedArgument
@@ -49,23 +46,6 @@ final class RouterConfigurator
     public function routes(): array
     {
         return $this->routes;
-    }
-
-    /**
-     * @param array<class-string, callable|class-string|object> $array
-     */
-    public function setMappingInterfaces(array $array): self
-    {
-        $this->mappingInterfaces = $array;
-        return $this;
-    }
-
-    /**
-     * @return array<class-string, callable|class-string|object>
-     */
-    public function getMappingInterfaces(): array
-    {
-        return $this->mappingInterfaces;
     }
 
     public function redirect(

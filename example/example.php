@@ -6,7 +6,7 @@ require_once \dirname(__DIR__) . '/vendor/autoload.php';
 
 use Gacela\Router\Entities\Request;
 use Gacela\Router\Router;
-use Gacela\Router\RouterConfigurator;
+use Gacela\Router\Routes;
 
 # php -S localhost:8081 example/example.php
 
@@ -29,7 +29,7 @@ $controller = new class() {
     }
 };
 
-Router::configure(static function (RouterConfigurator $routes) use ($controller): void {
+Router::configure(static function (Routes $routes) use ($controller): void {
     $routes->redirect('docs', 'https://gacela-project.com/');
 
     # localhost:8081/custom/123
