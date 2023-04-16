@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 require_once \dirname(__DIR__) . '/vendor/autoload.php';
 
-use Gacela\Router\Request;
-use Gacela\Router\Routing;
-use Gacela\Router\RoutingConfigurator;
+use Gacela\Router\Entities\Request;
+use Gacela\Router\Router;
+use Gacela\Router\RouterConfigurator;
 
 # php -S localhost:8081 example/example.php
 
 $controller = new class() {
     public function __invoke(): string
     {
-        $request = Request::instance();
+        $request = Request::fromGlobals();
         $number = $request->get('number');
 
         if (!empty($number)) {
@@ -29,7 +29,7 @@ $controller = new class() {
     }
 };
 
-Routing::configure(static function (RoutingConfigurator $routes) use ($controller): void {
+Router::configure(static function (RouterConfigurator $routes) use ($controller): void {
     $routes->redirect('docs', 'https://gacela-project.com/');
 
     # localhost:8081/custom/123

@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Gacela\Router;
+namespace Gacela\Router\Entities;
 
 use Gacela\Resolver\InstanceCreator;
+use Gacela\Router\RouterConfigurator;
 
 use function is_object;
 
@@ -24,7 +25,7 @@ final class Route
     /**
      * @psalm-suppress MixedMethodCall
      */
-    public function run(RoutingConfigurator $routingConfigurator): string
+    public function run(RouterConfigurator $routerConfigurator): string
     {
         $params = (new RouteParams($this))->asArray();
 
@@ -32,7 +33,7 @@ final class Route
             return (string)$this->controller->{$this->action}(...$params);
         }
 
-        $creator = new InstanceCreator($routingConfigurator->getMappingInterfaces());
+        $creator = new InstanceCreator($routerConfigurator->getMappingInterfaces());
         $controller = $creator->createByClassName($this->controller);
 
         return (string)$controller->{$this->action}(...$params);
@@ -83,12 +84,12 @@ final class Route
 
     public function methodMatches(): bool
     {
-        return Request::instance()->isMethod($this->method);
+        return Request::fromGlobals()->isMethod($this->method);
     }
 
     private function pathMatches(): bool
     {
-        $path = Request::instance()->path();
+        $path = Request::fromGlobals()->path();
 
         return preg_match($this->getPathPattern(), $path)
             || preg_match($this->getPathPatternWithoutOptionals(), $path);

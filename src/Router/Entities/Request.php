@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Gacela\Router;
+namespace Gacela\Router\Entities;
 
 final class Request
 {
@@ -27,8 +27,6 @@ final class Request
         self::METHOD_TRACE,
     ];
 
-    private static ?self $instance = null;
-
     private function __construct(
         private array $query,
         private array $request,
@@ -36,17 +34,9 @@ final class Request
     ) {
     }
 
-    public static function resetCache(): void
+    public static function fromGlobals(): self
     {
-        self::$instance = null;
-    }
-
-    public static function instance(): self
-    {
-        if (self::$instance === null) {
-            self::$instance = new self($_GET, $_POST, $_SERVER);
-        }
-        return self::$instance;
+        return new self($_GET, $_POST, $_SERVER);
     }
 
     public function isMethod(string $method): bool
