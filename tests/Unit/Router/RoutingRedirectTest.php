@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace GacelaTest\Unit\Router;
 
-use Gacela\Router\Request;
-use Gacela\Router\Routing;
-use Gacela\Router\RoutingConfigurator;
+use Gacela\Router\Entities\Request;
+use Gacela\Router\Router;
+use Gacela\Router\Routes;
 use GacelaTest\Unit\Router\Fixtures\HeadersTearDown;
 use PHPUnit\Framework\TestCase;
 
 include_once __DIR__ . '/Fake/header.php';
 
-class RoutingRedirectTest extends TestCase
+final class RoutingRedirectTest extends TestCase
 {
     use HeadersTearDown;
 
@@ -21,7 +21,6 @@ class RoutingRedirectTest extends TestCase
      */
     protected function setUp(): void
     {
-        Request::resetCache();
     }
 
     /**
@@ -34,7 +33,7 @@ class RoutingRedirectTest extends TestCase
         $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
-        Routing::configure(static function (RoutingConfigurator $routes) use ($destination): void {
+        Router::configure(static function (Routes $routes) use ($destination): void {
             $routes->redirect('optional/uri', $destination);
         });
 
@@ -57,7 +56,7 @@ class RoutingRedirectTest extends TestCase
         $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
-        Routing::configure(static function (RoutingConfigurator $routes) use ($destination, $statusCode): void {
+        Router::configure(static function (Routes $routes) use ($destination, $statusCode): void {
             $routes->redirect('optional/uri', $destination, $statusCode);
         });
 
@@ -80,8 +79,8 @@ class RoutingRedirectTest extends TestCase
         $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
         $_SERVER['REQUEST_METHOD'] = $method;
 
-        Routing::configure(
-            static function (RoutingConfigurator $routes) use ($destination, $statusCode, $method): void {
+        Router::configure(
+            static function (Routes $routes) use ($destination, $statusCode, $method): void {
                 $routes->redirect('optional/uri', $destination, $statusCode, $method);
             },
         );
@@ -105,8 +104,8 @@ class RoutingRedirectTest extends TestCase
         $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_OPTIONS;
 
-        Routing::configure(
-            static function (RoutingConfigurator $routes) use ($destination, $statusCode, $method): void {
+        Router::configure(
+            static function (Routes $routes) use ($destination, $statusCode, $method): void {
                 $routes->redirect('optional/uri', $destination, $statusCode, $method);
             },
         );

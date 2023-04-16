@@ -44,11 +44,12 @@ php -S localhost:8081 example/example.php
 You can access the example routes:
 ```php
 # file: example/example.php
-Routing::configure(static function (RoutingConfigurator $routes): void {
+Router::configure(static function (Routes $routes, MappingInterfaces $mappingInterfaces) void {
     $routes->redirect('docs', 'https://gacela-project.com/');
 
     # localhost:8081/custom/123
-    $routes->get('custom/{number}', CustomController::class, 'customAction');
+    $routes->get('custom/{number}', CustomControllerWithDependencies::class, 'customAction');
+    $mappingInterfaces->add(SomeDependencyInterface::class, SomeDependencyConcrete::class)
 
     # localhost:8081/custom
     $routes->get('custom', CustomController::class);

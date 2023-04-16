@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace Gacela\Router;
 
+use Gacela\Router\Controllers\RedirectController;
+use Gacela\Router\Entities\Request;
+use Gacela\Router\Entities\Route;
+use Gacela\Router\Exceptions\UnsupportedHttpMethodException;
+
 use function in_array;
 
 /**
@@ -18,13 +23,10 @@ use function in_array;
  * @method trace(string $path, object|string $controller, string $action = '__invoke')
  * @method any(string $path, object|string $controller, string $action = '__invoke')
  */
-final class RoutingConfigurator
+final class Routes
 {
     /** @var list<Route> */
     private array $routes = [];
-
-    /** @var array<class-string, callable|class-string|object> */
-    private array $mappingInterfaces = [];
 
     /**
      * @psalm-suppress MixedArgument
@@ -44,23 +46,6 @@ final class RoutingConfigurator
     public function routes(): array
     {
         return $this->routes;
-    }
-
-    /**
-     * @param array<class-string, callable|class-string|object> $array
-     */
-    public function setMappingInterfaces(array $array): self
-    {
-        $this->mappingInterfaces = $array;
-        return $this;
-    }
-
-    /**
-     * @return array<class-string, callable|class-string|object>
-     */
-    public function getMappingInterfaces(): array
-    {
-        return $this->mappingInterfaces;
     }
 
     public function redirect(

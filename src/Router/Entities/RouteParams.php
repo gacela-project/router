@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Gacela\Router;
+namespace Gacela\Router\Entities;
 
 use ReflectionClass;
 use ReflectionNamedType;
@@ -34,7 +34,7 @@ final class RouteParams
         $pathParamValues = [];
 
         preg_match($this->route->getPathPattern(), '/' . $this->route->path(), $pathParamKeys);
-        preg_match($this->route->getPathPattern(), Request::instance()->path(), $pathParamValues);
+        preg_match($this->route->getPathPattern(), Request::fromGlobals()->path(), $pathParamValues);
 
         unset($pathParamValues[0], $pathParamKeys[0]);
         $pathParamKeys = array_map(static fn ($key) => trim($key, '{}'), $pathParamKeys);
