@@ -10,6 +10,6 @@ trait HeadersTearDown
     {
         global $testHeaders;
 
-        $testHeaders = [];
+        $testHeaders = null;
     }
 }

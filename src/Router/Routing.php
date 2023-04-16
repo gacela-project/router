@@ -26,7 +26,7 @@ final class Routing
         $fn($routingConfigurator);
 
         $route = self::findRoute($routingConfigurator);
-dump($route);
+
         if ($route) {
             echo $route->run($routingConfigurator);
         }

@@ -67,11 +67,11 @@ final class RoutingConfigurator
         int $status = 302,
         string $method = null,
     ): void {
-//        if ($method === null) {
+        if ($method === null) {
             $this->addRoutesForAllMethods([$uri, new RedirectController($destination, $status)]);
-//        } else {
-//            $this->addRouteByName($method, [$uri, new RedirectController($destination, $status)]);
-//        }
+        } else {
+            $this->addRouteByName($method, [$uri, new RedirectController($destination, $status)]);
+        }
     }
 
     /**

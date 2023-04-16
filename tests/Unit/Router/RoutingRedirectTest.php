@@ -27,7 +27,7 @@ class RoutingRedirectTest extends TestCase
     /**
      * @dataProvider provideSimpleRedirect
      */
-    public function test_default_redirect(string $destination): void
+    public function test_simple_redirect(string $destination): void
     {
         global $testHeaders;
 
@@ -50,7 +50,7 @@ class RoutingRedirectTest extends TestCase
     /**
      * @dataProvider provideSimpleRedirect
      */
-    public function test_simple_redirect(string $destination, int $statusCode): void
+    public function test_redirect_with_status_code(string $destination, int $statusCode): void
     {
         global $testHeaders;
 
@@ -83,7 +83,7 @@ class RoutingRedirectTest extends TestCase
         Routing::configure(
             static function (RoutingConfigurator $routes) use ($destination, $statusCode, $method): void {
                 $routes->redirect('optional/uri', $destination, $statusCode, $method);
-            }
+            },
         );
 
         self::assertSame([
@@ -93,6 +93,25 @@ class RoutingRedirectTest extends TestCase
                 'response_code' => $statusCode,
             ],
         ], $testHeaders);
+    }
+
+    /**
+     * @dataProvider provideSimpleRedirect
+     */
+    public function test_not_redirect_non_registered_method(string $destination, int $statusCode, string $method): void
+    {
+        global $testHeaders;
+
+        $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
+        $_SERVER['REQUEST_METHOD'] = 'OPTIONS';
+
+        Routing::configure(
+            static function (RoutingConfigurator $routes) use ($destination, $statusCode, $method): void {
+                $routes->redirect('optional/uri', $destination, $statusCode, $method);
+            },
+        );
+
+        self::assertNull($testHeaders);
     }
 
     public function provideSimpleRedirect(): iterable
