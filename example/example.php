@@ -30,6 +30,8 @@ $controller = new class() {
 };
 
 Routing::configure(static function (RoutingConfigurator $routes) use ($controller): void {
+    $routes->redirect('docs', 'https://gacela-project.com/');
+
     # localhost:8081/custom/123
     $routes->get('custom/{number}', $controller, 'customAction');
 
