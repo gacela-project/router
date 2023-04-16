@@ -1,7 +1,6 @@
 # Gacela Router
 
-A minimalistic HTTP router ideal for your proof-of-concept projects.
-
+A minimalistic HTTP router, ideal for your proof-of-concept projects and decoupled controllers.
 
 <p align="center">
   <a href="https://github.com/c/actions">
@@ -21,7 +20,7 @@ A minimalistic HTTP router ideal for your proof-of-concept projects.
   </a>
 </p>
 
-## Why?
+### Why?
 
 There are many other routers out there. Eg: using Symfony Framework, Laravel, etc... however, these are really rich in features which means they add a lot of accidental complexity and dependencies to your vendor, that you might want to avoid. At least for your proof-of-concept project.
 
@@ -29,7 +28,13 @@ Gacela Router doesn't aim to be the best router that can do everything, but a li
 
 For a POC, we value simplicity over a rich-feature library.
 
-## Example
+### Installation
+
+```bash
+composer require gacela-project/router
+```
+
+### Example
 
 Start the example local server:
 ```bash
