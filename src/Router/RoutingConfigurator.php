@@ -68,9 +68,9 @@ final class RoutingConfigurator
         string $method = null,
     ): void {
         if ($method === null) {
-            $this->addRoutesForAllMethods([$uri, new RedirectController($destination)]);
+            $this->addRoutesForAllMethods([$uri, new RedirectController($destination, $status)]);
         } else {
-            $this->addRouteByName($method, [$uri, new RedirectController($destination)]);
+            $this->addRouteByName($method, [$uri, new RedirectController($destination, $status)]);
         }
     }
 

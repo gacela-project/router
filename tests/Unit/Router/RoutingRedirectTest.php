@@ -25,14 +25,14 @@ class RoutingRedirectTest extends TestCase
     /**
      * @dataProvider provideSimpleRedirect
      */
-    public function test_simple_redirect(string $destination, int $statusCode): void
+    public function test_default_redirect(string $destination): void
     {
         global $testHeaders;
 
         $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
         $_SERVER['REQUEST_METHOD'] = 'GET';
 
-        Routing::configure(static function (RoutingConfigurator $routes) use ($destination, $statusCode): void {
+        Routing::configure(static function (RoutingConfigurator $routes) use ($destination): void {
             $routes->redirect('optional/uri', $destination);
         });
 
@@ -41,6 +41,29 @@ class RoutingRedirectTest extends TestCase
                 'header' => 'Location: ' . $destination,
                 'replace' => true,
                 'response_code' => 302,
+            ],
+        ], $testHeaders);
+    }
+
+    /**
+     * @dataProvider provideSimpleRedirect
+     */
+    public function test_simple_redirect(string $destination, int $statusCode): void
+    {
+        global $testHeaders;
+
+        $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+
+        Routing::configure(static function (RoutingConfigurator $routes) use ($destination, $statusCode): void {
+            $routes->redirect('optional/uri', $destination, $statusCode);
+        });
+
+        self::assertSame([
+            [
+                'header' => 'Location: ' . $destination,
+                'replace' => true,
+                'response_code' => $statusCode,
             ],
         ], $testHeaders);
     }

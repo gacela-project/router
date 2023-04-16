@@ -8,11 +8,12 @@ final class RedirectController
 {
     public function __construct(
         private string $destination,
+        private int $status,
     ) {
     }
 
     public function __invoke(): void
     {
-        header('Location: ' . $this->destination, true, 302);
+        header('Location: ' . $this->destination, true, $this->status);
     }
 }
