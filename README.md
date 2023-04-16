@@ -38,7 +38,10 @@ php -S localhost:8081 example/example.php
 
 You can access the example routes:
 ```php
-Route::configure(static function (RoutingConfigurator $routes): void {
+# file: example/example.php
+Routing::configure(static function (RoutingConfigurator $routes): void {
+    $routes->redirect('docs', 'https://gacela-project.com/');
+
     # localhost:8081/custom/123
     $routes->get('custom/{number}', CustomController::class, 'customAction');
 

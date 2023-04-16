@@ -8,17 +8,6 @@ use Gacela\Resolver\InstanceCreator;
 
 use function is_object;
 
-/**
- * @method static get(string $path, object|string $controller, string $action = '__invoke')
- * @method static head(string $path, object|string $controller, string $action = '__invoke')
- * @method static connect(string $path, object|string $controller, string $action = '__invoke')
- * @method static post(string $path, object|string $controller, string $action = '__invoke')
- * @method static delete(string $path, object|string $controller, string $action = '__invoke')
- * @method static options(string $path, object|string $controller, string $action = '__invoke')
- * @method static patch(string $path, object|string $controller, string $action = '__invoke')
- * @method static put(string $path, object|string $controller, string $action = '__invoke')
- * @method static trace(string $path, object|string $controller, string $action = '__invoke')
- */
 final class Route
 {
     /**
@@ -33,22 +22,6 @@ final class Route
     }
 
     /**
-     * @param callable(RoutingConfigurator):void $fn
-     */
-    public static function configure(callable $fn): void
-    {
-        $routingConfigurator = new RoutingConfigurator();
-        $fn($routingConfigurator);
-
-        foreach ($routingConfigurator->routes() as $route) {
-            if ($route->requestMatches()) {
-                echo $route->run($routingConfigurator);
-                break;
-            }
-        }
-    }
-
-    /**
      * @psalm-suppress MixedMethodCall
      */
     public function run(RoutingConfigurator $routingConfigurator): string
@@ -56,8 +29,7 @@ final class Route
         $params = (new RouteParams($this))->asArray();
 
         if (is_object($this->controller)) {
-            return (string)$this->controller
-                ->{$this->action}(...$params);
+            return (string)$this->controller->{$this->action}(...$params);
         }
 
         $creator = new InstanceCreator($routingConfigurator->getMappingInterfaces());
@@ -69,6 +41,11 @@ final class Route
     public function path(): string
     {
         return $this->path;
+    }
+
+    public function method(): string
+    {
+        return $this->method;
     }
 
     /**
@@ -91,7 +68,7 @@ final class Route
         return '#^/' . $pattern . '$#';
     }
 
-    private function requestMatches(): bool
+    public function requestMatches(): bool
     {
         if (!$this->methodMatches()) {
             return false;
@@ -104,7 +81,7 @@ final class Route
         return true;
     }
 
-    private function methodMatches(): bool
+    public function methodMatches(): bool
     {
         return Request::instance()->isMethod($this->method);
     }

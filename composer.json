@@ -6,6 +6,7 @@
         "gacela-project/resolver": "^0.1"
     },
     "require-dev": {
+        "ext-mbstring": "*",
         "friendsofphp/php-cs-fixer": "^3.16",
         "phpunit/phpunit": "^9.6",
         "phpstan/phpstan": "^1.10",
