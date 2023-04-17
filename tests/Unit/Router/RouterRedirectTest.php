@@ -7,20 +7,20 @@ namespace GacelaTest\Unit\Router;
 use Gacela\Router\Entities\Request;
 use Gacela\Router\Router;
 use Gacela\Router\Routes;
-use GacelaTest\Unit\Router\Fixtures\HeadersTearDown;
 use PHPUnit\Framework\TestCase;
 
 include_once __DIR__ . '/Fake/header.php';
 
 final class RouterRedirectTest extends TestCase
 {
-    use HeadersTearDown;
-
     /**
      * @runInSeparateProcess
      */
     protected function setUp(): void
     {
+        global $testHeaders;
+
+        $testHeaders = null;
     }
 
     /**
@@ -112,9 +112,9 @@ final class RouterRedirectTest extends TestCase
 
         self::assertSame([
             [
-                'header' => 'Location: /optional/uri',
+                'header' => 'HTTP/1.0 404 Not Found',
                 'replace' => true,
-                'response_code' => 404,
+                'response_code' => 0,
             ],
         ], $testHeaders);
     }
