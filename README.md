@@ -49,7 +49,7 @@ Router::configure(static function (Routes $routes, MappingInterfaces $mappingInt
     $routes->redirect('docs', 'https://gacela-project.com/');
 
     # http://localhost:8081?number=456
-    $routes->get('/', CustomController::class);
+    $routes->match(['GET', 'POST'], '/', CustomController::class);
     
     # http://localhost:8081/custom/123
     $routes->get('custom/{number}', CustomControllerWithDependencies::class, 'customAction');

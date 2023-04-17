@@ -21,12 +21,13 @@ class Controller
     public function __invoke(): string
     {
         $number = $this->request->get('number');
+        $method = $this->request->get('REQUEST_METHOD');
 
         if (!empty($number)) {
-            return "__invoke with GET 'number'={$number}";
+            return sprintf("__invoke with %s 'number'=%d", $method, $number);
         }
 
-        return '__invoke';
+        return '__invoke with ' . $method;
     }
 
     public function customAction(int $number = 0): string
@@ -40,7 +41,7 @@ Router::configure(static function (Routes $routes): void {
     $routes->redirect('docs', 'https://gacela-project.com/');
 
     # Try it out: http://localhost:8081?number=456
-    $routes->get('/', Controller::class);
+    $routes->match(['GET', 'POST'], '/', Controller::class);
 
     # Try it out: http://localhost:8081/custom/123
     $routes->get('custom/{number}', Controller::class, 'customAction');

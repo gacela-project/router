@@ -15,6 +15,7 @@ final class Request
     public const METHOD_POST = 'POST';
     public const METHOD_PUT = 'PUT';
     public const METHOD_TRACE = 'TRACE';
+
     public const ALL_METHODS = [
         self::METHOD_CONNECT,
         self::METHOD_DELETE,
@@ -58,6 +59,7 @@ final class Request
     {
         return $this->request[$key]
             ?? $this->query[$key]
+            ?? $this->server[$key]
             ?? null;
     }
 }
