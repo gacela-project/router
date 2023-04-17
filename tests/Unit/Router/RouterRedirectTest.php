@@ -110,7 +110,13 @@ final class RouterRedirectTest extends TestCase
             },
         );
 
-        self::assertNull($testHeaders);
+        self::assertSame([
+            [
+                'header' => 'Location: /optional/uri',
+                'replace' => true,
+                'response_code' => 404,
+            ],
+        ], $testHeaders);
     }
 
     public function destinationProvider(): iterable
