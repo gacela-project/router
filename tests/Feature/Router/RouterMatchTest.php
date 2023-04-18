@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GacelaTest\Unit\Router;
+namespace GacelaTest\Feature\Router;
 
 use Gacela\Router\Entities\Request;
 use Gacela\Router\Exceptions\UnsupportedHttpMethodException;
 use Gacela\Router\Router;
 use Gacela\Router\Routes;
-use GacelaTest\Unit\Router\Fixtures\FakeController;
+use GacelaTest\Feature\Router\Fixtures\FakeController;
 use Generator;
 use PHPUnit\Framework\TestCase;
 
@@ -23,30 +23,6 @@ final class RouterMatchTest extends TestCase
 
         Router::configure(static function (Routes $routes): void {
             $routes->get('expected/uri', FakeController::class, 'basicAction');
-        });
-    }
-
-    public function test_not_respond_when_the_uri_does_not_matches(): void
-    {
-        $_SERVER['REQUEST_URI'] = 'https://example.org/unexpected/uri';
-        $_SERVER['REQUEST_METHOD'] = 'GET';
-
-        $this->expectOutputString('');
-
-        Router::configure(static function (Routes $routes): void {
-            $routes->get('other/uri', FakeController::class, 'basicAction');
-        });
-    }
-
-    public function test_not_respond_when_the_method_does_not_matches(): void
-    {
-        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
-        $_SERVER['REQUEST_METHOD'] = 'GET';
-
-        $this->expectOutputString('');
-
-        Router::configure(static function (Routes $routes): void {
-            $routes->post('expected/uri', FakeController::class, 'basicAction');
         });
     }
 

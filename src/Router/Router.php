@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Gacela\Router;
 
+use Gacela\Router\Controllers\NotFound404Controller;
 use Gacela\Router\Entities\Route;
 
 final class Router
@@ -20,12 +21,10 @@ final class Router
 
         $route = self::findRoute($routerConfigurator);
 
-        if ($route) {
-            echo $route->run($mappingInterfaces);
-        }
+        echo $route->run($mappingInterfaces);
     }
 
-    private static function findRoute(Routes $routerConfigurator): ?Route
+    private static function findRoute(Routes $routerConfigurator): Route
     {
         foreach ($routerConfigurator->routes() as $route) {
             if ($route->requestMatches()) {
@@ -33,6 +32,6 @@ final class Router
             }
         }
 
-        return null;
+        return new Route('', '/', NotFound404Controller::class);
     }
 }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GacelaTest\Unit\Router\Fixtures;
+namespace GacelaTest\Feature\Router\Fixtures;
 
 use Gacela\Router\Entities\Request;
 

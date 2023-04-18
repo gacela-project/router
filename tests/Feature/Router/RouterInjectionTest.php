@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace GacelaTest\Unit\Router;
+namespace GacelaTest\Feature\Router;
 
 use Gacela\Router\MappingInterfaces;
 use Gacela\Router\Router;
 use Gacela\Router\Routes;
-use GacelaTest\Unit\Router\Fake\Name;
-use GacelaTest\Unit\Router\Fake\NameInterface;
-use GacelaTest\Unit\Router\Fixtures\FakeControllerWithDependencies;
-use GacelaTest\Unit\Router\Fixtures\FakeControllerWithRequest;
+use GacelaTest\Feature\Router\Fake\Name;
+use GacelaTest\Feature\Router\Fake\NameInterface;
+use GacelaTest\Feature\Router\Fixtures\FakeControllerWithDependencies;
+use GacelaTest\Feature\Router\Fixtures\FakeControllerWithRequest;
 use PHPUnit\Framework\TestCase;
 
 final class RouterInjectionTest extends TestCase

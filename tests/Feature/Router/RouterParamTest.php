@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GacelaTest\Unit\Router;
+namespace GacelaTest\Feature\Router;
 
 use Gacela\Router\Router;
 use Gacela\Router\Routes;
-use GacelaTest\Unit\Router\Fixtures\FakeController;
+use GacelaTest\Feature\Router\Fixtures\FakeController;
 use Generator;
 use PHPUnit\Framework\TestCase;
 
