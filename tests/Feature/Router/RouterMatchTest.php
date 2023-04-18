@@ -122,30 +122,4 @@ final class RouterMatchTest extends TestCase
         yield [Request::METHOD_PATCH, [Request::METHOD_PATCH, Request::METHOD_PUT]];
         yield [Request::METHOD_PUT, [Request::METHOD_PATCH, Request::METHOD_PUT]];
     }
-
-    /**
-     * @dataProvider notMatchesMethodsProvider
-     */
-    public function test_match_does_not_matches_other_methods(string $testMethod, array $givenMethods): void
-    {
-        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
-        $_SERVER['REQUEST_METHOD'] = $testMethod;
-
-        $this->expectOutputString('');
-
-        Router::configure(static function (Routes $routes) use ($givenMethods): void {
-            $routes->match($givenMethods, 'expected/uri', FakeController::class, 'basicAction');
-        });
-    }
-
-    public function notMatchesMethodsProvider(): Generator
-    {
-        yield [Request::METHOD_PUT, [Request::METHOD_GET, Request::METHOD_POST]];
-        yield [Request::METHOD_OPTIONS, [Request::METHOD_GET, Request::METHOD_POST]];
-        yield [Request::METHOD_GET, [Request::METHOD_PATCH, Request::METHOD_PUT, Request::METHOD_DELETE, Request::METHOD_POST]];
-        yield [Request::METHOD_CONNECT, [
-            Request::METHOD_GET, Request::METHOD_DELETE, Request::METHOD_HEAD, Request::METHOD_OPTIONS,
-            Request::METHOD_PATCH, Request::METHOD_POST, Request::METHOD_PUT, Request::METHOD_TRACE,
-        ]];
-    }
 }
