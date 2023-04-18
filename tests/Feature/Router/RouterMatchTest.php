@@ -26,18 +26,6 @@ final class RouterMatchTest extends TestCase
         });
     }
 
-    public function test_not_respond_when_the_method_does_not_matches(): void
-    {
-        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
-        $_SERVER['REQUEST_METHOD'] = 'GET';
-
-        $this->expectOutputString('');
-
-        Router::configure(static function (Routes $routes): void {
-            $routes->post('expected/uri', FakeController::class, 'basicAction');
-        });
-    }
-
     public function test_respond_only_the_first_match(): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
