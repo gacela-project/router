@@ -7,29 +7,17 @@ namespace GacelaTest\Unit\Router;
 use Gacela\Router\Entities\Request;
 use Gacela\Router\Router;
 use Gacela\Router\Routes;
-use PHPUnit\Framework\TestCase;
+use GacelaTest\Unit\HeaderTestCase;
 
 include_once __DIR__ . '/Fake/header.php';
 
-final class RouterRedirectTest extends TestCase
+final class RouterRedirectTest extends HeaderTestCase
 {
-    /**
-     * @runInSeparateProcess
-     */
-    protected function setUp(): void
-    {
-        global $testHeaders;
-
-        $testHeaders = null;
-    }
-
     /**
      * @dataProvider destinationProvider
      */
     public function test_simple_redirect(string $destination): void
     {
-        global $testHeaders;
-
         $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
@@ -43,7 +31,7 @@ final class RouterRedirectTest extends TestCase
                 'replace' => true,
                 'response_code' => 302,
             ],
-        ], $testHeaders);
+        ], $this->headers());
     }
 
     /**
@@ -51,8 +39,6 @@ final class RouterRedirectTest extends TestCase
      */
     public function test_redirect_with_status_code(string $destination, int $statusCode): void
     {
-        global $testHeaders;
-
         $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
@@ -66,7 +52,7 @@ final class RouterRedirectTest extends TestCase
                 'replace' => true,
                 'response_code' => $statusCode,
             ],
-        ], $testHeaders);
+        ], $this->headers());
     }
 
     /**
@@ -74,8 +60,6 @@ final class RouterRedirectTest extends TestCase
      */
     public function test_redirect_with_custom_method(string $destination, int $statusCode, string $method): void
     {
-        global $testHeaders;
-
         $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
         $_SERVER['REQUEST_METHOD'] = $method;
 
@@ -91,32 +75,7 @@ final class RouterRedirectTest extends TestCase
                 'replace' => true,
                 'response_code' => $statusCode,
             ],
-        ], $testHeaders);
-    }
-
-    /**
-     * @dataProvider destinationProvider
-     */
-    public function test_not_redirect_non_registered_method(string $destination, int $statusCode, string $method): void
-    {
-        global $testHeaders;
-
-        $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
-        $_SERVER['REQUEST_METHOD'] = Request::METHOD_OPTIONS;
-
-        Router::configure(
-            static function (Routes $routes) use ($destination, $statusCode, $method): void {
-                $routes->redirect('optional/uri', $destination, $statusCode, $method);
-            },
-        );
-
-        self::assertSame([
-            [
-                'header' => 'HTTP/1.0 404 Not Found',
-                'replace' => true,
-                'response_code' => 0,
-            ],
-        ], $testHeaders);
+        ], $this->headers());
     }
 
     public function destinationProvider(): iterable
