@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Gacela\Router;
 
+use Exception;
 use Gacela\Router\Controllers\NotFound404Controller;
 use Gacela\Router\Entities\Route;
 
@@ -21,7 +22,11 @@ final class Router
 
         $route = self::findRoute($routerConfigurator);
 
-        echo $route->run($mappingInterfaces);
+        try {
+            echo $route->run($mappingInterfaces);
+        } catch (Exception $exception) {
+            header('HTTP/1.1 500 Internal Server Error');
+        }
     }
 
     private static function findRoute(Routes $routerConfigurator): Route

@@ -9,6 +9,7 @@ use Gacela\Router\Router;
 use Gacela\Router\Routes;
 use GacelaTest\Feature\HeaderTestCase;
 use GacelaTest\Feature\Router\Fixtures\FakeController;
+use GacelaTest\Feature\Router\Fixtures\FakeControllerWithUnhandledException;
 use Generator;
 
 final class ErrorHandlingTest extends HeaderTestCase
@@ -78,5 +79,23 @@ final class ErrorHandlingTest extends HeaderTestCase
             Request::METHOD_GET, Request::METHOD_DELETE, Request::METHOD_HEAD, Request::METHOD_OPTIONS,
             Request::METHOD_PATCH, Request::METHOD_POST, Request::METHOD_PUT, Request::METHOD_TRACE,
         ]];
+    }
+
+    public function test_respond_500_status_when_unhandled_exception(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+
+        Router::configure(static function (Routes $routes): void {
+            $routes->get('expected/uri', FakeControllerWithUnhandledException::class);
+        });
+
+        self::assertSame([
+            [
+                'header' => 'HTTP/1.1 500 Internal Server Error',
+                'replace' => true,
+                'response_code' => 0,
+            ],
+        ], $this->headers());
     }
 }
