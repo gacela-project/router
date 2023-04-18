@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GacelaTest\Unit;
+namespace GacelaTest\Feature;
 
 use PHPUnit\Framework\TestCase;
 
-include_once __DIR__ . '/Fake/header.php';
+include_once __DIR__ . '/header.php';
 
 abstract class HeaderTestCase extends TestCase
 {

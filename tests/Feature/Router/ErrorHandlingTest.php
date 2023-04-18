@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GacelaTest\Unit\Router;
+namespace GacelaTest\Feature\Router;
 
 use Gacela\Router\Entities\Request;
 use Gacela\Router\Router;
-use GacelaTest\Unit\HeaderTestCase;
+use GacelaTest\Feature\HeaderTestCase;
 
 final class ErrorHandlingTest extends HeaderTestCase
 {

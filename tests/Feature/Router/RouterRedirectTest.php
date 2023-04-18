@@ -2,14 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GacelaTest\Unit\Router;
+namespace GacelaTest\Feature\Router;
 
 use Gacela\Router\Entities\Request;
 use Gacela\Router\Router;
 use Gacela\Router\Routes;
-use GacelaTest\Unit\HeaderTestCase;
-
-include_once __DIR__ . '/Fake/header.php';
+use GacelaTest\Feature\HeaderTestCase;
 
 final class RouterRedirectTest extends HeaderTestCase
 {

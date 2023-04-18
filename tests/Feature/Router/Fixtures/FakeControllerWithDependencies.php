@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GacelaTest\Unit\Router\Fixtures;
+namespace GacelaTest\Feature\Router\Fixtures;
 
-use GacelaTest\Unit\Router\Fake\NameInterface;
+use GacelaTest\Feature\Router\Fake\NameInterface;
 
 final class FakeControllerWithDependencies
 {

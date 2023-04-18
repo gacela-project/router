@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GacelaTest\Unit\Router\Fake;
+namespace GacelaTest\Feature\Router\Fake;
 
 final class Name implements NameInterface
 {
