@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace GacelaTest\Feature\Router\Fixtures;
 
-use Exception;
-
 final class FakeControllerWithUnhandledException
 {
     /**
-     * @throws Exception
+     * @throws UnhandledException
      */
     public function __invoke(): string
     {
-        throw new Exception('Unhandled Exception');
+        throw new UnhandledException();
     }
 }
