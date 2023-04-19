@@ -68,7 +68,7 @@ final class Routes
     /**
      * @return list<Route>
      */
-    public function routes(): array
+    public function getAllRoutes(): array
     {
         return $this->routes;
     }

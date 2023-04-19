@@ -4,34 +4,44 @@ declare(strict_types=1);
 
 namespace Gacela\Router;
 
+use Closure;
 use Exception;
 use Gacela\Router\Controllers\NotFound404Controller;
 use Gacela\Router\Entities\Route;
+use ReflectionException;
+use ReflectionFunction;
 
 final class Router
 {
+    // @param callable(Routes $routes, Bindings $bindings):void $fn
     /**
-     * @param callable(Routes, MappingInterfaces):void $fn
+     * @throws ReflectionException
      */
-    public static function configure(callable $fn): void
+    public static function configure(Closure $fn): void
     {
-        $routerConfigurator = new Routes();
-        $mappingInterfaces = new MappingInterfaces();
+        $routes = new Routes();
+        $bindings = new Bindings();
 
-        $fn($routerConfigurator, $mappingInterfaces);
+        $params = array_map(static fn ($param) => match ((string) $param->getType()) {
+            Routes::class => $routes,
+            Bindings::class => $bindings,
+            default => null,
+        }, (new ReflectionFunction($fn))->getParameters());
 
-        $route = self::findRoute($routerConfigurator);
+        $fn(...$params);
+
+        $route = self::findRoute($routes);
 
         try {
-            echo $route->run($mappingInterfaces);
+            echo $route->run($bindings);
         } catch (Exception $exception) {
             header('HTTP/1.1 500 Internal Server Error');
         }
     }
 
-    private static function findRoute(Routes $routerConfigurator): Route
+    private static function findRoute(Routes $routes): Route
     {
-        foreach ($routerConfigurator->routes() as $route) {
+        foreach ($routes->getAllRoutes() as $route) {
             if ($route->requestMatches()) {
                 return $route;
             }

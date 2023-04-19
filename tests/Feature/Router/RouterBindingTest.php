@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace GacelaTest\Feature\Router;
 
+use Gacela\Router\Bindings;
 use Gacela\Router\Entities\Request;
-use Gacela\Router\MappingInterfaces;
 use Gacela\Router\Router;
 use Gacela\Router\Routes;
 use GacelaTest\Feature\Router\Fake\Name;
@@ -14,7 +14,7 @@ use GacelaTest\Feature\Router\Fixtures\FakeControllerWithDependencies;
 use GacelaTest\Feature\Router\Fixtures\FakeControllerWithRequest;
 use PHPUnit\Framework\TestCase;
 
-final class RouterInjectionTest extends TestCase
+final class RouterBindingTest extends TestCase
 {
     public function test_inject_dependencies_in_controllers(): void
     {
@@ -23,9 +23,9 @@ final class RouterInjectionTest extends TestCase
 
         $this->expectOutputString('default-Expected!');
 
-        Router::configure(static function (Routes $routes, MappingInterfaces $mappingInterfaces): void {
+        Router::configure(static function (Bindings $binding, Routes $routes): void {
             $routes->get('expected/uri', FakeControllerWithDependencies::class);
-            $mappingInterfaces->add(NameInterface::class, new Name('Expected!'));
+            $binding->bind(NameInterface::class, new Name('Expected!'));
         });
     }
 

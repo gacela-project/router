@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Gacela\Router\Entities;
 
 use Gacela\Resolver\InstanceCreator;
-use Gacela\Router\MappingInterfaces;
+use Gacela\Router\Bindings;
 
 use function is_object;
 
@@ -25,7 +25,7 @@ final class Route
     /**
      * @psalm-suppress MixedMethodCall
      */
-    public function run(MappingInterfaces $mappingInterfaces): string
+    public function run(Bindings $bindings): string
     {
         $params = (new RouteParams($this))->asArray();
 
@@ -33,7 +33,7 @@ final class Route
             return (string)$this->controller->{$this->action}(...$params);
         }
 
-        $creator = new InstanceCreator($mappingInterfaces->getAll());
+        $creator = new InstanceCreator($bindings->getAllBindings());
         $controller = $creator->createByClassName($this->controller);
 
         return (string)$controller->{$this->action}(...$params);
