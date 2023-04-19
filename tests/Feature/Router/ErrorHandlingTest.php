@@ -34,7 +34,7 @@ final class ErrorHandlingTest extends HeaderTestCase
     public function test_respond_404_status_when_method_does_not_match(): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
-        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
         Router::configure(static function (Routes $routes): void {
             $routes->post('expected/uri', FakeController::class, 'basicAction');
@@ -84,7 +84,7 @@ final class ErrorHandlingTest extends HeaderTestCase
     public function test_respond_500_status_when_unhandled_exception(): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
-        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
         Router::configure(static function (Routes $routes): void {
             $routes->get('expected/uri', FakeControllerWithUnhandledException::class);

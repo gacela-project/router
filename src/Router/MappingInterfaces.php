@@ -13,7 +13,7 @@ final class MappingInterfaces
 
     public function __construct()
     {
-        $this->builtInInjections();
+        $this->addBuiltInInjections();
     }
 
     /**
@@ -34,7 +34,7 @@ final class MappingInterfaces
         return $this->mappingInterfaces;
     }
 
-    private function builtInInjections(): void
+    private function addBuiltInInjections(): void
     {
         $this->add(Request::class, Request::fromGlobals());
     }

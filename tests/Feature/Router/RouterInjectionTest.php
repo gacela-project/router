@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace GacelaTest\Feature\Router;
 
+use Gacela\Router\Entities\Request;
 use Gacela\Router\MappingInterfaces;
 use Gacela\Router\Router;
 use Gacela\Router\Routes;
@@ -18,7 +19,7 @@ final class RouterInjectionTest extends TestCase
     public function test_inject_dependencies_in_controllers(): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
-        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
         $this->expectOutputString('default-Expected!');
 
@@ -31,7 +32,7 @@ final class RouterInjectionTest extends TestCase
     public function test_inject_controller_with_request_dependency(): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/expected';
-        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
         $_GET['name'] = 'Katarn';
 
         $this->expectOutputString('Katarn');
