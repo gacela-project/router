@@ -91,7 +91,7 @@ final class Routes
 
         foreach ($methods as $method) {
             if (!in_array($method, Request::ALL_METHODS, true)) {
-                throw new UnsupportedHttpMethodException($method);
+                throw UnsupportedHttpMethodException::withName($method);
             }
             $path = ($path === '/') ? '' : $path;
 
