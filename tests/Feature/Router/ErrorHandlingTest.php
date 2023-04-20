@@ -172,4 +172,31 @@ final class ErrorHandlingTest extends HeaderTestCase
             ],
         ], $this->headers());
     }
+
+    public function test_handle_handled_exception_with_anonymous_class(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        Router::configure(static function (Handlers $handlers, Routes $routes): void {
+            $routes->get('expected/uri', FakeControllerWithUnhandledException::class);
+
+            $handlers->handle(UnhandledException::class, new class() {
+                public function __invoke(): string
+                {
+                    \Gacela\Router\header('HTTP/1.1 418 I\'m a teapot');
+                    return 'Handled!';
+                }
+            });
+        });
+
+        $this->expectOutputString('Handled!');
+        self::assertSame([
+            [
+                'header' => 'HTTP/1.1 418 I\'m a teapot',
+                'replace' => true,
+                'response_code' => 0,
+            ],
+        ], $this->headers());
+    }
 }
