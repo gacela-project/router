@@ -6,6 +6,7 @@ namespace Gacela\Router;
 
 use Exception;
 use Gacela\Router\Exceptions\NotFound404Exception;
+use Gacela\Router\Handlers\FallbackExceptionHandler;
 use Gacela\Router\Handlers\NotFound404ExceptionHandler;
 
 final class Handlers
@@ -39,6 +40,10 @@ final class Handlers
         $this->handle(
             NotFound404Exception::class,
             static fn (NotFound404Exception $exception) => (new NotFound404ExceptionHandler())->__invoke($exception),
+        );
+        $this->handle(
+            Exception::class,
+            static fn (Exception $exception) => (new FallbackExceptionHandler())->__invoke($exception),
         );
     }
 }
