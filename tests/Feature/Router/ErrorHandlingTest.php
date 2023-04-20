@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace GacelaTest\Feature\Router;
 
+use Exception;
 use Gacela\Router\Entities\Request;
+use Gacela\Router\Exceptions\NotFound404Exception;
 use Gacela\Router\Handlers;
 use Gacela\Router\Router;
 use Gacela\Router\Routes;
@@ -101,7 +103,7 @@ final class ErrorHandlingTest extends HeaderTestCase
         ], $this->headers());
     }
 
-    public function test_handle_handled_exception(): void
+    public function test_handle_handled_exception_with_anonymous_function(): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
@@ -116,7 +118,52 @@ final class ErrorHandlingTest extends HeaderTestCase
         });
 
         $this->expectOutputString('Handled!');
+        self::assertSame([
+            [
+                'header' => 'HTTP/1.1 418 I\'m a teapot',
+                'replace' => true,
+                'response_code' => 0,
+            ],
+        ], $this->headers());
+    }
 
+    public function test_custom_404_handler(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        Router::configure(static function (Handlers $handlers): void {
+            $handlers->handle(NotFound404Exception::class, static function (): string {
+                \Gacela\Router\header('HTTP/1.1 418 I\'m a teapot');
+                return 'Handled!';
+            });
+        });
+
+        $this->expectOutputString('Handled!');
+        self::assertSame([
+            [
+                'header' => 'HTTP/1.1 418 I\'m a teapot',
+                'replace' => true,
+                'response_code' => 0,
+            ],
+        ], $this->headers());
+    }
+
+    public function test_custom_fallback_handler(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        Router::configure(static function (Handlers $handlers, Routes $routes): void {
+            $routes->get('expected/uri', FakeControllerWithUnhandledException::class);
+
+            $handlers->handle(Exception::class, static function (): string {
+                \Gacela\Router\header('HTTP/1.1 418 I\'m a teapot');
+                return 'Handled!';
+            });
+        });
+
+        $this->expectOutputString('Handled!');
         self::assertSame([
             [
                 'header' => 'HTTP/1.1 418 I\'m a teapot',

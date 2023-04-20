@@ -6,8 +6,8 @@ namespace Gacela\Router;
 
 use Closure;
 use Exception;
-use Gacela\Router\Controllers\NotFound404Controller;
 use Gacela\Router\Entities\Route;
+use Gacela\Router\Exceptions\NotFound404Exception;
 use ReflectionException;
 use ReflectionFunction;
 
@@ -34,9 +34,10 @@ final class Router
         $fn(...$params);
 
         try {
-            echo self::findRoute($routes)->run($bindings);
+            echo self::findRoute($routes)
+                ->run($bindings);
         } catch (Exception $exception) {
-            echo self::handleException($handlers, $exception);
+            echo (string) self::findHandler($handlers, $exception)($exception);
         }
     }
 
@@ -48,18 +49,17 @@ final class Router
             }
         }
 
-        return new Route('', '/', NotFound404Controller::class);
+        throw new NotFound404Exception();
     }
 
-    private static function handleException(Handlers $handlers, Exception $exception): string
+    private static function findHandler(Handlers $handlers, Exception $exception): callable
     {
         $handler = $handlers->getAllHandlers()[get_class($exception)] ?? null;
 
         if ($handler === null) {
-            header('HTTP/1.1 500 Internal Server Error');
-            return '';
+            return $handlers->getAllHandlers()[Exception::class];
         }
 
-        return $handler($exception);
+        return $handler;
     }
 }
