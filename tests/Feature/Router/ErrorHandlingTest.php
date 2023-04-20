@@ -110,7 +110,7 @@ final class ErrorHandlingTest extends HeaderTestCase
             $routes->get('expected/uri', FakeControllerWithUnhandledException::class);
 
             $handlers->handle(UnhandledException::class, static function (): string {
-                header('HTTP/1.1 418 I\'m a teapot');
+                \Gacela\Router\header('HTTP/1.1 418 I\'m a teapot');
                 return 'Handled!';
             });
         });
