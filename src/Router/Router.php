@@ -4,34 +4,62 @@ declare(strict_types=1);
 
 namespace Gacela\Router;
 
+use Closure;
+use Exception;
 use Gacela\Router\Controllers\NotFound404Controller;
 use Gacela\Router\Entities\Route;
+use ReflectionException;
+use ReflectionFunction;
+
+use function get_class;
 
 final class Router
 {
     /**
-     * @param callable(Routes, MappingInterfaces):void $fn
+     * @throws ReflectionException
      */
-    public static function configure(callable $fn): void
+    public static function configure(Closure $fn): void
     {
-        $routerConfigurator = new Routes();
-        $mappingInterfaces = new MappingInterfaces();
+        $routes = new Routes();
+        $bindings = new Bindings();
+        $handlers = new Handlers();
 
-        $fn($routerConfigurator, $mappingInterfaces);
+        $params = array_map(static fn ($param) => match ((string)$param->getType()) {
+            Routes::class => $routes,
+            Bindings::class => $bindings,
+            Handlers::class => $handlers,
+            default => null,
+        }, (new ReflectionFunction($fn))->getParameters());
 
-        $route = self::findRoute($routerConfigurator);
+        $fn(...$params);
 
-        echo $route->run($mappingInterfaces);
+        try {
+            echo self::findRoute($routes)->run($bindings);
+        } catch (Exception $exception) {
+            echo self::handleException($handlers, $exception);
+        }
     }
 
-    private static function findRoute(Routes $routerConfigurator): Route
+    private static function findRoute(Routes $routes): Route
     {
-        foreach ($routerConfigurator->routes() as $route) {
+        foreach ($routes->getAllRoutes() as $route) {
             if ($route->requestMatches()) {
                 return $route;
             }
         }
 
         return new Route('', '/', NotFound404Controller::class);
+    }
+
+    private static function handleException(Handlers $handlers, Exception $exception): string
+    {
+        $handler = $handlers->getAllHandlers()[get_class($exception)] ?? null;
+
+        if ($handler === null) {
+            header('HTTP/1.1 500 Internal Server Error');
+            return '';
+        }
+
+        return $handler($exception);
     }
 }

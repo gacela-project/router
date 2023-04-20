@@ -44,7 +44,7 @@ php -S localhost:8081 example/example.php
 You can access the example routes:
 ```php
 # file: example/example.php
-Router::configure(static function (Routes $routes, MappingInterfaces $mappingInterfaces) void {
+Router::configure(static function (Routes $routes, Bindings $bindings) void {
     # http://localhost:8081/docs
     $routes->redirect('docs', 'https://gacela-project.com/');
 
@@ -53,7 +53,7 @@ Router::configure(static function (Routes $routes, MappingInterfaces $mappingInt
     
     # http://localhost:8081/custom/123
     $routes->get('custom/{number}', CustomControllerWithDependencies::class, 'customAction');
-    $mappingInterfaces->add(SomeDependencyInterface::class, SomeDependencyConcrete::class)
+    $bindings->bind(SomeDependencyInterface::class, SomeDependencyConcrete::class)
 
     # http://localhost:8081/custom
     $routes->any('custom', CustomController::class);

@@ -17,7 +17,7 @@ final class RouterMatchTest extends TestCase
     public function test_respond_when_everything_matches(): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
-        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
         $this->expectOutputString('Expected!');
 
@@ -29,7 +29,7 @@ final class RouterMatchTest extends TestCase
     public function test_respond_only_the_first_match(): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
-        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
         $this->expectOutputString('Expected!');
 
@@ -42,7 +42,7 @@ final class RouterMatchTest extends TestCase
     public function test_optional_argument(): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/optional';
-        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
         $this->expectOutputString('Expected!');
 
@@ -54,7 +54,7 @@ final class RouterMatchTest extends TestCase
     public function test_multiple_optional_argument(): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/optional';
-        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
         $this->expectOutputString('Expected!');
 

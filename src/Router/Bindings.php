@@ -6,36 +6,36 @@ namespace Gacela\Router;
 
 use Gacela\Router\Entities\Request;
 
-final class MappingInterfaces
+final class Bindings
 {
     /** @var array<class-string, callable|class-string|object> */
-    private array $mappingInterfaces = [];
+    private array $bindings = [];
 
     public function __construct()
     {
-        $this->builtInInjections();
+        $this->addBuiltInBindings();
     }
 
     /**
      * @param class-string $name
      * @param callable|class-string|object $instance
      */
-    public function add(string $name, mixed $instance): self
+    public function bind(string $name, mixed $instance): self
     {
-        $this->mappingInterfaces[$name] = $instance;
+        $this->bindings[$name] = $instance;
         return $this;
     }
 
     /**
      * @return array<class-string, callable|class-string|object>
      */
-    public function getAll(): array
+    public function getAllBindings(): array
     {
-        return $this->mappingInterfaces;
+        return $this->bindings;
     }
 
-    private function builtInInjections(): void
+    private function addBuiltInBindings(): void
     {
-        $this->add(Request::class, Request::fromGlobals());
+        $this->bind(Request::class, Request::fromGlobals());
     }
 }

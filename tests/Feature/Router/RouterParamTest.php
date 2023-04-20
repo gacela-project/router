@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace GacelaTest\Feature\Router;
 
+use Gacela\Router\Entities\Request;
 use Gacela\Router\Router;
 use Gacela\Router\Routes;
 use GacelaTest\Feature\Router\Fixtures\FakeController;
@@ -19,7 +20,7 @@ final class RouterParamTest extends TestCase
         $params = ['foo', 'bar', 'baz'];
 
         $_SERVER['REQUEST_URI'] = "https://example.org/{$params[0]}/{$params[1]}/{$params[2]}";
-        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
         $this->expectOutputString("The params are '{$params[0]}', '{$params[1]}' and '{$params[2]}'!");
 
@@ -33,7 +34,7 @@ final class RouterParamTest extends TestCase
         $params = ['foo', 'bar', 'baz'];
 
         $_SERVER['REQUEST_URI'] = "https://example.org/{$params[0]}/{$params[1]}/{$params[2]}";
-        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
         $this->expectOutputString("The params are '{$params[1]}', '{$params[0]}' and '{$params[2]}'!");
 
@@ -48,7 +49,7 @@ final class RouterParamTest extends TestCase
     public function test_pass_string_params_to_the_action(string $string): void
     {
         $_SERVER['REQUEST_URI'] = "https://example.org/expected/string/is/{$string}";
-        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
         $this->expectOutputString("The 'string' param is '{$string}'!");
 
@@ -71,7 +72,7 @@ final class RouterParamTest extends TestCase
     public function test_pass_int_params_to_the_action(string $int): void
     {
         $_SERVER['REQUEST_URI'] = "https://example.org/expected/integer/is/{$int}";
-        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
         $this->expectOutputString("The 'int' param is '{$int}'!");
 
@@ -94,7 +95,7 @@ final class RouterParamTest extends TestCase
     public function test_pass_float_params_to_the_action(string $float): void
     {
         $_SERVER['REQUEST_URI'] = "https://example.org/expected/float/is/{$float}";
-        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
         $this->expectOutputString("The 'float' param is '{$float}'!");
 
@@ -117,7 +118,7 @@ final class RouterParamTest extends TestCase
     public function test_pass_bool_params_to_the_action(string $given, string $expected): void
     {
         $_SERVER['REQUEST_URI'] = "https://example.org/expected/bool/is/{$given}";
-        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
         $this->expectOutputString("The 'bool' param is '{$expected}'!");
 
