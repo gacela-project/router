@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace GacelaTest\Feature\Router;
 
 use Gacela\Router\Entities\Request;
+use Gacela\Router\Exceptions\UnhandledException;
+use Gacela\Router\Handlers;
 use Gacela\Router\Router;
 use Gacela\Router\Routes;
 use GacelaTest\Feature\HeaderTestCase;
 use GacelaTest\Feature\Router\Fixtures\FakeController;
 use GacelaTest\Feature\Router\Fixtures\FakeControllerWithUnhandledException;
-use GacelaTest\Feature\Router\Fixtures\UnhandledException;
 use Generator;
 
 final class ErrorHandlingTest extends HeaderTestCase
@@ -102,17 +103,15 @@ final class ErrorHandlingTest extends HeaderTestCase
 
     public function test_handle_handled_exception(): void
     {
-        $this->markTestIncomplete();
-
         $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
         Router::configure(static function (Routes $routes, Handlers $handlers): void {
             $routes->get('expected/uri', FakeControllerWithUnhandledException::class);
 
-            $handlers->handle(UnhandledException::class, static function () {
+            $handlers->handle(UnhandledException::class, static function (): string {
                 header('HTTP/1.1 418 I\'m a teapot');
-                return 'Handled';
+                return 'Handled!';
             });
         });
 
