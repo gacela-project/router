@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace GacelaTest\Feature\Router;
 
 use Gacela\Router\Entities\Request;
-use Gacela\Router\Exceptions\UnhandledException;
 use Gacela\Router\Handlers;
 use Gacela\Router\Router;
 use Gacela\Router\Routes;
 use GacelaTest\Feature\HeaderTestCase;
 use GacelaTest\Feature\Router\Fixtures\FakeController;
 use GacelaTest\Feature\Router\Fixtures\FakeControllerWithUnhandledException;
+use GacelaTest\Feature\Router\Fixtures\UnhandledException;
 use Generator;
 
 final class ErrorHandlingTest extends HeaderTestCase

@@ -11,8 +11,6 @@ use Gacela\Router\Entities\Route;
 use ReflectionException;
 use ReflectionFunction;
 
-use function is_string;
-
 final class Router
 {
     /**
@@ -33,12 +31,10 @@ final class Router
 
         $fn(...$params);
 
-        $route = self::findRoute($routes);
-
         try {
-            echo $route->run($bindings);
+            echo self::findRoute($routes)->run($bindings);
         } catch (Exception $exception) {
-            self::handleException($handlers, $exception);
+            echo self::handleException($handlers, $exception);
         }
     }
 
@@ -53,17 +49,14 @@ final class Router
         return new Route('', '/', NotFound404Controller::class);
     }
 
-    private static function handleException(Handlers $handlers, Exception $exception): void
+    private static function handleException(Handlers $handlers, Exception $exception): string
     {
         $handler = $handlers->getByException($exception);
         if ($handler === null) {
             header('HTTP/1.1 500 Internal Server Error');
-        } else {
-            /** @var mixed $result */
-            $result = $handler($exception);
-            if (is_string($result)) {
-                echo $result;
-            }
+            return '';
         }
+
+        return $handler($exception);
     }
 }
