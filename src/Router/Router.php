@@ -11,6 +11,8 @@ use Gacela\Router\Entities\Route;
 use ReflectionException;
 use ReflectionFunction;
 
+use function get_class;
+
 final class Router
 {
     /**
@@ -51,7 +53,8 @@ final class Router
 
     private static function handleException(Handlers $handlers, Exception $exception): string
     {
-        $handler = $handlers->getByException($exception);
+        $handler = $handlers->getAllHandlers()[get_class($exception)] ?? null;
+
         if ($handler === null) {
             header('HTTP/1.1 500 Internal Server Error');
             return '';
