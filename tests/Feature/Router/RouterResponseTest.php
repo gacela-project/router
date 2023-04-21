@@ -6,19 +6,34 @@ namespace GacelaTest\Feature\Router;
 
 use Gacela\Router\Entities\JsonResponse;
 use Gacela\Router\Entities\Request;
+use Gacela\Router\Entities\Response;
 use Gacela\Router\Router;
 use Gacela\Router\Routes;
 use GacelaTest\Feature\HeaderTestCase;
 
-final class RouterJsonResponseTest extends HeaderTestCase
+final class RouterResponseTest extends HeaderTestCase
 {
-    public function test_simple_redirect(): void
+    public function test_string_response(): void
     {
-        $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
+        $_SERVER['REQUEST_URI'] = 'https://example.org/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
         Router::configure(static function (Routes $routes): void {
-            $routes->get('optional/uri', static fn () => new JsonResponse([
+            $routes->get('uri', static fn () => new Response('body'));
+        });
+
+        $this->expectOutputString('body');
+
+        self::assertSame([], $this->headers());
+    }
+
+    public function test_json_response(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/uri';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        Router::configure(static function (Routes $routes): void {
+            $routes->get('uri', static fn () => new JsonResponse([
                 'key' => 'value',
             ]));
         });
