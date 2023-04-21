@@ -6,12 +6,14 @@ namespace Gacela\Router;
 
 use Closure;
 use Exception;
+use Gacela\Resolver\InstanceCreator;
 use Gacela\Router\Entities\Route;
 use Gacela\Router\Exceptions\NotFound404Exception;
 use ReflectionException;
 use ReflectionFunction;
 
 use function get_class;
+use function is_callable;
 
 final class Router
 {
@@ -37,7 +39,7 @@ final class Router
             echo self::findRoute($routes)
                 ->run($bindings);
         } catch (Exception $exception) {
-            echo (string) self::findHandler($handlers, $exception)($exception);
+            echo self::handleException($handlers, $exception);
         }
     }
 
@@ -52,14 +54,29 @@ final class Router
         throw new NotFound404Exception();
     }
 
-    private static function findHandler(Handlers $handlers, Exception $exception): callable
+    private static function handleException(Handlers $handlers, Exception $exception): string
     {
-        $handler = $handlers->getAllHandlers()[get_class($exception)] ?? null;
+        $handler = self::findHandler($handlers, $exception);
 
-        if ($handler === null) {
-            return $handlers->getAllHandlers()[Exception::class];
+        if (is_callable($handler)) {
+            return $handler($exception);
         }
 
-        return $handler;
+        $instance = (new InstanceCreator())->createByClassName($handler);
+
+        if (is_callable($instance)) {
+            return $instance($exception);
+        }
+
+        return '';
+    }
+
+    /**
+     * @return callable|class-string
+     */
+    private static function findHandler(Handlers $handlers, Exception $exception): string|callable
+    {
+        return $handlers->getAllHandlers()[get_class($exception)]
+            ?? $handlers->getAllHandlers()[Exception::class];
     }
 }

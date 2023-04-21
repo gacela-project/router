@@ -11,7 +11,7 @@ use Gacela\Router\Handlers\NotFound404ExceptionHandler;
 
 final class Handlers
 {
-    /** @var array<class-string, callable> */
+    /** @var array<class-string, callable|class-string> */
     private array $handlers = [];
 
     public function __construct()
@@ -20,15 +20,16 @@ final class Handlers
     }
     /**
      * @param class-string<Exception> $exception
+     * @param callable|class-string $handler
      */
-    public function handle(string $exception, callable $handler): self
+    public function handle(string $exception, callable|string $handler): self
     {
         $this->handlers[$exception] = $handler;
         return $this;
     }
 
     /**
-     * @return array<class-string, callable>
+     * @return array<class-string, callable|class-string>
      */
     public function getAllHandlers(): array
     {
@@ -37,13 +38,7 @@ final class Handlers
 
     private function addBuiltInHandlers(): void
     {
-        $this->handle(
-            NotFound404Exception::class,
-            static fn (NotFound404Exception $exception) => (new NotFound404ExceptionHandler())->__invoke($exception),
-        );
-        $this->handle(
-            Exception::class,
-            static fn (Exception $exception) => (new FallbackExceptionHandler())->__invoke($exception),
-        );
+        $this->handle(NotFound404Exception::class, NotFound404ExceptionHandler::class);
+        $this->handle(Exception::class, FallbackExceptionHandler::class);
     }
 }
