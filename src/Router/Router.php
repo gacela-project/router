@@ -58,7 +58,7 @@ final class Router
             return $handler($exception);
         }
 
-        $instance = (new InstanceCreator())->createByClassName($handler);
+        $instance = InstanceCreator::create($handler);
 
         if (is_callable($instance)) {
             return $instance($exception);
