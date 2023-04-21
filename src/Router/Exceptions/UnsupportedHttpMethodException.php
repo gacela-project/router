@@ -8,8 +8,8 @@ use RuntimeException;
 
 final class UnsupportedHttpMethodException extends RuntimeException
 {
-    public function __construct(string $name)
+    public static function withName(string $name): self
     {
-        parent::__construct("Unsupported HTTP method '{$name}'");
+        return new self("Unsupported HTTP method '{$name}'");
     }
 }

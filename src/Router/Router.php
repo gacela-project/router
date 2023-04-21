@@ -9,7 +9,6 @@ use Exception;
 use Gacela\Resolver\InstanceCreator;
 use Gacela\Router\Entities\Route;
 use Gacela\Router\Exceptions\NotFound404Exception;
-use ReflectionException;
 use ReflectionFunction;
 
 use function get_class;
@@ -17,9 +16,6 @@ use function is_callable;
 
 final class Router
 {
-    /**
-     * @throws ReflectionException
-     */
     public static function configure(Closure $fn): void
     {
         $routes = new Routes();
