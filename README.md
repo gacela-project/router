@@ -36,26 +36,37 @@ composer require gacela-project/router
 
 ### Example
 
-Start the example local server:
-```bash
-php -S localhost:8081 example/example.php
-```
-
-You can access the example routes:
 ```php
-# file: example/example.php
-Router::configure(static function (Routes $routes, Bindings $bindings) void {
-    # http://localhost:8081/docs
-    $routes->redirect('docs', 'https://gacela-project.com/');
+# `Bindings` and `Handlers` are optional, and you can place them in any order.
 
-    # http://localhost:8081?number=456
+Router::configure(static function (Routes $routes, Bindings $bindings, Handlers $handlers) void {
+
+    // Custom redirections
+    $routes->redirect('docs', 'https://gacela-project.com/');
+    
+    // Matching a route coming from a particular or any custom HTTP methods
+    $routes->get('custom', CustomController::class, '__invoke');
+    $routes->...('custom', CustomController::class, 'customAction');
+    $routes->any('custom', CustomController::class);
+
+    // Matching a route coming from multiple HTTP methods
     $routes->match(['GET', 'POST'], '/', CustomController::class);
     
-    # http://localhost:8081/custom/123
+    // Binding custom dependencies on your controllers
     $routes->get('custom/{number}', CustomControllerWithDependencies::class, 'customAction');
     $bindings->bind(SomeDependencyInterface::class, SomeDependencyConcrete::class)
 
-    # http://localhost:8081/custom
-    $routes->any('custom', CustomController::class);
+    // Handle custom Exceptions with class-string|callable
+    $handlers->handle(NotFound404Exception::class, NotFound404ExceptionHandler::class);
+
 });
 ```
+
+### Working demo
+
+For a working example run `composer serve` and check the `example/example.php`
+
+> TIP: `composer serve` is equivalent to:
+> ```bash
+> php -S localhost:8081 example/example.php
+> ```
