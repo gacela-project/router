@@ -23,14 +23,14 @@ final class RouterJsonResponseTest extends HeaderTestCase
             ]));
         });
 
-        $this->expectOutputString(json_encode(['key' => 'value']));
+        $this->expectOutputString('{"key":"value"}');
 
-        //        self::assertSame([
-        //            [
-        //                'header' => 'Content-Type: application/json',
-        //                'replace' => true,
-        //                'response_code' => 0,
-        //            ],
-        //        ], $this->headers());
+        self::assertSame([
+            [
+                'header' => 'Content-Type: application/json',
+                'replace' => true,
+                'response_code' => 0,
+            ],
+        ], $this->headers());
     }
 }

@@ -13,7 +13,7 @@ final class JsonResponse
 
     public function __toString(): string
     {
-        //        header('Content-Type: application/json');
+        header('Content-Type: application/json');
 
         return json_encode($this->json, JSON_THROW_ON_ERROR);
     }
