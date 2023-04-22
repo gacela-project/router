@@ -6,9 +6,9 @@ namespace Gacela\Router\Entities;
 
 final class JsonResponse extends Response
 {
-    public function __construct(array $json)
+    public function __construct(array $json, array $headers = [])
     {
-        parent::__construct(json_encode($json, JSON_THROW_ON_ERROR));
+        parent::__construct(json_encode($json, JSON_THROW_ON_ERROR), $headers);
     }
 
     public function __toString(): string

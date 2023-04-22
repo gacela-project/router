@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once \dirname(__DIR__) . '/vendor/autoload.php';
 
 use Gacela\Router\Entities\Request;
+use Gacela\Router\Entities\Response;
 use Gacela\Router\Router;
 use Gacela\Router\Routes;
 
@@ -34,6 +35,14 @@ class Controller
     {
         return "customAction(number: {$number})";
     }
+
+    public function customHeaders(): Response
+    {
+        return new Response('{"custom": "headers"}', [
+            'Access-Control-Allow-Origin: *',
+            'Content-Type: application/json',
+        ]);
+    }
 }
 
 Router::configure(static function (Routes $routes): void {
@@ -48,4 +57,7 @@ Router::configure(static function (Routes $routes): void {
 
     # Try it out: http://localhost:8081/custom
     $routes->any('custom', Controller::class);
+
+    # Try it out: http://localhost:8081/headers
+    $routes->any('headers', Controller::class, 'customHeaders');
 });
