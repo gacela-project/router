@@ -6,13 +6,21 @@ namespace Gacela\Router\Entities;
 
 class Response
 {
+    /**
+     * @param list<string> $headers
+     */
     public function __construct(
-        private string $body,
+        private string $content,
+        private array $headers = [],
     ) {
     }
 
     public function __toString(): string
     {
-        return $this->body;
+        foreach ($this->headers as $header) {
+            header($header);
+        }
+
+        return $this->content;
     }
 }
