@@ -24,6 +24,6 @@ abstract class HeaderTestCase extends TestCase
     {
         global $testHeaders;
 
-        return $testHeaders;
+        return $testHeaders ?? [];
     }
 }
