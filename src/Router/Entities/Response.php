@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Gacela\Router\Entities;
 
-class Response
+use Stringable;
+
+class Response implements Stringable
 {
     /**
      * @param list<string> $headers

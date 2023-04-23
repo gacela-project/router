@@ -12,8 +12,9 @@ final class RedirectController
     ) {
     }
 
-    public function __invoke(): void
+    public function __invoke(): string
     {
         header('Location: ' . $this->destination, true, $this->status);
+        return '';
     }
 }

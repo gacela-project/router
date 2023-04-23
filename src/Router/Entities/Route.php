@@ -7,7 +7,11 @@ namespace Gacela\Router\Entities;
 use Gacela\Resolver\InstanceCreator;
 use Gacela\Router\Bindings;
 
+use Gacela\Router\Exceptions\UnsupportedResponseTypeException;
+use Stringable;
+
 use function is_object;
+use function is_string;
 
 final class Route
 {
@@ -25,18 +29,24 @@ final class Route
     /**
      * @psalm-suppress MixedMethodCall
      */
-    public function run(Bindings $bindings): string
+    public function run(Bindings $bindings): string|Stringable
     {
         $params = (new RouteParams($this))->asArray();
 
-        if (is_object($this->controller)) {
-            return (string)$this->controller->{$this->action}(...$params);
+        if (!is_object($this->controller)) {
+            $creator = new InstanceCreator($bindings->getAllBindings());
+            $controller = $creator->createByClassName($this->controller);
+            $response = $controller->{$this->action}(...$params);
+        } else {
+            /** @var string|Stringable $response */
+            $response = $this->controller->{$this->action}(...$params);
         }
 
-        $creator = new InstanceCreator($bindings->getAllBindings());
-        $controller = $creator->createByClassName($this->controller);
+        if (!is_string($response) && !($response instanceof Stringable)) {
+            throw UnsupportedResponseTypeException::fromType($response);
+        }
 
-        return (string)$controller->{$this->action}(...$params);
+        return $response;
     }
 
     public function path(): string

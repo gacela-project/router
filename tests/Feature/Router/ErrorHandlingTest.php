@@ -7,6 +7,7 @@ namespace GacelaTest\Feature\Router;
 use Exception;
 use Gacela\Router\Entities\Request;
 use Gacela\Router\Exceptions\NotFound404Exception;
+use Gacela\Router\Exceptions\UnsupportedResponseTypeException;
 use Gacela\Router\Handlers;
 use Gacela\Router\Router;
 use Gacela\Router\Routes;
@@ -15,6 +16,7 @@ use GacelaTest\Feature\Router\Fixtures\FakeController;
 use GacelaTest\Feature\Router\Fixtures\FakeControllerWithUnhandledException;
 use GacelaTest\Feature\Router\Fixtures\UnhandledException;
 use Generator;
+use stdClass;
 
 final class ErrorHandlingTest extends HeaderTestCase
 {
@@ -198,5 +200,36 @@ final class ErrorHandlingTest extends HeaderTestCase
                 'response_code' => 0,
             ],
         ], $this->headers());
+    }
+
+    /**
+     * @dataProvider nonStringProvider
+     *
+     * @param mixed $given
+     * @param mixed $type
+     */
+    public function test_throws_exception_if_response_is_not_a_string_or_stringable($given, $type): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        Router::configure(static function (Handlers $handlers, Routes $routes) use ($given): void {
+            $routes->get('expected/uri', static fn () => $given);
+
+            $handlers->handle(
+                UnsupportedResponseTypeException::class,
+                static fn (UnsupportedResponseTypeException $exception): string => $exception->getMessage(),
+            );
+        });
+
+        $this->expectOutputString("Unsupported response type '{$type}'. Must be a string or implement Stringable interface.");
+    }
+
+    public function nonStringProvider(): Generator
+    {
+        yield [42, 'integer'];
+        yield [false, 'boolean'];
+        yield [[], 'array'];
+        yield [new stdClass(), 'stdClass'];
     }
 }
