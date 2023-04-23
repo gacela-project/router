@@ -67,6 +67,19 @@ final class RouterMatchTest extends TestCase
         $router->run();
     }
 
+    public function test_mandatory_and_optional_argument(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/optional/bob';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $this->expectOutputString("The 'string' param is 'bob'!");
+
+        $router = new Router(static function (Routes $routes): void {
+            $routes->get('optional/{param}/{param?}', FakeController::class, 'stringParamAction');
+        });
+        $router->run();
+    }
+
     public function test_thrown_exception_when_method_does_not_exist(): void
     {
         $this->expectException(UnsupportedHttpMethodException::class);
