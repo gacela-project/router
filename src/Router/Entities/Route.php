@@ -35,6 +35,7 @@ final class Route
 
         if (!is_object($this->controller)) {
             $creator = new Container($bindings->getAllBindings());
+            /** @var object $controller */
             $controller = $creator->get($this->controller);
             $response = $controller->{$this->action}(...$params);
         } else {

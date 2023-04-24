@@ -58,6 +58,7 @@ final class Router
             return $handler($exception);
         }
 
+        /** @var mixed $instance */
         $instance = Container::create($handler);
 
         if (is_callable($instance)) {
