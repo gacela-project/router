@@ -6,7 +6,7 @@ namespace Gacela\Router;
 
 use Closure;
 use Exception;
-use Gacela\Resolver\InstanceCreator;
+use Gacela\Container\Container;
 use Gacela\Router\Entities\Route;
 use Gacela\Router\Exceptions\NotFound404Exception;
 use ReflectionFunction;
@@ -58,7 +58,7 @@ final class Router
             return $handler($exception);
         }
 
-        $instance = InstanceCreator::create($handler);
+        $instance = Container::create($handler);
 
         if (is_callable($instance)) {
             return $instance($exception);
