@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Gacela\Router\Entities;
 
-use Gacela\Resolver\InstanceCreator;
+use Gacela\Container\Container;
 use Gacela\Router\Bindings;
 
 use Gacela\Router\Exceptions\UnsupportedResponseTypeException;
@@ -34,8 +34,8 @@ final class Route
         $params = (new RouteParams($this))->asArray();
 
         if (!is_object($this->controller)) {
-            $creator = new InstanceCreator($bindings->getAllBindings());
-            $controller = $creator->createByClassName($this->controller);
+            $creator = new Container($bindings->getAllBindings());
+            $controller = $creator->get($this->controller);
             $response = $controller->{$this->action}(...$params);
         } else {
             /** @var string|Stringable $response */
