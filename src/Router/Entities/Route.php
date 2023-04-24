@@ -81,15 +81,7 @@ final class Route
 
     public function requestMatches(): bool
     {
-        if (!$this->methodMatches()) {
-            return false;
-        }
-
-        if (!$this->pathMatches()) {
-            return false;
-        }
-
-        return true;
+        return $this->methodMatches() && $this->pathMatches();
     }
 
     public function methodMatches(): bool
