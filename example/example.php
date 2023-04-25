@@ -45,7 +45,9 @@ class Controller
     }
 }
 
-Router::configure(static function (Routes $routes): void {
+$router = Router::create();
+
+$router->addRoutes(static function (Routes $routes): void {
     # Try it out: http://localhost:8081/docs
     $routes->redirect('docs', 'https://gacela-project.com/');
 
@@ -61,3 +63,5 @@ Router::configure(static function (Routes $routes): void {
     # Try it out: http://localhost:8081/headers
     $routes->any('headers', Controller::class, 'customHeaders');
 });
+
+$router->run();

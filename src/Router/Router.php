@@ -16,26 +16,48 @@ use function is_callable;
 
 final class Router
 {
+    public function __construct(
+        private Routes $routes,
+        private Bindings $bindings,
+        private Handlers $handlers,
+    ) {
+    }
+
+    /**
+     * Shortcut to create, add and run all routes at once.
+     */
     public static function configure(Closure $fn): void
     {
-        $routes = new Routes();
-        $bindings = new Bindings();
-        $handlers = new Handlers();
+        $self = self::create();
+        $self->addRoutes($fn);
+        $self->run();
+    }
 
-        $params = array_map(static fn ($param) => match ((string)$param->getType()) {
-            Routes::class => $routes,
-            Bindings::class => $bindings,
-            Handlers::class => $handlers,
+    public static function create(): self
+    {
+        return new self(new Routes(), new Bindings(), new Handlers());
+    }
+
+    public function addRoutes(Closure $fn): self
+    {
+        $params = array_map(fn ($param) => match ((string)$param->getType()) {
+            Routes::class => $this->routes,
+            Bindings::class => $this->bindings,
+            Handlers::class => $this->handlers,
             default => null,
         }, (new ReflectionFunction($fn))->getParameters());
 
         $fn(...$params);
 
+        return $this;
+    }
+
+    public function run(): void
+    {
         try {
-            echo self::findRoute($routes)
-                ->run($bindings);
+            echo self::findRoute($this->routes)->run($this->bindings);
         } catch (Exception $exception) {
-            echo self::handleException($handlers, $exception);
+            echo self::handleException($this->handlers, $exception);
         }
     }
 
