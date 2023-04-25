@@ -16,7 +16,7 @@ use function is_callable;
 
 final class Router
 {
-    private function __construct(
+    public function __construct(
         private Routes $routes,
         private Bindings $bindings,
         private Handlers $handlers,
