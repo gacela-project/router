@@ -57,7 +57,7 @@ final class Router
         try {
             echo $this->findRoute()->run($this->bindings);
         } catch (Exception $exception) {
-            echo self::handleException($this->handlers, $exception);
+            echo $this->handleException($exception);
         }
     }
 
@@ -72,9 +72,9 @@ final class Router
         throw new NotFound404Exception();
     }
 
-    private static function handleException(Handlers $handlers, Exception $exception): string
+    private function handleException(Exception $exception): string
     {
-        $handler = self::findHandler($handlers, $exception);
+        $handler = self::findHandler($this->handlers, $exception);
 
         if (is_callable($handler)) {
             return $handler($exception);
