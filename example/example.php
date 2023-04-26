@@ -45,9 +45,7 @@ class Controller
     }
 }
 
-$router = Router::create();
-
-$router->addRoutes(static function (Routes $routes): void {
+$router = new Router(static function (Routes $routes): void {
     # Try it out: http://localhost:8081/docs
     $routes->redirect('docs', 'https://gacela-project.com/');
 

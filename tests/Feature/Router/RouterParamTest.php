@@ -24,9 +24,10 @@ final class RouterParamTest extends TestCase
 
         $this->expectOutputString("The params are '{$params[0]}', '{$params[1]}' and '{$params[2]}'!");
 
-        Router::configure(static function (Routes $routes): void {
+        $router = new Router(static function (Routes $routes): void {
             $routes->get('{firstParam}/{secondParam}/{thirdParam}', FakeController::class, 'manyParamsAction');
         });
+        $router->run();
     }
 
     public function test_pass_associated_params_by_name_to_the_action(): void
@@ -38,9 +39,10 @@ final class RouterParamTest extends TestCase
 
         $this->expectOutputString("The params are '{$params[1]}', '{$params[0]}' and '{$params[2]}'!");
 
-        Router::configure(static function (Routes $routes): void {
+        $router = new Router(static function (Routes $routes): void {
             $routes->get('{secondParam}/{firstParam}/{thirdParam}', FakeController::class, 'manyParamsAction');
         });
+        $router->run();
     }
 
     /**
@@ -53,15 +55,16 @@ final class RouterParamTest extends TestCase
 
         $this->expectOutputString("The 'string' param is '{$string}'!");
 
-        Router::configure(static function (Routes $routes): void {
+        $router = new Router(static function (Routes $routes): void {
             $routes->get('expected/string/is/{param}', FakeController::class, 'stringParamAction');
         });
+        $router->run();
     }
 
     public function stringProvider(): Generator
     {
         for ($try = 0; $try < self::PROVIDER_TRIES; ++$try) {
-            $randomString = (string)'word-' . mt_rand();
+            $randomString = 'word-' . mt_rand();
             yield $randomString => ['string' => $randomString];
         }
     }
@@ -76,9 +79,10 @@ final class RouterParamTest extends TestCase
 
         $this->expectOutputString("The 'int' param is '{$int}'!");
 
-        Router::configure(static function (Routes $routes): void {
+        $router = new Router(static function (Routes $routes): void {
             $routes->get('expected/integer/is/{param}', FakeController::class, 'intParamAction');
         });
+        $router->run();
     }
 
     public function intProvider(): Generator
@@ -99,9 +103,10 @@ final class RouterParamTest extends TestCase
 
         $this->expectOutputString("The 'float' param is '{$float}'!");
 
-        Router::configure(static function (Routes $routes): void {
+        $router = new Router(static function (Routes $routes): void {
             $routes->get('expected/float/is/{param}', FakeController::class, 'floatParamAction');
         });
+        $router->run();
     }
 
     public function floatProvider(): Generator
@@ -122,9 +127,10 @@ final class RouterParamTest extends TestCase
 
         $this->expectOutputString("The 'bool' param is '{$expected}'!");
 
-        Router::configure(static function (Routes $routes): void {
+        $router = new Router(static function (Routes $routes): void {
             $routes->get('expected/bool/is/{param}', FakeController::class, 'boolParamAction');
         });
+        $router->run();
     }
 
     public function boolProvider(): iterable

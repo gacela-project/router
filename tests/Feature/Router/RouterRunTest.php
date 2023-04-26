@@ -17,13 +17,13 @@ final class RouterRunTest extends HeaderTestCase
         $_SERVER['REQUEST_URI'] = 'https://example.org/uri-2';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
-        $router = Router::create();
+        $router = new Router();
 
-        $router->addRoutes(static function (Routes $routes): void {
+        $router->configure(static function (Routes $routes): void {
             $routes->get('uri-1', static fn () => new Response('first body'));
         });
 
-        $router->addRoutes(static function (Routes $routes): void {
+        $router->configure(static function (Routes $routes): void {
             $routes->get('uri-2', static fn () => new Response('second body'));
         });
 
@@ -39,13 +39,13 @@ final class RouterRunTest extends HeaderTestCase
         $_SERVER['REQUEST_URI'] = 'https://example.org/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
-        $router = Router::create();
+        $router = new Router();
 
-        $router->addRoutes(static function (Routes $routes): void {
+        $router->configure(static function (Routes $routes): void {
             $routes->get('uri', static fn () => new Response('first body'));
         });
 
-        $router->addRoutes(static function (Routes $routes): void {
+        $router->configure(static function (Routes $routes): void {
             $routes->get('uri', static fn () => new Response('second body'));
         });
 
