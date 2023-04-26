@@ -74,7 +74,7 @@ final class Router
 
     private function handleException(Exception $exception): string
     {
-        $handler = self::findHandler($this->handlers, $exception);
+        $handler = $this->findHandler($exception);
 
         if (is_callable($handler)) {
             return $handler($exception);
@@ -93,9 +93,9 @@ final class Router
     /**
      * @return callable|class-string
      */
-    private static function findHandler(Handlers $handlers, Exception $exception): string|callable
+    private function findHandler(Exception $exception): string|callable
     {
-        return $handlers->getAllHandlers()[get_class($exception)]
-            ?? $handlers->getAllHandlers()[Exception::class];
+        return $this->handlers->getAllHandlers()[get_class($exception)]
+            ?? $this->handlers->getAllHandlers()[Exception::class];
     }
 }
