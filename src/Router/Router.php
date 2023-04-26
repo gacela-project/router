@@ -55,15 +55,15 @@ final class Router
     public function run(): void
     {
         try {
-            echo self::findRoute($this->routes)->run($this->bindings);
+            echo $this->findRoute()->run($this->bindings);
         } catch (Exception $exception) {
             echo self::handleException($this->handlers, $exception);
         }
     }
 
-    private static function findRoute(Routes $routes): Route
+    private function findRoute(): Route
     {
-        foreach ($routes->getAllRoutes() as $route) {
+        foreach ($this->routes->getAllRoutes() as $route) {
             if ($route->requestMatches()) {
                 return $route;
             }
