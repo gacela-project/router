@@ -50,15 +50,15 @@ final class Router
     public function run(): void
     {
         try {
-            echo self::findRoute($this->routes)->run($this->bindings);
+            echo $this->findRoute()->run($this->bindings);
         } catch (Exception $exception) {
-            echo self::handleException($this->handlers, $exception);
+            echo $this->handleException($exception);
         }
     }
 
-    private static function findRoute(Routes $routes): Route
+    private function findRoute(): Route
     {
-        foreach ($routes->getAllRoutes() as $route) {
+        foreach ($this->routes->getAllRoutes() as $route) {
             if ($route->requestMatches()) {
                 return $route;
             }
@@ -67,9 +67,9 @@ final class Router
         throw new NotFound404Exception();
     }
 
-    private static function handleException(Handlers $handlers, Exception $exception): string
+    private function handleException(Exception $exception): string
     {
-        $handler = self::findHandler($handlers, $exception);
+        $handler = $this->findHandler($exception);
 
         if (is_callable($handler)) {
             return $handler($exception);
@@ -88,9 +88,9 @@ final class Router
     /**
      * @return callable|class-string
      */
-    private static function findHandler(Handlers $handlers, Exception $exception): string|callable
+    private function findHandler(Exception $exception): string|callable
     {
-        return $handlers->getAllHandlers()[get_class($exception)]
-            ?? $handlers->getAllHandlers()[Exception::class];
+        return $this->handlers->getAllHandlers()[get_class($exception)]
+            ?? $this->handlers->getAllHandlers()[Exception::class];
     }
 }
