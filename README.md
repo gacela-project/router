@@ -39,7 +39,7 @@ composer require gacela-project/router
 ```php
 # `Bindings` and `Handlers` are optional, and you can place them in any order.
 
-$router = new Router(static function (Routes $routes, Bindings $bindings, Handlers $handlers) void {
+$router = new Router(function (Routes $routes, Bindings $bindings, Handlers $handlers) {
 
     // Custom redirections
     $routes->redirect('docs', 'https://gacela-project.com/');
