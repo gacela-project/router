@@ -18,9 +18,10 @@ final class RouterResponseTest extends HeaderTestCase
         $_SERVER['REQUEST_URI'] = 'https://example.org/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
-        Router::configure(static function (Routes $routes): void {
+        $router = new Router(static function (Routes $routes): void {
             $routes->get('uri', static fn () => new Response('body'));
         });
+        $router->run();
 
         $this->expectOutputString('body');
 
@@ -32,11 +33,12 @@ final class RouterResponseTest extends HeaderTestCase
         $_SERVER['REQUEST_URI'] = 'https://example.org/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
-        Router::configure(static function (Routes $routes): void {
+        $router = new Router(static function (Routes $routes): void {
             $routes->get('uri', static fn () => new JsonResponse([
                 'key' => 'value',
             ]));
         });
+        $router->run();
 
         $this->expectOutputString('{"key":"value"}');
 
@@ -54,12 +56,13 @@ final class RouterResponseTest extends HeaderTestCase
         $_SERVER['REQUEST_URI'] = 'https://example.org/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
-        Router::configure(static function (Routes $routes): void {
+        $router = new Router(static function (Routes $routes): void {
             $routes->get('uri', static fn () => new Response('{"key":"value"}', [
                 'Access-Control-Allow-Origin: *',
                 'Content-Type: application/json',
             ]));
         });
+        $router->run();
 
         $this->expectOutputString('{"key":"value"}');
 
@@ -82,12 +85,13 @@ final class RouterResponseTest extends HeaderTestCase
         $_SERVER['REQUEST_URI'] = 'https://example.org/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
-        Router::configure(static function (Routes $routes): void {
+        $router = new Router(static function (Routes $routes): void {
             $routes->get('uri', static fn () => new JsonResponse(['key' => 'value'], [
                 'Access-Control-Allow-Origin: *',
                 'Content-Type: application/json',
             ]));
         });
+        $router->run();
 
         $this->expectOutputString('{"key":"value"}');
 

@@ -13,32 +13,27 @@ use ReflectionFunction;
 
 use function get_class;
 use function is_callable;
+use function is_null;
 
 final class Router
 {
+    private Routes $routes;
+    private Bindings $bindings;
+    private Handlers $handlers;
+
     public function __construct(
-        private Routes $routes,
-        private Bindings $bindings,
-        private Handlers $handlers,
+        Closure $fn = null,
     ) {
+        $this->routes = new Routes();
+        $this->bindings = new Bindings();
+        $this->handlers = new Handlers();
+
+        if (!is_null($fn)) {
+            $this->configure($fn);
+        }
     }
 
-    /**
-     * Shortcut to create, add and run all routes at once.
-     */
-    public static function configure(Closure $fn): void
-    {
-        $self = self::create();
-        $self->addRoutes($fn);
-        $self->run();
-    }
-
-    public static function create(): self
-    {
-        return new self(new Routes(), new Bindings(), new Handlers());
-    }
-
-    public function addRoutes(Closure $fn): self
+    public function configure(Closure $fn): self
     {
         $params = array_map(fn ($param) => match ((string)$param->getType()) {
             Routes::class => $this->routes,

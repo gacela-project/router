@@ -21,9 +21,10 @@ final class RouterMatchTest extends TestCase
 
         $this->expectOutputString('Expected!');
 
-        Router::configure(static function (Routes $routes): void {
+        $router = new Router(static function (Routes $routes): void {
             $routes->get('expected/uri', FakeController::class, 'basicAction');
         });
+        $router->run();
     }
 
     public function test_respond_only_the_first_match(): void
@@ -33,10 +34,11 @@ final class RouterMatchTest extends TestCase
 
         $this->expectOutputString('Expected!');
 
-        Router::configure(static function (Routes $routes): void {
+        $router = new Router(static function (Routes $routes): void {
             $routes->get('expected/uri', FakeController::class, 'basicAction');
             $routes->get('expected/{param}', FakeController::class, 'stringParamAction');
         });
+        $router->run();
     }
 
     public function test_optional_argument(): void
@@ -46,9 +48,10 @@ final class RouterMatchTest extends TestCase
 
         $this->expectOutputString('Expected!');
 
-        Router::configure(static function (Routes $routes): void {
+        $router = new Router(static function (Routes $routes): void {
             $routes->get('optional/{param?}', FakeController::class, 'basicAction');
         });
+        $router->run();
     }
 
     public function test_multiple_optional_argument(): void
@@ -58,18 +61,20 @@ final class RouterMatchTest extends TestCase
 
         $this->expectOutputString('Expected!');
 
-        Router::configure(static function (Routes $routes): void {
+        $router = new Router(static function (Routes $routes): void {
             $routes->get('optional/{param1?}/{param2?}', FakeController::class, 'basicAction');
         });
+        $router->run();
     }
 
     public function test_thrown_exception_when_method_does_not_exist(): void
     {
         $this->expectException(UnsupportedHttpMethodException::class);
 
-        Router::configure(static function (Routes $routes): void {
+        $router = new Router(static function (Routes $routes): void {
             $routes->invalidName('', FakeController::class);
         });
+        $router->run();
     }
 
     /**
@@ -82,9 +87,10 @@ final class RouterMatchTest extends TestCase
 
         $this->expectOutputString('Expected!');
 
-        Router::configure(static function (Routes $routes): void {
+        $router = new Router(static function (Routes $routes): void {
             $routes->any('expected/uri', FakeController::class, 'basicAction');
         });
+        $router->run();
     }
 
     public function anyHttpMethodProvider(): Generator
@@ -110,9 +116,10 @@ final class RouterMatchTest extends TestCase
 
         $this->expectOutputString('Expected!');
 
-        Router::configure(static function (Routes $routes) use ($givenMethods): void {
+        $router = new Router(static function (Routes $routes) use ($givenMethods): void {
             $routes->match($givenMethods, 'expected/uri', FakeController::class, 'basicAction');
         });
+        $router->run();
     }
 
     public function matchesMethodsProvider(): Generator

@@ -39,7 +39,7 @@ composer require gacela-project/router
 ```php
 # `Bindings` and `Handlers` are optional, and you can place them in any order.
 
-Router::configure(static function (Routes $routes, Bindings $bindings, Handlers $handlers) void {
+$router = new Router(static function (Routes $routes, Bindings $bindings, Handlers $handlers) void {
 
     // Custom redirections
     $routes->redirect('docs', 'https://gacela-project.com/');
@@ -60,6 +60,8 @@ Router::configure(static function (Routes $routes, Bindings $bindings, Handlers 
     $handlers->handle(NotFound404Exception::class, NotFound404ExceptionHandler::class);
 
 });
+
+$router->run();
 ```
 
 ### Working demo

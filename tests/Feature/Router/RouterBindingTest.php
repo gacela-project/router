@@ -23,10 +23,11 @@ final class RouterBindingTest extends TestCase
 
         $this->expectOutputString('default-Expected!');
 
-        Router::configure(static function (Bindings $binding, Routes $routes): void {
+        $router = new Router(static function (Bindings $binding, Routes $routes): void {
             $routes->get('expected/uri', FakeControllerWithDependencies::class);
             $binding->bind(NameInterface::class, new Name('Expected!'));
         });
+        $router->run();
     }
 
     public function test_inject_controller_with_request_dependency(): void
@@ -37,8 +38,9 @@ final class RouterBindingTest extends TestCase
 
         $this->expectOutputString('Katarn');
 
-        Router::configure(static function (Routes $routes): void {
+        $router = new Router(static function (Routes $routes): void {
             $routes->get('expected', FakeControllerWithRequest::class);
         });
+        $router->run();
     }
 }

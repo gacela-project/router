@@ -25,8 +25,9 @@ final class ErrorHandlingTest extends HeaderTestCase
         $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_OPTIONS;
 
-        Router::configure(static function (): void {
+        $router = new Router(static function (): void {
         });
+        $router->run();
 
         self::assertSame([
             [
@@ -42,9 +43,10 @@ final class ErrorHandlingTest extends HeaderTestCase
         $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
-        Router::configure(static function (Routes $routes): void {
+        $router = new Router(static function (Routes $routes): void {
             $routes->post('expected/uri', FakeController::class, 'basicAction');
         });
+        $router->run();
 
         self::assertSame([
             [
@@ -63,9 +65,10 @@ final class ErrorHandlingTest extends HeaderTestCase
         $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
         $_SERVER['REQUEST_METHOD'] = $testMethod;
 
-        Router::configure(static function (Routes $routes) use ($givenMethods): void {
+        $router = new Router(static function (Routes $routes) use ($givenMethods): void {
             $routes->match($givenMethods, 'expected/uri', FakeController::class, 'basicAction');
         });
+        $router->run();
 
         self::assertSame([
             [
@@ -92,9 +95,10 @@ final class ErrorHandlingTest extends HeaderTestCase
         $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
-        Router::configure(static function (Routes $routes): void {
+        $router = new Router(static function (Routes $routes): void {
             $routes->get('expected/uri', FakeControllerWithUnhandledException::class);
         });
+        $router->run();
 
         self::assertSame([
             [
@@ -110,7 +114,7 @@ final class ErrorHandlingTest extends HeaderTestCase
         $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
-        Router::configure(static function (Routes $routes, Handlers $handlers): void {
+        $router = new Router(static function (Routes $routes, Handlers $handlers): void {
             $routes->get('expected/uri', FakeControllerWithUnhandledException::class);
 
             $handlers->handle(UnhandledException::class, static function (): string {
@@ -118,6 +122,7 @@ final class ErrorHandlingTest extends HeaderTestCase
                 return 'Handled!';
             });
         });
+        $router->run();
 
         $this->expectOutputString('Handled!');
         self::assertSame([
@@ -134,12 +139,13 @@ final class ErrorHandlingTest extends HeaderTestCase
         $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
-        Router::configure(static function (Handlers $handlers): void {
+        $router = new Router(static function (Handlers $handlers): void {
             $handlers->handle(NotFound404Exception::class, static function (): string {
                 \Gacela\Router\header('HTTP/1.1 418 I\'m a teapot');
                 return 'Handled!';
             });
         });
+        $router->run();
 
         $this->expectOutputString('Handled!');
         self::assertSame([
@@ -156,7 +162,7 @@ final class ErrorHandlingTest extends HeaderTestCase
         $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
-        Router::configure(static function (Handlers $handlers, Routes $routes): void {
+        $router = new Router(static function (Handlers $handlers, Routes $routes): void {
             $routes->get('expected/uri', FakeControllerWithUnhandledException::class);
 
             $handlers->handle(Exception::class, static function (): string {
@@ -164,6 +170,7 @@ final class ErrorHandlingTest extends HeaderTestCase
                 return 'Handled!';
             });
         });
+        $router->run();
 
         $this->expectOutputString('Handled!');
         self::assertSame([
@@ -180,7 +187,7 @@ final class ErrorHandlingTest extends HeaderTestCase
         $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
-        Router::configure(static function (Handlers $handlers, Routes $routes): void {
+        $router = new Router(static function (Handlers $handlers, Routes $routes): void {
             $routes->get('expected/uri', FakeControllerWithUnhandledException::class);
 
             $handlers->handle(UnhandledException::class, new class() {
@@ -191,6 +198,7 @@ final class ErrorHandlingTest extends HeaderTestCase
                 }
             });
         });
+        $router->run();
 
         $this->expectOutputString('Handled!');
         self::assertSame([
@@ -213,7 +221,7 @@ final class ErrorHandlingTest extends HeaderTestCase
         $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
-        Router::configure(static function (Handlers $handlers, Routes $routes) use ($given): void {
+        $router = new Router(static function (Handlers $handlers, Routes $routes) use ($given): void {
             $routes->get('expected/uri', static fn () => $given);
 
             $handlers->handle(
@@ -221,6 +229,7 @@ final class ErrorHandlingTest extends HeaderTestCase
                 static fn (UnsupportedResponseTypeException $exception): string => $exception->getMessage(),
             );
         });
+        $router->run();
 
         $this->expectOutputString("Unsupported response type '{$type}'. Must be a string or implement Stringable interface.");
     }

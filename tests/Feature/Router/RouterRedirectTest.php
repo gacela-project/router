@@ -19,9 +19,10 @@ final class RouterRedirectTest extends HeaderTestCase
         $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
-        Router::configure(static function (Routes $routes) use ($destination): void {
+        $router = new Router(static function (Routes $routes) use ($destination): void {
             $routes->redirect('optional/uri', $destination);
         });
+        $router->run();
 
         self::assertSame([
             [
@@ -40,9 +41,10 @@ final class RouterRedirectTest extends HeaderTestCase
         $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
-        Router::configure(static function (Routes $routes) use ($destination, $statusCode): void {
+        $router = new Router(static function (Routes $routes) use ($destination, $statusCode): void {
             $routes->redirect('optional/uri', $destination, $statusCode);
         });
+        $router->run();
 
         self::assertSame([
             [
@@ -61,11 +63,12 @@ final class RouterRedirectTest extends HeaderTestCase
         $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
         $_SERVER['REQUEST_METHOD'] = $method;
 
-        Router::configure(
+        $router = new Router(
             static function (Routes $routes) use ($destination, $statusCode, $method): void {
                 $routes->redirect('optional/uri', $destination, $statusCode, $method);
             },
         );
+        $router->run();
 
         self::assertSame([
             [
