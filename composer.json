@@ -9,8 +9,9 @@
     "require-dev": {
         "ext-mbstring": "*",
         "friendsofphp/php-cs-fixer": "^3.16",
-        "phpunit/phpunit": "^9.6",
+        "infection/infection": "^0.26.16",
         "phpstan/phpstan": "^1.10",
+        "phpunit/phpunit": "^9.6",
         "psalm/plugin-phpunit": "^0.18",
         "symfony/var-dumper": "^5.4",
         "vimeo/psalm": "^5.9"
@@ -21,7 +22,10 @@
         },
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "infection/extension-installer": true
+        }
     },
     "autoload": {
         "psr-4": {
@@ -38,7 +42,8 @@
         "ctal": [
             "@static-clear-cache",
             "@csfix",
-            "@test-all"
+            "@test-all",
+            "@infection"
         ],
         "test-all": [
             "@quality",
@@ -61,6 +66,7 @@
         "psalm": "XDEBUG_MODE=off ./vendor/bin/psalm",
         "phpstan": "XDEBUG_MODE=off ./vendor/bin/phpstan analyze",
         "csfix": "XDEBUG_MODE=off ./vendor/bin/php-cs-fixer fix",
-        "csrun": "XDEBUG_MODE=off ./vendor/bin/php-cs-fixer fix --dry-run"
+        "csrun": "XDEBUG_MODE=off ./vendor/bin/php-cs-fixer fix --dry-run",
+        "infection": "XDEBUG_MODE=coverage ./vendor/bin/infection  --show-mutations --threads=$(nproc)"
     }
 }
