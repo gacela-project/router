@@ -50,11 +50,12 @@ final class Request
 
     public function path(): string
     {
-        /** @psalm-suppress PossiblyUndefinedArrayOffset */
-        return (string)parse_url(
-            (string)$this->server['REQUEST_URI'],
-            PHP_URL_PATH,
-        );
+        /** @var string $requestUri */
+        $requestUri = $this->server['REQUEST_URI'];
+        /** @var string $parsedUrl */
+        $parsedUrl = parse_url($requestUri, PHP_URL_PATH);
+
+        return $parsedUrl;
     }
 
     public function get(string $key): mixed
