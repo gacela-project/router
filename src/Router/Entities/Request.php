@@ -42,8 +42,10 @@ final class Request
 
     public function isMethod(string $method): bool
     {
-        /** @psalm-suppress PossiblyUndefinedArrayOffset */
-        return (string)$this->server['REQUEST_METHOD'] === $method;
+        /** @var string $requestMethod */
+        $requestMethod = $this->server['REQUEST_METHOD'];
+
+        return $requestMethod === $method;
     }
 
     public function path(): string
