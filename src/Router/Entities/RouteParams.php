@@ -48,7 +48,7 @@ final class RouteParams
             ->getParameters();
 
         foreach ($actionParams as $actionParam) {
-            /**@var string|null $paramType */
+            /** @var string|null $paramType */
             $paramType = $actionParam->getType()?->__toString();
 
             $paramName = $actionParam->getName();
