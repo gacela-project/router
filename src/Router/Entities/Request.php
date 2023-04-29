@@ -62,7 +62,6 @@ final class Request
     {
         return $this->request[$key]
             ?? $this->query[$key]
-            ?? $this->server[$key]
             ?? null;
     }
 }
