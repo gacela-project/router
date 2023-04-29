@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Gacela\Router\Entities;
 
 use ReflectionClass;
-use ReflectionNamedType;
 
 use function count;
 
@@ -49,12 +48,8 @@ final class RouteParams
             ->getParameters();
 
         foreach ($actionParams as $actionParam) {
-            /** @var string|null $paramType */
-            $paramType = null;
-
-            if ($actionParam->getType() && is_a($actionParam->getType(), ReflectionNamedType::class)) {
-                $paramType = $actionParam->getType()->getName();
-            }
+            /**@var string|null $paramType */
+            $paramType = $actionParam->getType()?->__toString();
 
             $paramName = $actionParam->getName();
 
