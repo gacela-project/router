@@ -245,7 +245,7 @@ final class ErrorHandlingTest extends HeaderTestCase
 
     public function test_throws_exception_when_param_has_no_type(): void
     {
-        $_SERVER['REQUEST_URI'] = "https://example.org/expected/param/is/any";
+        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/param/is/any';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
         $router = new Router(static function (Routes $routes, Handlers $handlers): void {
