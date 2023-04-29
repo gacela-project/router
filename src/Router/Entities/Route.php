@@ -85,7 +85,7 @@ final class Route
         return $this->methodMatches() && $this->pathMatches();
     }
 
-    public function methodMatches(): bool
+    private function methodMatches(): bool
     {
         return Request::fromGlobals()->isMethod($this->method);
     }
