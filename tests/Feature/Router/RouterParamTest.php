@@ -144,7 +144,7 @@ final class RouterParamTest extends TestCase
 
     public function test_priori_post_params_over_get(): void
     {
-        $_SERVER['REQUEST_URI'] = "https://example.org/expected/uri";
+        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
         $_GET['name'] = 'Unexpected!';
         $_POST['name'] = 'Expected!';
