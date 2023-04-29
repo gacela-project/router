@@ -8,6 +8,7 @@ use Gacela\Router\Entities\Request;
 use Gacela\Router\Router;
 use Gacela\Router\Routes;
 use GacelaTest\Feature\Router\Fixtures\FakeController;
+use GacelaTest\Feature\Router\Fixtures\FakeControllerWithRequest;
 use Generator;
 use PHPUnit\Framework\TestCase;
 
@@ -139,5 +140,20 @@ final class RouterParamTest extends TestCase
         yield 'false' => ['given' => 'false', 'expected' => 'false'];
         yield '1' => ['given' => '1', 'expected' => 'true'];
         yield '0' => ['given' => '0', 'expected' => 'false'];
+    }
+
+    public function test_priori_post_params_over_get(): void
+    {
+        $_SERVER['REQUEST_URI'] = "https://example.org/expected/uri";
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+        $_GET['name'] = 'Unexpected!';
+        $_POST['name'] = 'Expected!';
+
+        $this->expectOutputString('Expected!');
+
+        $router = new Router(static function (Routes $routes): void {
+            $routes->get('expected/uri', FakeControllerWithRequest::class);
+        });
+        $router->run();
     }
 }
