@@ -31,7 +31,7 @@ final class Route
      */
     public function run(Bindings $bindings): string|Stringable
     {
-        $params = (new RouteParams($this))->asArray();
+        $params = (new RouteParams($this))->getAll();
 
         if (!is_object($this->controller)) {
             $creator = new Container($bindings->getAllBindings());

@@ -4,23 +4,24 @@ declare(strict_types=1);
 
 namespace Gacela\Router\Entities;
 
+use Gacela\Router\Exceptions\UnsupportedParamTypeException;
 use ReflectionClass;
 
 use function count;
 
 final class RouteParams
 {
-    private array $asArray;
+    private array $params;
 
     public function __construct(
         private Route $route,
     ) {
-        $this->asArray = $this->getParams();
+        $this->params = $this->getParams();
     }
 
-    public function asArray(): array
+    public function getAll(): array
     {
-        return $this->asArray;
+        return $this->params;
     }
 
     /**
@@ -58,7 +59,8 @@ final class RouteParams
                 'int' => (int)$pathParams[$paramName],
                 'float' => (float)$pathParams[$paramName],
                 'bool' => (bool)json_decode($pathParams[$paramName]),
-                null => null,
+                null => throw UnsupportedParamTypeException::nonTyped(),
+                default => throw UnsupportedParamTypeException::fromType($paramType),
             };
 
             $params[$paramName] = $value;

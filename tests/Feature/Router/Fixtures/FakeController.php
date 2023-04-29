@@ -40,4 +40,17 @@ final class FakeController
     {
         return "The params are '{$firstParam}', '{$secondParam}' and '{$thirdParam}'!";
     }
+
+    /**
+     * @param mixed $param
+     */
+    public function nonTypedParam($param): string
+    {
+        return 'I AM ERROR!';
+    }
+
+    public function nonScalarParam(array $param): string
+    {
+        return 'I AM ERROR!';
+    }
 }

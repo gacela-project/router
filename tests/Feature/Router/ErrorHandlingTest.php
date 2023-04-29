@@ -7,6 +7,7 @@ namespace GacelaTest\Feature\Router;
 use Exception;
 use Gacela\Router\Entities\Request;
 use Gacela\Router\Exceptions\NotFound404Exception;
+use Gacela\Router\Exceptions\UnsupportedParamTypeException;
 use Gacela\Router\Exceptions\UnsupportedResponseTypeException;
 use Gacela\Router\Handlers;
 use Gacela\Router\Router;
@@ -240,5 +241,41 @@ final class ErrorHandlingTest extends HeaderTestCase
         yield [false, 'boolean'];
         yield [[], 'array'];
         yield [new stdClass(), 'stdClass'];
+    }
+
+    public function test_throws_exception_when_param_has_no_type(): void
+    {
+        $_SERVER['REQUEST_URI'] = "https://example.org/expected/param/is/any";
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $router = new Router(static function (Routes $routes, Handlers $handlers): void {
+            $routes->get('expected/param/is/{param}', FakeController::class, 'nonTypedParam');
+
+            $handlers->handle(
+                UnsupportedParamTypeException::class,
+                static fn (UnsupportedParamTypeException $exception): string => $exception->getMessage(),
+            );
+        });
+        $router->run();
+
+        $this->expectOutputString('Unsupported non-typed param. Must be a scalar.');
+    }
+
+    public function test_throws_exception_when_param_is_no_scalar(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/param/is/array';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $router = new Router(static function (Routes $routes, Handlers $handlers): void {
+            $routes->get('expected/param/is/{param}', FakeController::class, 'nonScalarParam');
+
+            $handlers->handle(
+                UnsupportedParamTypeException::class,
+                static fn (UnsupportedParamTypeException $exception): string => $exception->getMessage(),
+            );
+        });
+        $router->run();
+
+        $this->expectOutputString("Unsupported param type 'array'. Must be a scalar.");
     }
 }
