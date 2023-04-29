@@ -59,10 +59,10 @@ final class RouteParams
             $paramName = $actionParam->getName();
 
             $value = match ($paramType) {
-                'string' => $pathParams[$paramName] ?? '',
-                'int' => (int)($pathParams[$paramName] ?? 0),
-                'float' => (float)($pathParams[$paramName] ?? 0.0),
-                'bool' => (bool)json_decode($pathParams[$paramName] ?? '0'),
+                'string' => $pathParams[$paramName],
+                'int' => (int)$pathParams[$paramName],
+                'float' => (float)$pathParams[$paramName],
+                'bool' => (bool)json_decode($pathParams[$paramName]),
                 null => null,
             };
 
