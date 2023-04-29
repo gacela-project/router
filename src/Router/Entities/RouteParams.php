@@ -24,9 +24,6 @@ final class RouteParams
         return $this->params;
     }
 
-    /**
-     * @psalm-suppress MixedAssignment,PossiblyNullReference
-     */
     private function getParams(): array
     {
         $params = [];
