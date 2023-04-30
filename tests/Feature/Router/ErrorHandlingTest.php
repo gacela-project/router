@@ -141,14 +141,14 @@ final class ErrorHandlingTest extends HeaderTestCase
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
         $router = new Router(static function (Handlers $handlers): void {
-            $handlers->handle(NotFound404Exception::class, static function (): string {
+            $handlers->handle(NotFound404Exception::class, static function (NotFound404Exception $exception): string {
                 \Gacela\Router\header('HTTP/1.1 418 I\'m a teapot');
-                return 'Handled!';
+                return "'{$exception->getMessage()}' Handled!";
             });
         });
         $router->run();
 
-        $this->expectOutputString('Handled!');
+        $this->expectOutputString("'Error 404 - Not Found' Handled!");
         self::assertSame([
             [
                 'header' => 'HTTP/1.1 418 I\'m a teapot',
