@@ -4,29 +4,26 @@ declare(strict_types=1);
 
 namespace Gacela\Router\Entities;
 
+use Gacela\Router\Exceptions\UnsupportedParamTypeException;
 use ReflectionClass;
-use ReflectionNamedType;
 
 use function count;
 
 final class RouteParams
 {
-    private array $asArray;
+    private array $params;
 
     public function __construct(
         private Route $route,
     ) {
-        $this->asArray = $this->getParams();
+        $this->params = $this->getParams();
     }
 
-    public function asArray(): array
+    public function getAll(): array
     {
-        return $this->asArray;
+        return $this->params;
     }
 
-    /**
-     * @psalm-suppress MixedAssignment,PossiblyNullReference
-     */
     private function getParams(): array
     {
         $params = [];
@@ -50,20 +47,17 @@ final class RouteParams
 
         foreach ($actionParams as $actionParam) {
             /** @var string|null $paramType */
-            $paramType = null;
-
-            if ($actionParam->getType() && is_a($actionParam->getType(), ReflectionNamedType::class)) {
-                $paramType = $actionParam->getType()->getName();
-            }
+            $paramType = $actionParam->getType()?->__toString();
 
             $paramName = $actionParam->getName();
 
             $value = match ($paramType) {
-                'string' => $pathParams[$paramName] ?? '',
-                'int' => (int)($pathParams[$paramName] ?? 0),
-                'float' => (float)($pathParams[$paramName] ?? 0.0),
-                'bool' => (bool)json_decode($pathParams[$paramName] ?? '0'),
-                null => null,
+                'string' => $pathParams[$paramName],
+                'int' => (int)$pathParams[$paramName],
+                'float' => (float)$pathParams[$paramName],
+                'bool' => (bool)json_decode($pathParams[$paramName]),
+                null => throw UnsupportedParamTypeException::nonTyped(),
+                default => throw UnsupportedParamTypeException::fromType($paramType),
             };
 
             $params[$paramName] = $value;

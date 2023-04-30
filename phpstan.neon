@@ -4,6 +4,3 @@ parameters:
         - %currentWorkingDirectory%/src/
     checkGenericClassInNonGenericObjectType: false
     checkMissingIterableValueType: false
-
-    ignoreErrors:
-        - '#Match expression does not handle remaining value: string#'

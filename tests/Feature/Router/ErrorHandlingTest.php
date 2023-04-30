@@ -7,6 +7,7 @@ namespace GacelaTest\Feature\Router;
 use Exception;
 use Gacela\Router\Entities\Request;
 use Gacela\Router\Exceptions\NotFound404Exception;
+use Gacela\Router\Exceptions\UnsupportedParamTypeException;
 use Gacela\Router\Exceptions\UnsupportedResponseTypeException;
 use Gacela\Router\Handlers;
 use Gacela\Router\Router;
@@ -140,14 +141,14 @@ final class ErrorHandlingTest extends HeaderTestCase
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
         $router = new Router(static function (Handlers $handlers): void {
-            $handlers->handle(NotFound404Exception::class, static function (): string {
+            $handlers->handle(NotFound404Exception::class, static function (NotFound404Exception $exception): string {
                 \Gacela\Router\header('HTTP/1.1 418 I\'m a teapot');
-                return 'Handled!';
+                return "'{$exception->getMessage()}' Handled!";
             });
         });
         $router->run();
 
-        $this->expectOutputString('Handled!');
+        $this->expectOutputString("'Error 404 - Not Found' Handled!");
         self::assertSame([
             [
                 'header' => 'HTTP/1.1 418 I\'m a teapot',
@@ -240,5 +241,63 @@ final class ErrorHandlingTest extends HeaderTestCase
         yield [false, 'boolean'];
         yield [[], 'array'];
         yield [new stdClass(), 'stdClass'];
+    }
+
+    public function test_throws_exception_when_param_has_no_type(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/param/is/any';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $router = new Router(static function (Routes $routes, Handlers $handlers): void {
+            $routes->get('expected/param/is/{param}', FakeController::class, 'nonTypedParam');
+
+            $handlers->handle(
+                UnsupportedParamTypeException::class,
+                static fn (UnsupportedParamTypeException $exception): string => $exception->getMessage(),
+            );
+        });
+        $router->run();
+
+        $this->expectOutputString('Unsupported non-typed param. Must be a scalar.');
+    }
+
+    public function test_throws_exception_when_param_is_no_scalar(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/param/is/array';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $router = new Router(static function (Routes $routes, Handlers $handlers): void {
+            $routes->get('expected/param/is/{param}', FakeController::class, 'nonScalarParam');
+
+            $handlers->handle(
+                UnsupportedParamTypeException::class,
+                static fn (UnsupportedParamTypeException $exception): string => $exception->getMessage(),
+            );
+        });
+        $router->run();
+
+        $this->expectOutputString("Unsupported param type 'array'. Must be a scalar.");
+    }
+
+    public function test_configure_throws_unsupported_closure_param(): void
+    {
+        $this->expectExceptionMessage("'unrecognised' parameter in configuration Closure for Router must be from types Routes, Bindings or Handlers.");
+
+        new Router(static function ($unrecognised): void {});
+    }
+
+    public function test_configure_non_callable_handler(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $this->expectExceptionMessage('Handler assigned to \'GacelaTest\Feature\Router\Fixtures\UnhandledException\' exception cannot be called.');
+
+        $router = new Router(static function (Handlers $handlers, Routes $routes): void {
+            $routes->get('expected/uri', FakeControllerWithUnhandledException::class);
+
+            $handlers->handle(UnhandledException::class, 'non-callable');
+        });
+        $router->run();
     }
 }

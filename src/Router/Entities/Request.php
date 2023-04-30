@@ -42,24 +42,26 @@ final class Request
 
     public function isMethod(string $method): bool
     {
-        /** @psalm-suppress PossiblyUndefinedArrayOffset */
-        return (string)$this->server['REQUEST_METHOD'] === $method;
+        /** @var string $requestMethod */
+        $requestMethod = $this->server['REQUEST_METHOD'];
+
+        return $requestMethod === $method;
     }
 
     public function path(): string
     {
-        /** @psalm-suppress PossiblyUndefinedArrayOffset */
-        return (string)parse_url(
-            (string)$this->server['REQUEST_URI'],
-            PHP_URL_PATH,
-        );
+        /** @var string $requestUri */
+        $requestUri = $this->server['REQUEST_URI'];
+        /** @var string $parsedUrl */
+        $parsedUrl = parse_url($requestUri, PHP_URL_PATH);
+
+        return $parsedUrl;
     }
 
     public function get(string $key): mixed
     {
         return $this->request[$key]
             ?? $this->query[$key]
-            ?? $this->server[$key]
             ?? null;
     }
 }

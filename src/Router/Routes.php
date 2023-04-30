@@ -87,7 +87,7 @@ final class Routes
             $methods = [$methods];
         }
 
-        $methods = array_map(static fn ($method) => strtoupper(trim($method)), $methods);
+        $methods = array_map(static fn ($method) => strtoupper($method), $methods);
 
         foreach ($methods as $method) {
             if (!in_array($method, Request::ALL_METHODS, true)) {
