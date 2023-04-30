@@ -1,7 +1,10 @@
 {
     $schema: 'vendor/infection/infection/resources/schema.json',
     logs: {
-        html: 'mutation-report.html'
+        html: 'mutation-report.html',
+        "stryker": {
+            "badge": "main"
+        }
     },
     timeout: 3,
     source: {
