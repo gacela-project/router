@@ -54,11 +54,6 @@ final class Route
         return $this->path;
     }
 
-    public function method(): string
-    {
-        return $this->method;
-    }
-
     /**
      * @return object|class-string
      */
