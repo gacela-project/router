@@ -1,11 +1,15 @@
 {
-    "$schema": "vendor/infection/infection/resources/schema.json",
-    "source": {
-        "directories": [
-            "src"
+    $schema: 'vendor/infection/infection/resources/schema.json',
+    logs: {
+        html: 'mutation-report.html'
+    },
+    timeout: 3,
+    source: {
+        directories: [
+            'src'
         ]
     },
-    "mutators": {
-        "@default": true
+    mutators: {
+        '@default': true
     }
 }
