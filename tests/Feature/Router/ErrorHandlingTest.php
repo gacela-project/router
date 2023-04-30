@@ -285,4 +285,19 @@ final class ErrorHandlingTest extends HeaderTestCase
 
         new Router(static function ($unrecognised): void {});
     }
+
+    public function test_configure_non_callable_handler(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $this->expectExceptionMessage('Handler assigned to \'GacelaTest\Feature\Router\Fixtures\UnhandledException\' exception cannot be called.');
+
+        $router = new Router(static function (Handlers $handlers, Routes $routes): void {
+            $routes->get('expected/uri', FakeControllerWithUnhandledException::class);
+
+            $handlers->handle(UnhandledException::class, 'non-callable');
+        });
+        $router->run();
+    }
 }

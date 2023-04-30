@@ -8,6 +8,7 @@ use Closure;
 use Exception;
 use Gacela\Container\Container;
 use Gacela\Router\Entities\Route;
+use Gacela\Router\Exceptions\NonCallableHandlerException;
 use Gacela\Router\Exceptions\NotFound404Exception;
 use Gacela\Router\Exceptions\UnsupportedRouterConfigureCallableParamException;
 use ReflectionFunction;
@@ -83,7 +84,7 @@ final class Router
             return $instance($exception);
         }
 
-        return '';
+        throw NonCallableHandlerException::fromException($exception::class);
     }
 
     /**
