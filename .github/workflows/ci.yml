@@ -143,4 +143,6 @@ jobs:
         run: composer install --no-interaction --no-ansi --no-progress
 
       - name: Run mutation tests
+        env:
+          STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
         run: ./vendor/bin/infection  --show-mutations --threads=$(nproc) --min-msi=100 --min-covered-msi=100
