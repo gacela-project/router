@@ -278,4 +278,11 @@ final class ErrorHandlingTest extends HeaderTestCase
 
         $this->expectOutputString("Unsupported param type 'array'. Must be a scalar.");
     }
+
+    public function test_configure_throws_unsupported_closure_param(): void
+    {
+        $this->expectExceptionMessage("'unrecognised' parameter in configuration Closure for Router must be from types Routes, Bindings or Handlers.");
+
+        new Router(static function ($unrecognised): void {});
+    }
 }

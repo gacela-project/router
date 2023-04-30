@@ -9,6 +9,7 @@ use Exception;
 use Gacela\Container\Container;
 use Gacela\Router\Entities\Route;
 use Gacela\Router\Exceptions\NotFound404Exception;
+use Gacela\Router\Exceptions\UnsupportedRouterConfigureCallableParamException;
 use ReflectionFunction;
 
 use function get_class;
@@ -39,7 +40,7 @@ final class Router
             Routes::class => $this->routes,
             Bindings::class => $this->bindings,
             Handlers::class => $this->handlers,
-            default => null,
+            default => throw UnsupportedRouterConfigureCallableParamException::fromName($param),
         }, (new ReflectionFunction($fn))->getParameters());
 
         $fn(...$params);
@@ -75,7 +76,7 @@ final class Router
             return $handler($exception);
         }
 
-        /** @var mixed $instance */
+        /** @psalm-suppress MixedAssignment */
         $instance = Container::create($handler);
 
         if (is_callable($instance)) {
