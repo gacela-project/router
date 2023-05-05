@@ -9,12 +9,12 @@
     "require-dev": {
         "ext-mbstring": "*",
         "friendsofphp/php-cs-fixer": "^3.16",
-        "infection/infection": "^0.26.16",
+        "infection/infection": "^0.26",
         "phpstan/phpstan": "^1.10",
         "phpunit/phpunit": "^9.6",
         "psalm/plugin-phpunit": "^0.18",
         "symfony/var-dumper": "^5.4",
-        "vimeo/psalm": "^5.9"
+        "vimeo/psalm": "^5.11"
     },
     "config": {
         "platform": {
