@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace GacelaTest\Feature\Router;
 
+use Gacela\Router\Configure\Routes;
 use Gacela\Router\Entities\Request;
 use Gacela\Router\Router;
-use Gacela\Router\Routes;
 use GacelaTest\Feature\HeaderTestCase;
 
 final class RouterRedirectTest extends HeaderTestCase

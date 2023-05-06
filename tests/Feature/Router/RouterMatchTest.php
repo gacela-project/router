@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace GacelaTest\Feature\Router;
 
+use Gacela\Router\Configure\Routes;
 use Gacela\Router\Entities\Request;
 use Gacela\Router\Exceptions\UnsupportedHttpMethodException;
 use Gacela\Router\Router;
-use Gacela\Router\Routes;
 use GacelaTest\Feature\Router\Fixtures\FakeController;
 use Generator;
 use PHPUnit\Framework\TestCase;
