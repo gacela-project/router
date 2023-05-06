@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Gacela\Router;
+namespace Gacela\Router\Configure;
 
 use Gacela\Router\Controllers\RedirectController;
 use Gacela\Router\Entities\Request;
@@ -26,7 +26,7 @@ use function is_array;
  */
 final class Routes
 {
-    /** @var list<Route> */
+    /** @var Route */
     private array $routes = [];
 
     /**
@@ -66,7 +66,7 @@ final class Routes
     }
 
     /**
-     * @return list<Route>
+     * @return Route
      */
     public function getAllRoutes(): array
     {

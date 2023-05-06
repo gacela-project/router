@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 require_once \dirname(__DIR__) . '/vendor/autoload.php';
 
+use Gacela\Router\Configure\Routes;
 use Gacela\Router\Entities\Request;
 use Gacela\Router\Entities\Response;
 use Gacela\Router\Router;
-use Gacela\Router\Routes;
 
 # To run this example locally, you can run in your terminal:
 # $ composer serve

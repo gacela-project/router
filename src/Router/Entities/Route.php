@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Gacela\Router\Entities;
 
 use Gacela\Container\Container;
-use Gacela\Router\Bindings;
+use Gacela\Router\Configure\Bindings;
 use Gacela\Router\Exceptions\UnsupportedResponseTypeException;
 use Stringable;
 

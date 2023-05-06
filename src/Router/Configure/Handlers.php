@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Gacela\Router;
+namespace Gacela\Router\Configure;
 
 use Exception;
 use Gacela\Router\Exceptions\NotFound404Exception;

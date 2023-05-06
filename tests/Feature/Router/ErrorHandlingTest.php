@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace GacelaTest\Feature\Router;
 
 use Exception;
+use Gacela\Router\Configure\Handlers;
+use Gacela\Router\Configure\Routes;
 use Gacela\Router\Entities\Request;
 use Gacela\Router\Exceptions\NotFound404Exception;
 use Gacela\Router\Exceptions\UnsupportedParamTypeException;
 use Gacela\Router\Exceptions\UnsupportedResponseTypeException;
-use Gacela\Router\Handlers;
 use Gacela\Router\Router;
-use Gacela\Router\Routes;
 use GacelaTest\Feature\HeaderTestCase;
 use GacelaTest\Feature\Router\Fixtures\FakeController;
 use GacelaTest\Feature\Router\Fixtures\FakeControllerWithUnhandledException;
