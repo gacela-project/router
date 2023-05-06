@@ -26,7 +26,7 @@ use function is_array;
  */
 final class Routes
 {
-    /** @var Route */
+    /** @var list<Route> */
     private array $routes = [];
 
     /**
@@ -66,7 +66,7 @@ final class Routes
     }
 
     /**
-     * @return Route
+     * @return list<Route>
      */
     public function getAllRoutes(): array
     {
