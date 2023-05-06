@@ -17,7 +17,7 @@ use function get_class;
 use function is_callable;
 use function is_null;
 
-final class Router
+final class Router implements RouterInterface
 {
     private Routes $routes;
     private Bindings $bindings;
