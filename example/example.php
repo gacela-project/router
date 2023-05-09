@@ -22,13 +22,12 @@ class Controller
     public function __invoke(): string
     {
         $number = $this->request->get('number');
-        $method = $this->request->get('REQUEST_METHOD');
 
         if (!empty($number)) {
-            return sprintf("__invoke with %s 'number'=%d", $method, $number);
+            return sprintf("__invoke with 'number'=%d", $number);
         }
 
-        return '__invoke with ' . $method;
+        return '__invoke';
     }
 
     public function customAction(int $number = 0): string
