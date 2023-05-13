@@ -69,9 +69,12 @@ final class Route
 
     public function getPathPattern(): string
     {
-        $pattern = preg_replace('#({.*})#U', '(.*)', $this->path);
+        $pattern = $this->path;
 
-        return '#^/' . $pattern . '$#';
+        $pattern = preg_replace('#({.*})#U', '([^\/]+)', $pattern);
+        $pattern = preg_replace('#({.*\?})#U', '(?:\/([^\/]+))?', $pattern);
+
+        return '#^\/' . $pattern . '\/?$#';
     }
 
     public function requestMatches(): bool
@@ -88,14 +91,6 @@ final class Route
     {
         $path = Request::fromGlobals()->path();
 
-        return preg_match($this->getPathPattern(), $path)
-            || preg_match($this->getPathPatternWithoutOptionals(), $path);
-    }
-
-    private function getPathPatternWithoutOptionals(): string
-    {
-        $pattern = preg_replace('#/({.*\?})#U', '(/(.*))?', $this->path);
-
-        return '#^/' . $pattern . '$#';
+        return preg_match($this->getPathPattern(), $path);
     }
 }
