@@ -36,7 +36,7 @@ final class FakeController
         return "The '{$type}' param is '{$stringParam}'!";
     }
 
-    public function manyParamsAction(string $firstParam, string $secondParam, string $thirdParam): string
+    public function manyParamsAction(string $firstParam, string $secondParam, string $thirdParam = 'optional'): string
     {
         return "The params are '{$firstParam}', '{$secondParam}' and '{$thirdParam}'!";
     }

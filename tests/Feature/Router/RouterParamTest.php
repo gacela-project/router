@@ -46,6 +46,22 @@ final class RouterParamTest extends TestCase
         $router->run();
     }
 
+    public function test_pass_associated_params_by_name_with_one_optional_param(): void
+    {
+        $params = ['foo', 'bar'];
+
+        $_SERVER['REQUEST_URI'] = "https://example.org/{$params[0]}/{$params[1]}";
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $this->expectOutputString("The params are '{$params[1]}', '{$params[0]}' and 'optional'!");
+
+        $router = new Router(static function (Routes $routes): void {
+            $routes->get('{secondParam}/{firstParam}/{thirdParam}', FakeController::class, 'manyParamsAction');
+            $routes->get('{secondParam}/{firstParam}', FakeController::class, 'manyParamsAction');
+        });
+        $router->run();
+    }
+
     /**
      * @dataProvider stringProvider
      */
