@@ -9,7 +9,6 @@ use Gacela\Framework\Gacela;
 use Gacela\Router\Config\RouterGacelaConfig;
 use Gacela\Router\Entities\Request;
 use Gacela\Router\Router;
-use Gacela\Router\RouterInterface;
 use GacelaTest\Feature\Config\Module\Plugin\NameRoutesPlugin;
 use GacelaTest\Feature\Config\Module\Plugin\RootRoutesPlugin;
 use GacelaTest\Feature\HeaderTestCase;
@@ -23,8 +22,8 @@ final class RouterConfigTest extends HeaderTestCase
 
             $config->addExtendConfig(RouterGacelaConfig::class);
 
-            $config->addPlugin(NameRoutesPlugin::class);
             $config->addPlugin(RootRoutesPlugin::class);
+            $config->addPlugin(NameRoutesPlugin::class);
         });
     }
 
@@ -33,9 +32,11 @@ final class RouterConfigTest extends HeaderTestCase
         $_SERVER['REQUEST_URI'] = 'https://example.org/';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
-        Gacela::get(Router::class)->run();
+        /** @var \Gacela\Router\RouterInterface $gacelaRouter */
+        $gacelaRouter = Gacela::get(Router::class);
+        $gacelaRouter->run();
 
-        $this->expectOutputString(json_encode(['hello' => 'bob?']));
+        $this->expectOutputString((string)json_encode(['hello' => 'bob?']));
     }
 
     public function test_name_routes_plugin(): void
@@ -43,8 +44,10 @@ final class RouterConfigTest extends HeaderTestCase
         $_SERVER['REQUEST_URI'] = 'https://example.org/alice';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
-        Gacela::get(RouterInterface::class)->run();
+        /** @var \Gacela\Router\RouterInterface $gacelaRouter */
+        $gacelaRouter = Gacela::get(Router::class);
+        $gacelaRouter->run();
 
-        $this->expectOutputString(json_encode(['hello' => 'alice']));
+        $this->expectOutputString((string)json_encode(['hello' => 'alice']));
     }
 }

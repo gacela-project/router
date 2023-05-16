@@ -67,15 +67,28 @@ final class RouterMatchTest extends TestCase
         $router->run();
     }
 
-    public function test_mandatory_and_optional_argument(): void
+    public function test_mandatory_argument(): void
     {
-        $_SERVER['REQUEST_URI'] = 'https://example.org/optional/bob';
+        $_SERVER['REQUEST_URI'] = 'https://example.org/mandatory/bob';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
 
-        $this->expectOutputString("The 'string' param is 'bob'!");
+        $this->expectOutputString('Expected!');
 
         $router = new Router(static function (Routes $routes): void {
-            $routes->get('optional/{param}/{param?}', FakeController::class, 'stringParamAction');
+            $routes->get('mandatory/{param1}', FakeController::class, 'basicAction');
+        });
+        $router->run();
+    }
+
+    public function test_mandatory_and_optional_argument(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/mandatory_and_optional/bob';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $this->expectOutputString('Expected!');
+
+        $router = new Router(static function (Routes $routes): void {
+            $routes->get('mandatory_and_optional/{param1}/{param2?}', FakeController::class, 'basicAction');
         });
         $router->run();
     }
