@@ -13,16 +13,16 @@ use function in_array;
 use function is_array;
 
 /**
- * @method head(string $path, object|string $controller, string $action = '__invoke')
- * @method connect(string $path, object|string $controller, string $action = '__invoke')
- * @method get(string $path, object|string $controller, string $action = '__invoke')
- * @method post(string $path, object|string $controller, string $action = '__invoke')
- * @method put(string $path, object|string $controller, string $action = '__invoke')
- * @method patch(string $path, object|string $controller, string $action = '__invoke')
- * @method delete(string $path, object|string $controller, string $action = '__invoke')
- * @method options(string $path, object|string $controller, string $action = '__invoke')
- * @method trace(string $path, object|string $controller, string $action = '__invoke')
- * @method any(string $path, object|string $controller, string $action = '__invoke')
+ * @method head(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
+ * @method connect(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
+ * @method get(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
+ * @method post(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
+ * @method put(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
+ * @method patch(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
+ * @method delete(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
+ * @method options(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
+ * @method trace(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
+ * @method any(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
  */
 final class Routes
 {
@@ -47,9 +47,14 @@ final class Routes
      * @param string[] $methods
      * @param object|class-string $controller
      */
-    public function match(array $methods, string $path, object|string $controller, string $action = '__invoke'): void
-    {
-        $this->addRoute($methods, $path, $controller, $action);
+    public function match(
+        array $methods,
+        string $path,
+        object|string $controller,
+        string $action = '__invoke',
+        ?string $pathPattern = null,
+    ): void {
+        $this->addRoute($methods, $path, $controller, $action, $pathPattern);
     }
 
     public function redirect(
@@ -82,6 +87,7 @@ final class Routes
         string $path,
         object|string $controller,
         string $action = '__invoke',
+        ?string $pathPattern = null,
     ): void {
         if (!is_array($methods)) {
             $methods = [$methods];
@@ -95,7 +101,15 @@ final class Routes
             }
             $path = ($path === '/') ? '' : $path;
 
-            $this->routes[] = new Route($method, $path, $controller, $action);
+            $this->routes[] = new Route($method, $path, $controller, $action, $pathPattern);
+            //            if ($path === '') {
+            //                foreach ($this->routes as $route) {
+            //                    dump($route->path());
+            //                    dump($route->getPathPattern());
+            //                }
+            //                dump($this->routes);
+            //                die;
+            //            }
         }
     }
 }
