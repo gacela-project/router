@@ -19,15 +19,16 @@ final class RouterConfigTest extends HeaderTestCase
     {
         Gacela::bootstrap(__DIR__, static function (GacelaConfig $config): void {
             $config->resetInMemoryCache();
+            $config->extendGacelaConfig(RouterGacelaConfig::class);
 
-            $config->addExtendConfig(RouterGacelaConfig::class);
-
-            $config->addPlugin(RootRoutesPlugin::class);
-            $config->addPlugin(NameRoutesPlugin::class);
+            $config->addPlugins([
+                NameRoutesPlugin::class,
+                RootRoutesPlugin::class,
+            ]);
         });
     }
 
-    public function test_root_routes_plugin(): void
+    public function test_root_route_plugin(): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
@@ -39,7 +40,7 @@ final class RouterConfigTest extends HeaderTestCase
         $this->expectOutputString((string)json_encode(['hello' => 'bob?']));
     }
 
-    public function test_name_routes_plugin(): void
+    public function test_name_route_plugin(): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/alice';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
