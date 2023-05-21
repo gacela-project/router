@@ -11,11 +11,13 @@ use function count;
 
 final class RouteParams
 {
+    public const MANDATORY_PARAM_PATTERN = '#({.*[^?]})#';
+    public const OPTIONAL_PARAM_PATTERN = '#(/?{.*\?})#';
+
     private array $params;
 
-    public function __construct(
-        private Route $route,
-    ) {
+    public function __construct(private Route $route)
+    {
         $this->params = $this->getParams();
     }
 
@@ -34,7 +36,7 @@ final class RouteParams
         preg_match($this->route->getPathPattern(), Request::fromGlobals()->path(), $pathParamValues);
 
         unset($pathParamValues[0], $pathParamKeys[0]);
-        $pathParamKeys = array_map(static fn ($key) => trim($key, '{}'), $pathParamKeys);
+        $pathParamKeys = array_map(static fn ($key) => trim($key, '{?}'), $pathParamKeys);
 
         while (count($pathParamValues) !== count($pathParamKeys)) {
             array_shift($pathParamKeys);
@@ -49,18 +51,22 @@ final class RouteParams
             /** @var string|null $paramType */
             $paramType = $actionParam->getType()?->__toString();
 
+            if ($paramType === null) {
+                throw UnsupportedParamTypeException::nonTyped();
+            }
+
             $paramName = $actionParam->getName();
+            if (isset($pathParams[$paramName])) {
+                $value = match ($paramType) {
+                    'string' => $pathParams[$paramName],
+                    'int' => (int)$pathParams[$paramName],
+                    'float' => (float)$pathParams[$paramName],
+                    'bool' => (bool)json_decode($pathParams[$paramName]),
+                    default => throw UnsupportedParamTypeException::fromType($paramType),
+                };
 
-            $value = match ($paramType) {
-                'string' => $pathParams[$paramName],
-                'int' => (int)$pathParams[$paramName],
-                'float' => (float)$pathParams[$paramName],
-                'bool' => (bool)json_decode($pathParams[$paramName]),
-                null => throw UnsupportedParamTypeException::nonTyped(),
-                default => throw UnsupportedParamTypeException::fromType($paramType),
-            };
-
-            $params[$paramName] = $value;
+                $params[$paramName] = $value;
+            }
         }
 
         return $params;

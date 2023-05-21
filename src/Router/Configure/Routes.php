@@ -7,7 +7,10 @@ namespace Gacela\Router\Configure;
 use Gacela\Router\Controllers\RedirectController;
 use Gacela\Router\Entities\Request;
 use Gacela\Router\Entities\Route;
+use Gacela\Router\Exceptions\MalformedPathException;
 use Gacela\Router\Exceptions\UnsupportedHttpMethodException;
+
+use Gacela\Router\Validators\PathValidator;
 
 use function in_array;
 use function is_array;
@@ -89,17 +92,22 @@ final class Routes
         string $action = '__invoke',
         ?string $pathPattern = null,
     ): void {
+        $path = ($path === '/') ? '' : $path;
+
+        $isPathValid = (new PathValidator())($path);
+        if (!$isPathValid) {
+            throw MalformedPathException::withPath($path);
+        }
+
         if (!is_array($methods)) {
             $methods = [$methods];
         }
-
         $methods = array_map(static fn ($method) => strtoupper($method), $methods);
 
         foreach ($methods as $method) {
             if (!in_array($method, Request::ALL_METHODS, true)) {
                 throw UnsupportedHttpMethodException::withName($method);
             }
-            $path = ($path === '/') ? '' : $path;
 
             $this->routes[] = new Route($method, $path, $controller, $action, $pathPattern);
         }

@@ -108,9 +108,9 @@ final class Route
         $parts = explode('/', $this->path);
         $pattern = '';
         foreach ($parts as $part) {
-            if (preg_match('#({.*[^?]})#U', $part)) {
+            if (preg_match(RouteParams::MANDATORY_PARAM_PATTERN, $part)) {
                 $pattern .= '/([^\/]+)';
-            } elseif (preg_match('#(/?{.*\?})#U', $part)) {
+            } elseif (preg_match(RouteParams::OPTIONAL_PARAM_PATTERN, $part)) {
                 $pattern .= '/?([^\/]+)?';
             } else {
                 $pattern .= '/' . $part;
