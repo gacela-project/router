@@ -8,51 +8,34 @@ use Gacela\Router\Entities\RouteParams;
 
 final class PathValidator
 {
-    public function __invoke(string $path): bool
+    public static function isValid(string $path): bool
     {
-        return $this->isPathValid($path);
-    }
+        if ($path === '/') {
+            return true;
+        }
 
-    protected function isPathValid(string $path): bool
-    {
-        return $this->isPathEmpty($path) || $this->isPathValidFormat($path);
-    }
+        if ($path === '') {
+            return false;
+        }
 
-    private function isPathEmpty(string $path): bool
-    {
-        return $path === '';
-    }
+        if (str_starts_with($path, '/')) {
+            return false;
+        }
 
-    private function isPathValidFormat(string $path): bool
-    {
-        return $this->isPathStartWithoutSlash($path)
-            && $this->isPathEndWithoutSlash($path)
-            && $this->areOptionalArgumentsAfterMandatoryArguments($path);
-    }
+        if (str_ends_with($path, '/')) {
+            return false;
+        }
 
-    private function isPathStartWithoutSlash(string $path): bool
-    {
-        return $path[0] !== '/';
-    }
-
-    private function isPathEndWithoutSlash(string $path): bool
-    {
-        return $path[-1] !== '/';
-    }
-
-    private function areOptionalArgumentsAfterMandatoryArguments(string $path): bool
-    {
         $parts = explode('/', $path);
         $optionalParamFound = false;
 
         foreach ($parts as $part) {
-            if (preg_match(RouteParams::OPTIONAL_PARAM_PATTERN, $part)) {
+            if (!$part) { // Empty part found
+                return false;
+            } elseif (preg_match(RouteParams::OPTIONAL_PARAM_PATTERN, $part)) { // Optional argument found
                 $optionalParamFound = true;
-            } else {
-                if ($optionalParamFound) {
-                    // Mandatory argument or static part found after an optional argument
-                    return false;
-                }
+            } elseif ($optionalParamFound) { // Mandatory argument or static part found after an optional argument
+                return false;
             }
         }
 

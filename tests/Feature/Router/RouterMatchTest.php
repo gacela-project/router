@@ -114,6 +114,46 @@ final class RouterMatchTest extends TestCase
         $router->run();
     }
 
+    public function test_throw_malformed_path_exception_due_route_start_with_slash(): void
+    {
+        $this->expectException(MalformedPathException::class);
+
+        $router = new Router(static function (Routes $routes): void {
+            $routes->get('/uri', FakeController::class);
+        });
+        $router->run();
+    }
+
+    public function test_throw_malformed_path_exception_due_route_end_with_slash(): void
+    {
+        $this->expectException(MalformedPathException::class);
+
+        $router = new Router(static function (Routes $routes): void {
+            $routes->get('uri/', FakeController::class);
+        });
+        $router->run();
+    }
+
+    public function test_throw_malformed_path_exception_due_empty_part(): void
+    {
+        $this->expectException(MalformedPathException::class);
+
+        $router = new Router(static function (Routes $routes): void {
+            $routes->get('uri//alice', FakeController::class);
+        });
+        $router->run();
+    }
+
+    public function test_throw_malformed_path_exception_due_empty_path(): void
+    {
+        $this->expectException(MalformedPathException::class);
+
+        $router = new Router(static function (Routes $routes): void {
+            $routes->get('', FakeController::class);
+        });
+        $router->run();
+    }
+
     public function test_mandatory_argument(): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/mandatory/alice';
@@ -158,7 +198,7 @@ final class RouterMatchTest extends TestCase
         $this->expectException(UnsupportedHttpMethodException::class);
 
         $router = new Router(static function (Routes $routes): void {
-            $routes->invalidName('', FakeController::class);
+            $routes->invalidName('invalid', FakeController::class);
         });
         $router->run();
     }

@@ -92,10 +92,7 @@ final class Routes
         string $action = '__invoke',
         ?string $pathPattern = null,
     ): void {
-        $path = ($path === '/') ? '' : $path;
-
-        $isPathValid = (new PathValidator())($path);
-        if (!$isPathValid) {
+        if (!PathValidator::isValid($path)) {
             throw MalformedPathException::withPath($path);
         }
 
@@ -103,6 +100,8 @@ final class Routes
             $methods = [$methods];
         }
         $methods = array_map(static fn ($method) => strtoupper($method), $methods);
+
+        $path = ($path === '/') ? '' : $path;
 
         foreach ($methods as $method) {
             if (!in_array($method, Request::ALL_METHODS, true)) {
