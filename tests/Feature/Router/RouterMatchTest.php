@@ -6,6 +6,7 @@ namespace GacelaTest\Feature\Router;
 
 use Gacela\Router\Configure\Routes;
 use Gacela\Router\Entities\Request;
+use Gacela\Router\Exceptions\MalformedPathException;
 use Gacela\Router\Exceptions\UnsupportedHttpMethodException;
 use Gacela\Router\Router;
 use GacelaTest\Feature\Router\Fixtures\FakeController;
@@ -67,12 +68,137 @@ final class RouterMatchTest extends TestCase
         $router->run();
     }
 
+    public function test_multiple_optional_argument_with_only_first_provided(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/optional/bob1';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $this->expectOutputString('Expected!');
+
+        $router = new Router(static function (Routes $routes): void {
+            $routes->get('optional/{param1?}/{param2?}', FakeController::class, 'basicAction');
+        });
+        $router->run();
+    }
+
+    public function test_multiple_optional_argument_with_both_provided(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/optional/bob1/bob2';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $this->expectOutputString('Expected!');
+
+        $router = new Router(static function (Routes $routes): void {
+            $routes->get('optional/{param1?}/{param2?}', FakeController::class, 'basicAction');
+        });
+        $router->run();
+    }
+
+    public function test_throw_malformed_path_exception_due_mandatory_argument_after_optional_argument(): void
+    {
+        $this->expectException(MalformedPathException::class);
+
+        $router = new Router(static function (Routes $routes): void {
+            $routes->get('uri/{param1?}/{param2}', FakeController::class);
+        });
+        $router->run();
+    }
+
+    public function test_throw_malformed_path_exception_due_static_part_after_optional_argument(): void
+    {
+        $this->expectException(MalformedPathException::class);
+
+        $router = new Router(static function (Routes $routes): void {
+            $routes->get('uri/{param1?}/alice', FakeController::class);
+        });
+        $router->run();
+    }
+
+    public function test_throw_malformed_path_exception_due_route_start_with_slash(): void
+    {
+        $this->expectException(MalformedPathException::class);
+
+        $router = new Router(static function (Routes $routes): void {
+            $routes->get('/uri', FakeController::class);
+        });
+        $router->run();
+    }
+
+    public function test_throw_malformed_path_exception_due_route_end_with_slash(): void
+    {
+        $this->expectException(MalformedPathException::class);
+
+        $router = new Router(static function (Routes $routes): void {
+            $routes->get('uri/', FakeController::class);
+        });
+        $router->run();
+    }
+
+    public function test_throw_malformed_path_exception_due_empty_part(): void
+    {
+        $this->expectException(MalformedPathException::class);
+
+        $router = new Router(static function (Routes $routes): void {
+            $routes->get('uri//alice', FakeController::class);
+        });
+        $router->run();
+    }
+
+    public function test_throw_malformed_path_exception_due_empty_path(): void
+    {
+        $this->expectException(MalformedPathException::class);
+
+        $router = new Router(static function (Routes $routes): void {
+            $routes->get('', FakeController::class);
+        });
+        $router->run();
+    }
+
+    public function test_mandatory_argument(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/mandatory/alice';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $this->expectOutputString('Expected!');
+
+        $router = new Router(static function (Routes $routes): void {
+            $routes->get('mandatory/{param1}', FakeController::class, 'basicAction');
+        });
+        $router->run();
+    }
+
+    public function test_mandatory_and_not_provided_optional_argument(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/mandatory_and_not_provided_optional/alice';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $this->expectOutputString('Expected!');
+
+        $router = new Router(static function (Routes $routes): void {
+            $routes->get('mandatory_and_not_provided_optional/{param1}/{param2?}', FakeController::class, 'basicAction');
+        });
+        $router->run();
+    }
+
+    public function test_mandatory_and_provided_optional_argument(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/mandatory_and_provided_optional/alice/bob';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $this->expectOutputString('Expected!');
+
+        $router = new Router(static function (Routes $routes): void {
+            $routes->get('mandatory_and_provided_optional/{param1}/{param2?}', FakeController::class, 'basicAction');
+        });
+        $router->run();
+    }
+
     public function test_thrown_exception_when_method_does_not_exist(): void
     {
         $this->expectException(UnsupportedHttpMethodException::class);
 
         $router = new Router(static function (Routes $routes): void {
-            $routes->invalidName('', FakeController::class);
+            $routes->invalidName('invalid', FakeController::class);
         });
         $router->run();
     }

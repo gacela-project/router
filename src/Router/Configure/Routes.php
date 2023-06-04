@@ -7,22 +7,25 @@ namespace Gacela\Router\Configure;
 use Gacela\Router\Controllers\RedirectController;
 use Gacela\Router\Entities\Request;
 use Gacela\Router\Entities\Route;
+use Gacela\Router\Exceptions\MalformedPathException;
 use Gacela\Router\Exceptions\UnsupportedHttpMethodException;
+
+use Gacela\Router\Validators\PathValidator;
 
 use function in_array;
 use function is_array;
 
 /**
- * @method head(string $path, object|string $controller, string $action = '__invoke')
- * @method connect(string $path, object|string $controller, string $action = '__invoke')
- * @method get(string $path, object|string $controller, string $action = '__invoke')
- * @method post(string $path, object|string $controller, string $action = '__invoke')
- * @method put(string $path, object|string $controller, string $action = '__invoke')
- * @method patch(string $path, object|string $controller, string $action = '__invoke')
- * @method delete(string $path, object|string $controller, string $action = '__invoke')
- * @method options(string $path, object|string $controller, string $action = '__invoke')
- * @method trace(string $path, object|string $controller, string $action = '__invoke')
- * @method any(string $path, object|string $controller, string $action = '__invoke')
+ * @method head(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
+ * @method connect(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
+ * @method get(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
+ * @method post(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
+ * @method put(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
+ * @method patch(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
+ * @method delete(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
+ * @method options(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
+ * @method trace(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
+ * @method any(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
  */
 final class Routes
 {
@@ -47,9 +50,14 @@ final class Routes
      * @param string[] $methods
      * @param object|class-string $controller
      */
-    public function match(array $methods, string $path, object|string $controller, string $action = '__invoke'): void
-    {
-        $this->addRoute($methods, $path, $controller, $action);
+    public function match(
+        array $methods,
+        string $path,
+        object|string $controller,
+        string $action = '__invoke',
+        ?string $pathPattern = null,
+    ): void {
+        $this->addRoute($methods, $path, $controller, $action, $pathPattern);
     }
 
     public function redirect(
@@ -82,20 +90,25 @@ final class Routes
         string $path,
         object|string $controller,
         string $action = '__invoke',
+        ?string $pathPattern = null,
     ): void {
+        if (!PathValidator::isValid($path)) {
+            throw MalformedPathException::withPath($path);
+        }
+
         if (!is_array($methods)) {
             $methods = [$methods];
         }
-
         $methods = array_map(static fn ($method) => strtoupper($method), $methods);
+
+        $path = ($path === '/') ? '' : $path;
 
         foreach ($methods as $method) {
             if (!in_array($method, Request::ALL_METHODS, true)) {
                 throw UnsupportedHttpMethodException::withName($method);
             }
-            $path = ($path === '/') ? '' : $path;
 
-            $this->routes[] = new Route($method, $path, $controller, $action);
+            $this->routes[] = new Route($method, $path, $controller, $action, $pathPattern);
         }
     }
 }

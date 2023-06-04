@@ -70,6 +70,32 @@ final class RouterParamTest extends TestCase
         }
     }
 
+    public function test_do_not_pass_optional_string_params_to_the_action(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/string/is';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $this->expectOutputString("The optional 'string' param is 'bob'!");
+
+        $router = new Router(static function (Routes $routes): void {
+            $routes->get('expected/string/is/{param?}', FakeController::class, 'optionalStringParamAction');
+        });
+        $router->run();
+    }
+
+    public function test_pass_optional_string_params_to_the_action(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/string/is/alice';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $this->expectOutputString("The optional 'string' param is 'alice'!");
+
+        $router = new Router(static function (Routes $routes): void {
+            $routes->get('expected/string/is/{param?}', FakeController::class, 'optionalStringParamAction');
+        });
+        $router->run();
+    }
+
     /**
      * @dataProvider intProvider
      */

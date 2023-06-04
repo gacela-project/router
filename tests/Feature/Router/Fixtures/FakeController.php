@@ -17,6 +17,12 @@ final class FakeController
         return "The '{$type}' param is '{$param}'!";
     }
 
+    public function optionalStringParamAction(string $param = 'bob'): string
+    {
+        $type = get_debug_type($param);
+        return "The optional '{$type}' param is '{$param}'!";
+    }
+
     public function intParamAction(int $param): string
     {
         $type = get_debug_type($param);

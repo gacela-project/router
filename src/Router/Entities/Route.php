@@ -22,6 +22,7 @@ final class Route
         private string $path,
         private object|string $controller,
         private string $action = '__invoke',
+        private ?string $pathPattern = null,
     ) {
     }
 
@@ -69,9 +70,11 @@ final class Route
 
     public function getPathPattern(): string
     {
-        $pattern = preg_replace('#({.*})#U', '(.*)', $this->path);
+        if ($this->pathPattern === null) {
+            $this->pathPattern = $this->calculateDefaultPathPattern();
+        }
 
-        return '#^/' . $pattern . '$#';
+        return $this->pathPattern;
     }
 
     public function requestMatches(): bool
@@ -88,14 +91,32 @@ final class Route
     {
         $path = Request::fromGlobals()->path();
 
-        return preg_match($this->getPathPattern(), $path)
-            || preg_match($this->getPathPatternWithoutOptionals(), $path);
+        return (bool)preg_match($this->getPathPattern(), $path);
     }
 
-    private function getPathPatternWithoutOptionals(): string
+    /**
+     * @todo: improve this method and maybe move it to a separate class
+     *
+     * @return string
+     */
+    private function calculateDefaultPathPattern(): string
     {
-        $pattern = preg_replace('#/({.*\?})#U', '(/(.*))?', $this->path);
+        if ($this->path === '') {
+            return '#^/?$#';
+        }
 
-        return '#^/' . $pattern . '$#';
+        $parts = explode('/', $this->path);
+        $pattern = '';
+        foreach ($parts as $part) {
+            if (preg_match(RouteParams::MANDATORY_PARAM_PATTERN, $part)) {
+                $pattern .= '/([^\/]+)';
+            } elseif (preg_match(RouteParams::OPTIONAL_PARAM_PATTERN, $part)) {
+                $pattern .= '/?([^\/]+)?';
+            } else {
+                $pattern .= '/' . $part;
+            }
+        }
+
+        return '#^/' . ltrim($pattern, '/') . '$#';
     }
 }
