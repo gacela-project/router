@@ -26,9 +26,8 @@ final class Router implements RouterInterface
     private Bindings $bindings;
     private Handlers $handlers;
 
-    public function __construct(
-        Closure $fn = null,
-    ) {
+    public function __construct(Closure $fn = null)
+    {
         $this->routes = new Routes();
         $this->bindings = new Bindings();
         $this->handlers = new Handlers();
