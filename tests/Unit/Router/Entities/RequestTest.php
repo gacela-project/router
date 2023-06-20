@@ -2,20 +2,29 @@
 
 declare(strict_types=1);
 
-namespace Unit\Router\Entities;
+namespace GacelaTest\Unit\Router\Entities;
 
 use Gacela\Router\Entities\Request;
 use PHPUnit\Framework\TestCase;
 
 final class RequestTest extends TestCase
 {
-    public function test_existing_request_key(): void
+    public function test_existing_request_key_get(): void
     {
-        $_GET['key'] = 'value';
+        $_GET['get_key'] = 'get value';
         $request = Request::fromGlobals();
 
-        self::assertSame('value', $request->get('key'));
-        unset($_GET['key']);
+        self::assertSame('get value', $request->get('get_key'));
+        unset($_GET['get_key']);
+    }
+
+    public function test_existing_request_key_post(): void
+    {
+        $_POST['post_key'] = 'post value';
+        $request = Request::fromGlobals();
+
+        self::assertSame('post value', $request->get('post_key'));
+        unset($_POST['post_key']);
     }
 
     public function test_non_existing_request_key(): void
