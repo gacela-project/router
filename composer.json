@@ -1,6 +1,7 @@
 {
     "name": "gacela-project/router",
     "type": "library",
+    "description": "A minimalistic HTTP router.",
     "license": "MIT",
     "require": {
         "php": ">=8.0.2",
@@ -8,28 +9,17 @@
     },
     "require-dev": {
         "ext-mbstring": "*",
-        "friendsofphp/php-cs-fixer": "^3.16",
+        "friendsofphp/php-cs-fixer": "^3.18",
         "gacela-project/gacela": "^1.4",
         "infection/infection": "^0.26",
         "phpstan/phpstan": "^1.10",
         "phpunit/phpunit": "^9.6",
         "psalm/plugin-phpunit": "^0.18",
         "symfony/var-dumper": "^5.4",
-        "vimeo/psalm": "^5.11"
+        "vimeo/psalm": "^5.12"
     },
     "suggest": {
         "gacela-project/gacela": "^1.4"
-    },
-    "config": {
-        "platform": {
-            "php": "8.0.2"
-        },
-        "optimize-autoloader": true,
-        "preferred-install": "dist",
-        "sort-packages": true,
-        "allow-plugins": {
-            "infection/extension-installer": true
-        }
     },
     "autoload": {
         "psr-4": {
@@ -53,14 +43,8 @@
             "@quality",
             "@phpunit"
         ],
-        "quality": [
-            "@csrun",
-            "@psalm",
-            "@phpstan"
-        ],
-        "phpunit": [
-            "@test-phpunit"
-        ],
+        "quality": ["@csrun", "@psalm", "@phpstan"],
+        "phpunit": ["@test-phpunit"],
         "static-clear-cache": [
             "XDEBUG_MODE=off vendor/bin/psalm --clear-cache",
             "XDEBUG_MODE=off vendor/bin/phpstan clear-result-cache"
@@ -72,5 +56,16 @@
         "csfix": "XDEBUG_MODE=off ./vendor/bin/php-cs-fixer fix",
         "csrun": "XDEBUG_MODE=off ./vendor/bin/php-cs-fixer fix --dry-run",
         "infection": "XDEBUG_MODE=coverage ./vendor/bin/infection  --show-mutations --threads=max --min-msi=100 --min-covered-msi=100"
+    },
+    "config": {
+        "platform": {
+            "php": "8.0.2"
+        },
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "allow-plugins": {
+            "infection/extension-installer": true
+        }
     }
 }
