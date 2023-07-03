@@ -58,10 +58,15 @@ final class Request
         return $parsedUrl;
     }
 
-    public function get(string $key): mixed
+    public function get(string $key, mixed $default = null): mixed
     {
-        return $this->request[$key]
-            ?? $this->query[$key]
-            ?? null;
+        /** @var mixed $result */
+        $result = $this->request[$key] ?? $this->query[$key] ?? null;
+
+        if ($result !== null) {
+            return $result;
+        }
+
+        return $default;
     }
 }
