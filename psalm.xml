@@ -20,6 +20,7 @@
     </plugins>
 
     <issueHandlers>
+        <ArgumentTypeCoercion errorLevel="suppress" />
         <InvalidReturnType errorLevel="suppress" />
         <InvalidReturnStatement errorLevel="suppress" />
         <LessSpecificReturnStatement errorLevel="suppress" />

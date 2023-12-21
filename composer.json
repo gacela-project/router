@@ -4,22 +4,22 @@
     "description": "A minimalistic HTTP router.",
     "license": "MIT",
     "require": {
-        "php": ">=8.0.2",
-        "gacela-project/container": "^0.5"
+        "php": ">=8.1",
+        "gacela-project/container": "^0.6"
     },
     "require-dev": {
         "ext-mbstring": "*",
-        "friendsofphp/php-cs-fixer": "^3.18",
-        "gacela-project/gacela": "^1.4",
+        "friendsofphp/php-cs-fixer": "^3.41",
+        "gacela-project/gacela": "^1.7",
         "infection/infection": "^0.26",
         "phpstan/phpstan": "^1.10",
         "phpunit/phpunit": "^9.6",
         "psalm/plugin-phpunit": "^0.18",
         "symfony/var-dumper": "^5.4",
-        "vimeo/psalm": "^5.12"
+        "vimeo/psalm": "^5.18"
     },
     "suggest": {
-        "gacela-project/gacela": "^1.4"
+        "gacela-project/gacela": "^1.7"
     },
     "autoload": {
         "psr-4": {
@@ -36,9 +36,10 @@
         "ctal": [
             "@static-clear-cache",
             "@csfix",
-            "@test-all",
+            "@test",
             "@infection"
         ],
+        "test": "@test-all",
         "test-all": [
             "@quality",
             "@phpunit"
@@ -59,7 +60,7 @@
     },
     "config": {
         "platform": {
-            "php": "8.0.2"
+            "php": "8.1"
         },
         "optimize-autoloader": true,
         "preferred-install": "dist",
