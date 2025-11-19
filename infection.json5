@@ -1,12 +1,16 @@
 {
     $schema: 'vendor/infection/infection/resources/schema.json',
+    phpUnit: {
+        configDir: '.'
+    },
+    initialTestsPhpOptions: '-d error_reporting=24575',
     logs: {
         html: 'data/mutation-report.html',
         stryker: {
             "report": "main"
         }
     },
-    timeout: 3,
+    timeout: 10,
     source: {
         directories: [
             'src'
