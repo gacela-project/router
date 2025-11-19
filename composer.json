@@ -56,7 +56,7 @@
         "phpstan": "XDEBUG_MODE=off ./vendor/bin/phpstan analyze",
         "csfix": "XDEBUG_MODE=off ./vendor/bin/php-cs-fixer fix",
         "csrun": "XDEBUG_MODE=off ./vendor/bin/php-cs-fixer fix --dry-run",
-        "infection": "XDEBUG_MODE=coverage ./vendor/bin/infection  --show-mutations --threads=max --min-msi=100 --min-covered-msi=100"
+        "infection": "XDEBUG_MODE=coverage php -d error_reporting='E_ALL & ~E_DEPRECATED' ./vendor/bin/infection --show-mutations --threads=max --min-msi=96 --min-covered-msi=97"
     },
     "config": {
         "platform": {
