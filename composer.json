@@ -9,14 +9,14 @@
     },
     "require-dev": {
         "ext-mbstring": "*",
-        "friendsofphp/php-cs-fixer": "^3.41",
-        "gacela-project/gacela": "^1.7",
-        "infection/infection": "^0.26",
-        "phpstan/phpstan": "^1.10",
+        "friendsofphp/php-cs-fixer": "^3.89",
+        "gacela-project/gacela": "^1.9",
+        "infection/infection": "^0.29",
+        "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^9.6",
-        "psalm/plugin-phpunit": "^0.18",
+        "psalm/plugin-phpunit": "^0.19",
         "symfony/var-dumper": "^5.4",
-        "vimeo/psalm": "^5.18"
+        "vimeo/psalm": "^6.0"
     },
     "suggest": {
         "gacela-project/gacela": "^1.7"
@@ -32,7 +32,7 @@
         }
     },
     "scripts": {
-        "serve": "php -S localhost:8081 example/example.php",
+        "serve": "php -d error_reporting='E_ALL & ~E_DEPRECATED' -S localhost:8081 example/example.php",
         "ctal": [
             "@static-clear-cache",
             "@csfix",
@@ -60,7 +60,7 @@
     },
     "config": {
         "platform": {
-            "php": "8.1"
+            "php": "8.1.31"
         },
         "optimize-autoloader": true,
         "preferred-install": "dist",

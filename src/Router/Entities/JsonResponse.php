@@ -9,6 +9,7 @@ use function in_array;
 final class JsonResponse extends Response
 {
     /**
+     * @param array<mixed> $json
      * @param list<string> $headers
      */
     public function __construct(array $json, array $headers = [])

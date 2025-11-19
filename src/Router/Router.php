@@ -14,6 +14,7 @@ use Gacela\Router\Entities\Route;
 use Gacela\Router\Exceptions\NonCallableHandlerException;
 use Gacela\Router\Exceptions\NotFound404Exception;
 use Gacela\Router\Exceptions\UnsupportedRouterConfigureCallableParamException;
+use Override;
 use ReflectionFunction;
 
 use function get_class;
@@ -26,7 +27,7 @@ final class Router implements RouterInterface
     private Bindings $bindings;
     private Handlers $handlers;
 
-    public function __construct(Closure $fn = null)
+    public function __construct(?Closure $fn = null)
     {
         $this->routes = new Routes();
         $this->bindings = new Bindings();
@@ -37,6 +38,7 @@ final class Router implements RouterInterface
         }
     }
 
+    #[Override]
     public function configure(Closure $fn): self
     {
         $params = array_map(fn ($param) => match ((string)$param->getType()) {
@@ -51,6 +53,7 @@ final class Router implements RouterInterface
         return $this;
     }
 
+    #[Override]
     public function run(): void
     {
         try {
@@ -76,14 +79,18 @@ final class Router implements RouterInterface
         $handler = $this->findHandler($exception);
 
         if (is_callable($handler)) {
-            return $handler($exception);
+            /** @var string $result */
+            $result = $handler($exception);
+            return $result;
         }
 
         /** @psalm-suppress MixedAssignment */
         $instance = Container::create($handler);
 
         if (is_callable($instance)) {
-            return $instance($exception);
+            /** @var string $result */
+            $result = $instance($exception);
+            return $result;
         }
 
         throw NonCallableHandlerException::fromException($exception::class);

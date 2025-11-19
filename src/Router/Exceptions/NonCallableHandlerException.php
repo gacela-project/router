@@ -6,7 +6,7 @@ namespace Gacela\Router\Exceptions;
 
 use RuntimeException;
 
-class NonCallableHandlerException extends RuntimeException
+final class NonCallableHandlerException extends RuntimeException
 {
     /**
      * @param class-string $class

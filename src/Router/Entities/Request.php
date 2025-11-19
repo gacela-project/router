@@ -28,6 +28,11 @@ final class Request
         self::METHOD_TRACE,
     ];
 
+    /**
+     * @param array<string, mixed> $query
+     * @param array<string, mixed> $request
+     * @param array<string, mixed> $server
+     */
     private function __construct(
         private array $query,
         private array $request,
@@ -37,7 +42,14 @@ final class Request
 
     public static function fromGlobals(): self
     {
-        return new self($_GET, $_POST, $_SERVER);
+        /** @var array<string, mixed> $get */
+        $get = $_GET;
+        /** @var array<string, mixed> $post */
+        $post = $_POST;
+        /** @var array<string, mixed> $server */
+        $server = $_SERVER;
+
+        return new self($get, $post, $server);
     }
 
     public function isMethod(string $method): bool

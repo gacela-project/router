@@ -14,6 +14,7 @@ final class RouteParams
     public const MANDATORY_PARAM_PATTERN = '#({.*[^?]})#';
     public const OPTIONAL_PARAM_PATTERN = '#(/?{.*\?})#';
 
+    /** @var array<string, mixed> */
     private array $params;
 
     public function __construct(private Route $route)
@@ -21,11 +22,17 @@ final class RouteParams
         $this->params = $this->getParams();
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getAll(): array
     {
         return $this->params;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function getParams(): array
     {
         $params = [];
