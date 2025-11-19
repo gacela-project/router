@@ -7,6 +7,7 @@ namespace Gacela\Router\Entities;
 use Gacela\Container\Container;
 use Gacela\Router\Configure\Bindings;
 use Gacela\Router\Exceptions\UnsupportedResponseTypeException;
+use Gacela\Router\Validators\PathPatternGenerator;
 use Stringable;
 
 use function is_object;
@@ -71,7 +72,7 @@ final class Route
     public function getPathPattern(): string
     {
         if ($this->pathPattern === null) {
-            $this->pathPattern = $this->calculateDefaultPathPattern();
+            $this->pathPattern = PathPatternGenerator::generate($this->path);
         }
 
         return $this->pathPattern;
@@ -92,31 +93,5 @@ final class Route
         $path = Request::fromGlobals()->path();
 
         return (bool)preg_match($this->getPathPattern(), $path);
-    }
-
-    /**
-     * @todo: improve this method and maybe move it to a separate class
-     *
-     * @return string
-     */
-    private function calculateDefaultPathPattern(): string
-    {
-        if ($this->path === '') {
-            return '#^/?$#';
-        }
-
-        $parts = explode('/', $this->path);
-        $pattern = '';
-        foreach ($parts as $part) {
-            if (preg_match(RouteParams::MANDATORY_PARAM_PATTERN, $part)) {
-                $pattern .= '/([^\/]+)';
-            } elseif (preg_match(RouteParams::OPTIONAL_PARAM_PATTERN, $part)) {
-                $pattern .= '/?([^\/]+)?';
-            } else {
-                $pattern .= '/' . $part;
-            }
-        }
-
-        return '#^/' . ltrim($pattern, '/') . '$#';
     }
 }

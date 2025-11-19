@@ -24,7 +24,7 @@ class Controller
         $number = $this->request->get('number');
 
         if (!empty($number)) {
-            return sprintf("__invoke with 'number'=%d", $number);
+            return \sprintf("__invoke with 'number'=%d", $number);
         }
 
         return '__invoke';
