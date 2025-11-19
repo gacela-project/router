@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Gacela\Router\Entities;
 
+use Override;
 use Stringable;
 
 class Response implements Stringable
@@ -17,6 +18,7 @@ class Response implements Stringable
     ) {
     }
 
+    #[Override]
     public function __toString(): string
     {
         foreach ($this->headers as $header) {

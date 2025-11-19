@@ -33,13 +33,17 @@ final class Routes
     private array $routes = [];
 
     /**
+     * @param array<mixed> $arguments
+     *
      * @psalm-suppress MixedArgument
      */
     public function __call(string $method, array $arguments): void
     {
         if ($method === 'any') {
+            /** @phpstan-ignore-next-line argument.type */
             $this->addRoute(Request::ALL_METHODS, ...$arguments);
         } else {
+            /** @phpstan-ignore-next-line argument.type */
             $this->addRoute($method, ...$arguments);
         }
     }
@@ -64,7 +68,7 @@ final class Routes
         string $uri,
         string $destination,
         int $status = 302,
-        string $method = null,
+        ?string $method = null,
     ): void {
         if ($method === null) {
             $this->addRoute(Request::ALL_METHODS, $uri, new RedirectController($destination, $status));
