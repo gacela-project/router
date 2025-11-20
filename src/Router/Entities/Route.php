@@ -7,6 +7,7 @@ namespace Gacela\Router\Entities;
 use Gacela\Container\Container;
 use Gacela\Router\Configure\Bindings;
 use Gacela\Router\Exceptions\UnsupportedResponseTypeException;
+use Gacela\Router\Middleware\MiddlewareInterface;
 use Gacela\Router\Validators\PathPatternGenerator;
 use Stringable;
 
@@ -15,14 +16,17 @@ use function is_string;
 
 final class Route
 {
+    /** @var list<MiddlewareInterface|class-string<MiddlewareInterface>|string> */
+    private array $middlewares = [];
+
     /**
      * @param object|class-string $controller
      */
     public function __construct(
-        private string $method,
-        private string $path,
-        private object|string $controller,
-        private string $action = '__invoke',
+        private readonly string $method,
+        private readonly string $path,
+        private readonly object|string $controller,
+        private readonly string $action = '__invoke',
         private ?string $pathPattern = null,
     ) {
     }
@@ -67,6 +71,23 @@ final class Route
     public function action(): string
     {
         return $this->action;
+    }
+
+    /**
+     * @param MiddlewareInterface|class-string<MiddlewareInterface>|string $middleware
+     */
+    public function middleware(MiddlewareInterface|string $middleware): self
+    {
+        $this->middlewares[] = $middleware;
+        return $this;
+    }
+
+    /**
+     * @return list<MiddlewareInterface|class-string<MiddlewareInterface>|string>
+     */
+    public function getMiddlewares(): array
+    {
+        return $this->middlewares;
     }
 
     public function getPathPattern(): string

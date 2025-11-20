@@ -40,9 +40,10 @@ composer require gacela-project/router
 ### Example
 
 ```php
-# `Bindings` and `Handlers` are optional, and you can place them in any order.
+# Request only the parameters you need: Routes, Bindings, Handlers, Middlewares
+# All except Routes are optional, and you can place them in any order.
 
-$router = new Router(function (Routes $routes, Bindings $bindings, Handlers $handlers) {
+$router = new Router(function (Routes $routes, Bindings $bindings, Handlers $handlers, Middlewares $middlewares) {
 
     // Custom redirections
     $routes->redirect('docs', 'https://gacela-project.com/');
@@ -61,6 +62,21 @@ $router = new Router(function (Routes $routes, Bindings $bindings, Handlers $han
 
     // Handle custom Exceptions with class-string|callable
     $handlers->handle(NotFound404Exception::class, NotFound404ExceptionHandler::class);
+
+    // Apply middleware to all routes
+    $middlewares->add(new GlobalMiddleware());
+
+    // Use individual middleware to a route
+    $routes->get('admin', AdminController::class)->middleware(new AuthMiddleware());
+
+    // Or define a middleware group
+    $middlewares->group('web', [
+        new SessionMiddleware(),
+        new CsrfMiddleware(),
+    ]);
+
+    // And apply the group to the route
+    $routes->get('/', Controller::class)->middleware('web');
 
 });
 
