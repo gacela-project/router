@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+- Middleware support with `MiddlewareInterface`
+- Middleware groups for reusable middleware stacks
+
 ## [0.12.0](https://github.com/gacela-project/router/compare/0.11.0...0.12.0) - 2023-06-16
 
 - Fix combining mandatory and optional GET arguments
