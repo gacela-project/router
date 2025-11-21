@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 require_once \dirname(__DIR__) . '/vendor/autoload.php';
 
+use Gacela\Router\Configure\Middlewares;
 use Gacela\Router\Configure\Routes;
 use Gacela\Router\Entities\Request;
 use Gacela\Router\Entities\Response;
+use Gacela\Router\Middleware\MiddlewareInterface;
 use Gacela\Router\Router;
 
 # To run this example locally, you can run in your terminal:
@@ -44,7 +46,23 @@ class Controller
     }
 }
 
-$router = new Router(static function (Routes $routes): void {
+// Example middleware that adds a custom header to all responses
+class TimingMiddleware implements MiddlewareInterface
+{
+    public function handle(Request $request, Closure $next): string
+    {
+        $start = microtime(true);
+        $response = $next($request);
+        $time = round((microtime(true) - $start) * 1000, 2);
+        header("X-Response-Time: {$time}ms");
+        return $response;
+    }
+}
+
+$router = new Router(static function (Routes $routes, Middlewares $middlewares): void {
+    // Add a global middleware that applies to all routes
+    $middlewares->add(new TimingMiddleware());
+
     # Try it out: http://localhost:8081/docs
     $routes->redirect('docs', 'https://gacela-project.com/');
 

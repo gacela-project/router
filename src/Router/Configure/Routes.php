@@ -9,23 +9,23 @@ use Gacela\Router\Entities\Request;
 use Gacela\Router\Entities\Route;
 use Gacela\Router\Exceptions\MalformedPathException;
 use Gacela\Router\Exceptions\UnsupportedHttpMethodException;
-
 use Gacela\Router\Validators\PathValidator;
+use RuntimeException;
 
 use function in_array;
 use function is_array;
 
 /**
- * @method head(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
- * @method connect(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
- * @method get(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
- * @method post(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
- * @method put(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
- * @method patch(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
- * @method delete(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
- * @method options(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
- * @method trace(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
- * @method any(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
+ * @method Route head(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
+ * @method Route connect(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
+ * @method Route get(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
+ * @method Route post(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
+ * @method Route put(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
+ * @method Route patch(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
+ * @method Route delete(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
+ * @method Route options(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
+ * @method Route trace(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
+ * @method Route any(string $path, object|string $controller, string $action = '__invoke', ?string $pathPattern = null)
  */
 final class Routes
 {
@@ -37,15 +37,14 @@ final class Routes
      *
      * @psalm-suppress MixedArgument
      */
-    public function __call(string $method, array $arguments): void
+    public function __call(string $method, array $arguments): Route
     {
         if ($method === 'any') {
             /** @phpstan-ignore-next-line argument.type */
-            $this->addRoute(Request::ALL_METHODS, ...$arguments);
-        } else {
-            /** @phpstan-ignore-next-line argument.type */
-            $this->addRoute($method, ...$arguments);
+            return $this->addRoute(Request::ALL_METHODS, ...$arguments);
         }
+        /** @phpstan-ignore-next-line argument.type */
+        return $this->addRoute($method, ...$arguments);
     }
 
     /**
@@ -60,8 +59,8 @@ final class Routes
         object|string $controller,
         string $action = '__invoke',
         ?string $pathPattern = null,
-    ): void {
-        $this->addRoute($methods, $path, $controller, $action, $pathPattern);
+    ): Route {
+        return $this->addRoute($methods, $path, $controller, $action, $pathPattern);
     }
 
     public function redirect(
@@ -95,7 +94,7 @@ final class Routes
         object|string $controller,
         string $action = '__invoke',
         ?string $pathPattern = null,
-    ): void {
+    ): Route {
         if (!PathValidator::isValid($path)) {
             throw MalformedPathException::withPath($path);
         }
@@ -107,12 +106,21 @@ final class Routes
 
         $path = ($path === '/') ? '' : $path;
 
+        $firstRoute = null;
         foreach ($methods as $method) {
             if (!in_array($method, Request::ALL_METHODS, true)) {
                 throw UnsupportedHttpMethodException::withName($method);
             }
 
-            $this->routes[] = new Route($method, $path, $controller, $action, $pathPattern);
+            $route = new Route($method, $path, $controller, $action, $pathPattern);
+            $this->routes[] = $route;
+
+            // Store the first route to return for middleware chaining
+            if ($firstRoute === null) {
+                $firstRoute = $route;
+            }
         }
+
+        return $firstRoute ?? throw new RuntimeException('No routes were created');
     }
 }

@@ -18,10 +18,14 @@ return (new Config())
         '@PSR12' => true,
         'array_syntax' => ['syntax' => 'short'],
         'backtick_to_shell_exec' => true,
-        'braces' => [
-            'allow_single_line_closure' => true,
-            'allow_single_line_anonymous_class_with_empty_body' => true,
+        'control_structure_braces' => true,
+        'control_structure_continuation_position' => true,
+        'braces_position' => [
+            'allow_single_line_anonymous_functions' => true,
+            'allow_single_line_empty_anonymous_classes' => true,
         ],
+        'statement_indentation' => true,
+        'no_multiple_statements_per_line' => true,
         'class_definition' => ['single_line' => true],
         'concat_space' => ['spacing' => 'one'],
         'declare_strict_types' => true,
@@ -30,7 +34,7 @@ return (new Config())
         'ereg_to_preg' => true,
         'explicit_string_variable' => true,
         'fully_qualified_strict_types' => true,
-        'function_typehint_space' => true,
+        'type_declaration_spaces' => true,
         'general_phpdoc_annotation_remove' => [
             'annotations' => [
                 'author',
@@ -48,8 +52,8 @@ return (new Config())
         'native_function_invocation' => [
             'include' => ['@compiler_optimized'],
         ],
-        'native_function_type_declaration_casing' => true,
-        'new_with_braces' => true,
+        'native_type_declaration_casing' => true,
+        'new_with_parentheses' => true,
         'no_blank_lines_after_class_opening' => true,
         'no_empty_comment' => true,
         'no_empty_phpdoc' => true,
@@ -118,7 +122,7 @@ return (new Config())
         'trim_array_spaces' => true,
         'unary_operator_spaces' => true,
         'types_spaces' => true,
-        'visibility_required' => true,
+        'visibility_required' => ['elements' => ['property', 'method', 'const']],
         'void_return' => true,
         'yoda_style' => [
             'equal' => false,
