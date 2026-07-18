@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Gacela\Router\Validators;
 
-use Gacela\Router\Entities\RouteParams;
-
 final class PathValidator
 {
     public static function isValid(string $path): bool
@@ -57,10 +55,7 @@ final class PathValidator
         $optionalParamFound = false;
 
         foreach ($parts as $part) {
-            if (!$part) { // Empty part found
-                return false;
-            }
-            if (preg_match(RouteParams::OPTIONAL_PARAM_PATTERN, $part)) { // Optional argument found
+            if (preg_match(PathPatternGenerator::OPTIONAL_PARAM_PATTERN, $part)) {
                 $optionalParamFound = true;
             } elseif ($optionalParamFound) { // Mandatory argument or static part found after an optional argument
                 return false;

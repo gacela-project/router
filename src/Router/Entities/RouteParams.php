@@ -5,16 +5,20 @@ declare(strict_types=1);
 namespace Gacela\Router\Entities;
 
 use Gacela\Router\Exceptions\UnsupportedParamTypeException;
+use Gacela\Router\Validators\PathPatternGenerator;
 use ReflectionClass;
 
 use function count;
 
 final class RouteParams
 {
-    public const MANDATORY_PARAM_PATTERN = '#({.*[^?]})#';
-    public const OPTIONAL_PARAM_PATTERN = '#(/?{.*\?})#';
+    /** @deprecated use PathPatternGenerator::MANDATORY_PARAM_PATTERN instead */
+    public const MANDATORY_PARAM_PATTERN = PathPatternGenerator::MANDATORY_PARAM_PATTERN;
 
-    /** @var array<string, mixed> */
+    /** @deprecated use PathPatternGenerator::OPTIONAL_PARAM_PATTERN instead */
+    public const OPTIONAL_PARAM_PATTERN = PathPatternGenerator::OPTIONAL_PARAM_PATTERN;
+
+    /** @var array<string, bool|float|int|string> */
     private array $params;
 
     public function __construct(private Route $route)
@@ -23,7 +27,7 @@ final class RouteParams
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array<string, bool|float|int|string>
      */
     public function getAll(): array
     {
@@ -31,7 +35,7 @@ final class RouteParams
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array<string, bool|float|int|string>
      */
     private function getParams(): array
     {
@@ -43,7 +47,7 @@ final class RouteParams
         preg_match($this->route->getPathPattern(), Request::fromGlobals()->path(), $pathParamValues);
 
         unset($pathParamValues[0], $pathParamKeys[0]);
-        $pathParamKeys = array_map(static fn ($key) => trim($key, '{?}'), $pathParamKeys);
+        $pathParamKeys = array_map(static fn (string $key): string => trim($key, '{?}'), $pathParamKeys);
 
         while (count($pathParamValues) !== count($pathParamKeys)) {
             array_shift($pathParamKeys);
@@ -55,7 +59,6 @@ final class RouteParams
             ->getParameters();
 
         foreach ($actionParams as $actionParam) {
-            /** @var string|null $paramType */
             $paramType = $actionParam->getType()?->__toString();
 
             if ($paramType === null) {
