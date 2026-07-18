@@ -4,26 +4,36 @@ declare(strict_types=1);
 
 namespace GacelaTest\Feature;
 
+use Gacela\Router\RouterInterface;
 use PHPUnit\Framework\TestCase;
 
 include_once __DIR__ . '/header.php';
 
+/**
+ * @psalm-import-type CapturedHeader from HeaderTestHelper
+ *
+ * @phpstan-import-type CapturedHeader from HeaderTestHelper
+ */
 abstract class HeaderTestCase extends TestCase
 {
-    /**
-     * @runInSeparateProcess
-     */
     protected function setUp(): void
     {
-        global $testHeaders;
-
-        $testHeaders = null;
+        HeaderTestHelper::clear();
     }
 
+    /**
+     * @return list<CapturedHeader>
+     */
     protected function headers(): array
     {
-        global $testHeaders;
+        return HeaderTestHelper::getHeaders();
+    }
 
-        return $testHeaders ?? [];
+    protected function runRouter(RouterInterface $router): string
+    {
+        ob_start();
+        $router->run();
+
+        return (string)ob_get_clean();
     }
 }
