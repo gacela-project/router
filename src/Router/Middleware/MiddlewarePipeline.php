@@ -10,10 +10,15 @@ use Gacela\Router\Entities\Request;
 
 use function is_string;
 
+/**
+ * @psalm-import-type ResolvedMiddleware from MiddlewareInterface
+ *
+ * @phpstan-import-type ResolvedMiddleware from MiddlewareInterface
+ */
 final class MiddlewarePipeline
 {
     /**
-     * @param list<MiddlewareInterface|class-string<MiddlewareInterface>> $middlewares
+     * @param list<ResolvedMiddleware> $middlewares
      */
     public function __construct(
         private readonly array $middlewares = [],

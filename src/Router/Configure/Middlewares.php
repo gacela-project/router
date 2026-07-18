@@ -6,16 +6,23 @@ namespace Gacela\Router\Configure;
 
 use Gacela\Router\Middleware\MiddlewareInterface;
 
+/**
+ * @psalm-import-type RawMiddleware from MiddlewareInterface
+ * @psalm-import-type ResolvedMiddleware from MiddlewareInterface
+ *
+ * @phpstan-import-type RawMiddleware from MiddlewareInterface
+ * @phpstan-import-type ResolvedMiddleware from MiddlewareInterface
+ */
 final class Middlewares
 {
-    /** @var list<MiddlewareInterface|class-string<MiddlewareInterface>|string> */
+    /** @var list<RawMiddleware> */
     private array $globalMiddlewares = [];
 
-    /** @var array<string, list<MiddlewareInterface|class-string<MiddlewareInterface>>> */
+    /** @var array<string, list<ResolvedMiddleware>> */
     private array $groups = [];
 
     /**
-     * @param MiddlewareInterface|class-string<MiddlewareInterface>|string $middleware
+     * @param RawMiddleware $middleware
      */
     public function add(MiddlewareInterface|string $middleware): self
     {
@@ -24,7 +31,7 @@ final class Middlewares
     }
 
     /**
-     * @param list<MiddlewareInterface|class-string<MiddlewareInterface>> $middlewares
+     * @param list<ResolvedMiddleware> $middlewares
      */
     public function group(string $name, array $middlewares): self
     {
@@ -33,7 +40,7 @@ final class Middlewares
     }
 
     /**
-     * @return list<MiddlewareInterface|class-string<MiddlewareInterface>|string>
+     * @return list<RawMiddleware>
      */
     public function getAll(): array
     {
@@ -41,7 +48,7 @@ final class Middlewares
     }
 
     /**
-     * @return array<string, list<MiddlewareInterface|class-string<MiddlewareInterface>>>
+     * @return array<string, list<ResolvedMiddleware>>
      */
     public function getGroups(): array
     {
@@ -49,23 +56,20 @@ final class Middlewares
     }
 
     /**
-     * @param MiddlewareInterface|class-string<MiddlewareInterface>|string $middleware
+     * @param RawMiddleware $middleware
      *
-     * @return list<MiddlewareInterface|class-string<MiddlewareInterface>>
+     * @return list<ResolvedMiddleware>
      */
     public function resolve(MiddlewareInterface|string $middleware): array
     {
-        // If it's already an instance, return it as-is
         if ($middleware instanceof MiddlewareInterface) {
             return [$middleware];
         }
 
-        // If it's a group name, return the group's middlewares
         if (isset($this->groups[$middleware])) {
             return $this->groups[$middleware];
         }
 
-        // Otherwise, treat it as a class string
         /** @var class-string<MiddlewareInterface> $middleware */
         return [$middleware];
     }
