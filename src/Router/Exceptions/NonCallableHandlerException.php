@@ -10,8 +10,6 @@ final class NonCallableHandlerException extends RuntimeException
 {
     /**
      * @param class-string $class
-     *
-     * @return self
      */
     public static function fromException(string $class): self
     {
