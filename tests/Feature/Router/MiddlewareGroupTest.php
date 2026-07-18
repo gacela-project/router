@@ -12,6 +12,7 @@ use Gacela\Router\Middleware\MiddlewareInterface;
 use Gacela\Router\Router;
 use GacelaTest\Feature\HeaderTestCase;
 use GacelaTest\Feature\Router\Fixtures\FakeMiddleware;
+use GacelaTest\Feature\Router\Fixtures\TagMiddleware;
 use Override;
 
 final class MiddlewareGroupTest extends HeaderTestCase
@@ -19,7 +20,7 @@ final class MiddlewareGroupTest extends HeaderTestCase
     public function test_can_define_middleware_group(): void
     {
         $router = new Router(static function (Routes $routes, Middlewares $middlewares): void {
-            $middlewares->group('test', [self::createAnonMiddleware('GROUP')]);
+            $middlewares->group('test', [new TagMiddleware('GROUP')]);
 
             $routes->get('/', static fn () => 'CONTENT')->middleware('test');
         });
@@ -27,9 +28,7 @@ final class MiddlewareGroupTest extends HeaderTestCase
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = '/';
 
-        ob_start();
-        $router->run();
-        $output = ob_get_clean();
+        $output = $this->runRouter($router);
 
         self::assertSame('[GROUP]CONTENT[/GROUP]', $output);
     }
@@ -38,8 +37,8 @@ final class MiddlewareGroupTest extends HeaderTestCase
     {
         $router = new Router(static function (Routes $routes, Middlewares $middlewares): void {
             $middlewares->group('web', [
-                self::createAnonMiddleware('FIRST'),
-                self::createAnonMiddleware('SECOND'),
+                new TagMiddleware('FIRST'),
+                new TagMiddleware('SECOND'),
             ]);
 
             $routes->get('/', static fn () => 'CONTENT')->middleware('web');
@@ -48,9 +47,7 @@ final class MiddlewareGroupTest extends HeaderTestCase
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = '/';
 
-        ob_start();
-        $router->run();
-        $output = ob_get_clean();
+        $output = $this->runRouter($router);
 
         self::assertSame('[FIRST][SECOND]CONTENT[/SECOND][/FIRST]', $output);
     }
@@ -59,11 +56,11 @@ final class MiddlewareGroupTest extends HeaderTestCase
     {
         $router = new Router(static function (Routes $routes, Middlewares $middlewares): void {
             $middlewares->group('group1', [
-                self::createAnonMiddleware('G1'),
+                new TagMiddleware('G1'),
             ]);
 
             $middlewares->group('group2', [
-                self::createAnonMiddleware('G2'),
+                new TagMiddleware('G2'),
             ]);
 
             $routes
@@ -75,9 +72,7 @@ final class MiddlewareGroupTest extends HeaderTestCase
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = '/';
 
-        ob_start();
-        $router->run();
-        $output = ob_get_clean();
+        $output = $this->runRouter($router);
 
         self::assertSame('[G1][G2]CONTENT[/G2][/G1]', $output);
     }
@@ -86,21 +81,19 @@ final class MiddlewareGroupTest extends HeaderTestCase
     {
         $router = new Router(static function (Routes $routes, Middlewares $middlewares): void {
             $middlewares->group('auth', [
-                self::createAnonMiddleware('AUTH'),
+                new TagMiddleware('AUTH'),
             ]);
 
             $routes
                 ->get('/', static fn () => 'CONTENT')
                 ->middleware('auth')
-                ->middleware(self::createAnonMiddleware('CUSTOM'));
+                ->middleware(new TagMiddleware('CUSTOM'));
         });
 
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = '/';
 
-        ob_start();
-        $router->run();
-        $output = ob_get_clean();
+        $output = $this->runRouter($router);
 
         self::assertSame('[AUTH][CUSTOM]CONTENT[/CUSTOM][/AUTH]', $output);
     }
@@ -108,9 +101,8 @@ final class MiddlewareGroupTest extends HeaderTestCase
     public function test_global_middleware_groups(): void
     {
         $router = new Router(static function (Routes $routes, Middlewares $middlewares): void {
-            $middlewares->group('global', [self::createAnonMiddleware('GLOBAL')]);
+            $middlewares->group('global', [new TagMiddleware('GLOBAL')]);
 
-            // Add group to global middleware
             $middlewares->add('global');
 
             $routes->get('/', static fn () => 'CONTENT');
@@ -119,9 +111,7 @@ final class MiddlewareGroupTest extends HeaderTestCase
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = '/';
 
-        ob_start();
-        $router->run();
-        $output = ob_get_clean();
+        $output = $this->runRouter($router);
 
         self::assertSame('[GLOBAL]CONTENT[/GLOBAL]', $output);
     }
@@ -139,9 +129,7 @@ final class MiddlewareGroupTest extends HeaderTestCase
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = '/';
 
-        ob_start();
-        $router->run();
-        $output = ob_get_clean();
+        $output = $this->runRouter($router);
 
         self::assertSame('[TEST]CONTENT[/TEST]', $output);
     }
@@ -149,7 +137,6 @@ final class MiddlewareGroupTest extends HeaderTestCase
     public function test_undefined_group_uses_name_as_class_string(): void
     {
         $router = new Router(static function (Routes $routes): void {
-            // Use class name directly without defining as group
             $routes
                 ->get('/', static fn () => 'CONTENT')
                 ->middleware(FakeMiddleware::class);
@@ -158,9 +145,7 @@ final class MiddlewareGroupTest extends HeaderTestCase
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = '/';
 
-        ob_start();
-        $router->run();
-        $output = ob_get_clean();
+        $output = $this->runRouter($router);
 
         self::assertSame('[TEST]CONTENT[/TEST]', $output);
     }
@@ -195,26 +180,8 @@ final class MiddlewareGroupTest extends HeaderTestCase
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = '/';
 
-        ob_start();
-        $router->run();
-        $output = ob_get_clean();
+        $output = $this->runRouter($router);
 
         self::assertSame('CONTENT', $output);
-    }
-
-    private static function createAnonMiddleware(string $tag): MiddlewareInterface
-    {
-        return new class($tag) implements MiddlewareInterface {
-            public function __construct(
-                private readonly string $tag,
-            ) {
-            }
-
-            #[Override]
-            public function handle(Request $request, Closure $next): string
-            {
-                return "[{$this->tag}]" . $next($request) . "[/{$this->tag}]";
-            }
-        };
     }
 }

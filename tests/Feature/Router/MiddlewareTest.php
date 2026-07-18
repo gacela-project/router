@@ -12,6 +12,7 @@ use Gacela\Router\Middleware\MiddlewareInterface;
 use Gacela\Router\Router;
 use GacelaTest\Feature\HeaderTestCase;
 use GacelaTest\Feature\Router\Fixtures\FakeMiddleware;
+use GacelaTest\Feature\Router\Fixtures\TagMiddleware;
 use Override;
 
 final class MiddlewareTest extends HeaderTestCase
@@ -19,7 +20,7 @@ final class MiddlewareTest extends HeaderTestCase
     public function test_middleware_can_modify_response(): void
     {
         $router = new Router(static function (Routes $routes, Middlewares $middlewares): void {
-            $middlewares->add(self::createAnonMiddleware('WRAPPED'));
+            $middlewares->add(new TagMiddleware('WRAPPED'));
 
             $routes->get('/', static fn () => 'CONTENT');
         });
@@ -27,9 +28,7 @@ final class MiddlewareTest extends HeaderTestCase
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = '/';
 
-        ob_start();
-        $router->run();
-        $output = ob_get_clean();
+        $output = $this->runRouter($router);
 
         self::assertSame('[WRAPPED]CONTENT[/WRAPPED]', $output);
     }
@@ -37,9 +36,9 @@ final class MiddlewareTest extends HeaderTestCase
     public function test_multiple_middlewares_execute_in_onion_pattern(): void
     {
         $router = new Router(static function (Routes $routes, Middlewares $middlewares): void {
-            $middlewares->add(self::createAnonMiddleware('FIRST'));
-            $middlewares->add(self::createAnonMiddleware('SECOND'));
-            $middlewares->add(self::createAnonMiddleware('THIRD'));
+            $middlewares->add(new TagMiddleware('FIRST'));
+            $middlewares->add(new TagMiddleware('SECOND'));
+            $middlewares->add(new TagMiddleware('THIRD'));
 
             $routes->get('/', static fn () => 'CORE');
         });
@@ -47,9 +46,7 @@ final class MiddlewareTest extends HeaderTestCase
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = '/';
 
-        ob_start();
-        $router->run();
-        $output = ob_get_clean();
+        $output = $this->runRouter($router);
 
         // Onion pattern: first middleware added wraps outermost
         self::assertSame('[FIRST][SECOND][THIRD]CORE[/THIRD][/SECOND][/FIRST]', $output);
@@ -63,7 +60,6 @@ final class MiddlewareTest extends HeaderTestCase
                     #[Override]
                     public function handle(Request $request, Closure $next): string
                     {
-                        // Short-circuit: don't call $next
                         return 'SHORT-CIRCUITED';
                     }
                 },
@@ -75,9 +71,7 @@ final class MiddlewareTest extends HeaderTestCase
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = '/';
 
-        ob_start();
-        $router->run();
-        $output = ob_get_clean();
+        $output = $this->runRouter($router);
 
         self::assertSame('SHORT-CIRCUITED', $output);
     }
@@ -87,27 +81,21 @@ final class MiddlewareTest extends HeaderTestCase
         $router = new Router(static function (Routes $routes): void {
             $routes
                 ->get('protected', static fn () => 'PROTECTED')
-                ->middleware(self::createAnonMiddleware('AUTH'));
+                ->middleware(new TagMiddleware('AUTH'));
 
             $routes->get('public', static fn () => 'PUBLIC');
         });
 
-        // Test protected route
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = '/protected';
 
-        ob_start();
-        $router->run();
-        $output = ob_get_clean();
+        $output = $this->runRouter($router);
 
         self::assertSame('[AUTH]PROTECTED[/AUTH]', $output);
 
-        // Test public route
         $_SERVER['REQUEST_URI'] = '/public';
 
-        ob_start();
-        $router->run();
-        $output = ob_get_clean();
+        $output = $this->runRouter($router);
 
         self::assertSame('PUBLIC', $output);
     }
@@ -115,19 +103,17 @@ final class MiddlewareTest extends HeaderTestCase
     public function test_route_middleware_combines_with_global_middleware(): void
     {
         $router = new Router(static function (Routes $routes, Middlewares $middlewares): void {
-            $middlewares->add(self::createAnonMiddleware('GLOBAL'));
+            $middlewares->add(new TagMiddleware('GLOBAL'));
 
             $routes
                 ->get('/', static fn () => 'CONTENT')
-                ->middleware(self::createAnonMiddleware('ROUTE'));
+                ->middleware(new TagMiddleware('ROUTE'));
         });
 
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = '/';
 
-        ob_start();
-        $router->run();
-        $output = ob_get_clean();
+        $output = $this->runRouter($router);
 
         // Global middleware wraps outside route middleware
         self::assertSame('[GLOBAL][ROUTE]CONTENT[/ROUTE][/GLOBAL]', $output);
@@ -153,9 +139,7 @@ final class MiddlewareTest extends HeaderTestCase
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = '/test-path';
 
-        ob_start();
-        $router->run();
-        $output = ob_get_clean();
+        $output = $this->runRouter($router);
 
         self::assertSame('[PATH:/test-path]CONTENT', $output);
     }
@@ -170,9 +154,7 @@ final class MiddlewareTest extends HeaderTestCase
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = '/';
 
-        ob_start();
-        $router->run();
-        $output = ob_get_clean();
+        $output = $this->runRouter($router);
 
         self::assertSame('[TEST]CONTENT[/TEST]', $output);
     }
@@ -182,33 +164,15 @@ final class MiddlewareTest extends HeaderTestCase
         $router = new Router(static function (Routes $routes): void {
             $routes
                 ->get('/', static fn () => 'CONTENT')
-                ->middleware(self::createAnonMiddleware('ONE'))
-                ->middleware(self::createAnonMiddleware('TWO'));
+                ->middleware(new TagMiddleware('ONE'))
+                ->middleware(new TagMiddleware('TWO'));
         });
 
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = '/';
 
-        ob_start();
-        $router->run();
-        $output = ob_get_clean();
+        $output = $this->runRouter($router);
 
         self::assertSame('[ONE][TWO]CONTENT[/TWO][/ONE]', $output);
-    }
-
-    private static function createAnonMiddleware(string $tag): MiddlewareInterface
-    {
-        return new class($tag) implements MiddlewareInterface {
-            public function __construct(
-                private readonly string $tag,
-            ) {
-            }
-
-            #[Override]
-            public function handle(Request $request, Closure $next): string
-            {
-                return "[{$this->tag}]" . $next($request) . "[/{$this->tag}]";
-            }
-        };
     }
 }
