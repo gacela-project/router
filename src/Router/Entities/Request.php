@@ -72,13 +72,6 @@ final class Request
 
     public function get(string $key, mixed $default = null): mixed
     {
-        /** @var mixed $result */
-        $result = $this->request[$key] ?? $this->query[$key] ?? null;
-
-        if ($result !== null) {
-            return $result;
-        }
-
-        return $default;
+        return $this->request[$key] ?? $this->query[$key] ?? $default;
     }
 }

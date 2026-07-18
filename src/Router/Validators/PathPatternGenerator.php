@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Gacela\Router\Validators;
 
-use Gacela\Router\Entities\RouteParams;
-
 final class PathPatternGenerator
 {
+    public const MANDATORY_PARAM_PATTERN = '#({.*[^?]})#';
+    public const OPTIONAL_PARAM_PATTERN = '#(/?{.*\?})#';
+
     public static function generate(string $path): string
     {
         if ($path === '') {
@@ -18,9 +19,9 @@ final class PathPatternGenerator
         $pattern = '';
 
         foreach ($parts as $part) {
-            if (preg_match(RouteParams::MANDATORY_PARAM_PATTERN, $part)) {
+            if (preg_match(self::MANDATORY_PARAM_PATTERN, $part)) {
                 $pattern .= '/([^\/]+)';
-            } elseif (preg_match(RouteParams::OPTIONAL_PARAM_PATTERN, $part)) {
+            } elseif (preg_match(self::OPTIONAL_PARAM_PATTERN, $part)) {
                 $pattern .= '/?([^\/]+)?';
             } else {
                 $pattern .= '/' . $part;

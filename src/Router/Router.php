@@ -16,14 +16,25 @@ use Gacela\Router\Entities\Route;
 use Gacela\Router\Exceptions\NonCallableHandlerException;
 use Gacela\Router\Exceptions\NotFound404Exception;
 use Gacela\Router\Exceptions\UnsupportedRouterConfigureCallableParamException;
+use Gacela\Router\Middleware\MiddlewareInterface;
 use Gacela\Router\Middleware\MiddlewarePipeline;
 use Override;
 use ReflectionFunction;
+use ReflectionParameter;
 
 use function get_class;
 use function is_callable;
 use function is_null;
 
+/**
+ * @psalm-import-type RawMiddleware from MiddlewareInterface
+ * @psalm-import-type ResolvedMiddleware from MiddlewareInterface
+ * @psalm-import-type ExceptionHandler from Handlers
+ *
+ * @phpstan-import-type RawMiddleware from MiddlewareInterface
+ * @phpstan-import-type ResolvedMiddleware from MiddlewareInterface
+ * @phpstan-import-type ExceptionHandler from Handlers
+ */
 final class Router implements RouterInterface
 {
     private Routes $routes;
@@ -46,7 +57,7 @@ final class Router implements RouterInterface
     #[Override]
     public function configure(Closure $fn): self
     {
-        $params = array_map(fn ($param) => match ((string) $param->getType()) {
+        $params = array_map(fn (ReflectionParameter $param) => match ((string) $param->getType()) {
             Routes::class => $this->routes,
             Bindings::class => $this->bindings,
             Handlers::class => $this->handlers,
@@ -66,10 +77,9 @@ final class Router implements RouterInterface
             $route = $this->findRoute();
             $request = Request::fromGlobals();
 
-            $resolvedGlobalMiddlewares = $this->resolveMiddlewares($this->middlewares->getAll());
-            $resolvedRouteMiddlewares = $this->resolveMiddlewares($route->getMiddlewares());
-
-            $allMiddlewares = array_merge($resolvedGlobalMiddlewares, $resolvedRouteMiddlewares);
+            $allMiddlewares = $this->resolveMiddlewares(
+                array_merge($this->middlewares->getAll(), $route->getMiddlewares()),
+            );
 
             $pipeline = new MiddlewarePipeline($allMiddlewares);
 
@@ -115,7 +125,7 @@ final class Router implements RouterInterface
     }
 
     /**
-     * @return callable|class-string
+     * @return ExceptionHandler
      */
     private function findHandler(Exception $exception): string|callable
     {
@@ -124,9 +134,9 @@ final class Router implements RouterInterface
     }
 
     /**
-     * @param list<Middleware\MiddlewareInterface|class-string<Middleware\MiddlewareInterface>|string> $middlewares
+     * @param list<RawMiddleware> $middlewares
      *
-     * @return list<Middleware\MiddlewareInterface|class-string<Middleware\MiddlewareInterface>>
+     * @return list<ResolvedMiddleware>
      */
     private function resolveMiddlewares(array $middlewares): array
     {

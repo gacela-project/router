@@ -9,9 +9,14 @@ use Gacela\Router\Exceptions\NotFound404Exception;
 use Gacela\Router\Handlers\FallbackExceptionHandler;
 use Gacela\Router\Handlers\NotFound404ExceptionHandler;
 
+/**
+ * @psalm-type ExceptionHandler = callable|class-string
+ *
+ * @phpstan-type ExceptionHandler callable|class-string
+ */
 final class Handlers
 {
-    /** @var array<class-string, callable|class-string> */
+    /** @var array<class-string, ExceptionHandler> */
     private array $handlers = [];
 
     public function __construct()
@@ -20,7 +25,7 @@ final class Handlers
     }
     /**
      * @param class-string<Exception> $exception
-     * @param callable|class-string $handler
+     * @param ExceptionHandler $handler
      */
     public function handle(string $exception, callable|string $handler): self
     {
@@ -29,7 +34,7 @@ final class Handlers
     }
 
     /**
-     * @return array<class-string, callable|class-string>
+     * @return array<class-string, ExceptionHandler>
      */
     public function getAllHandlers(): array
     {

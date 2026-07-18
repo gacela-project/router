@@ -2,53 +2,47 @@
 
 declare(strict_types=1);
 
+/**
+ * Namespace-level header() function overrides for testing.
+ *
+ * These functions intercept header() calls in production code and redirect them
+ * to HeaderTestHelper for capture and verification in tests. This approach uses
+ * PHP's namespace function resolution: when code calls header() without a leading
+ * backslash, PHP first looks in the current namespace before falling back to global.
+ */
+
 namespace Gacela\Router {
+    use GacelaTest\Feature\HeaderTestHelper;
+
     function header(string $header, bool $replace = true, int $responseCode = 0): void
     {
-        /** @var list<array{header: string, replace: bool, response_code: int}> | null $testHeaders */
-        global $testHeaders;
-
-        if (!\is_array($testHeaders)) {
-            $testHeaders = [];
-        }
-
-        $testHeaders[] = [
-            'header' => $header,
-            'replace' => $replace,
-            'response_code' => $responseCode,
-        ];
+        HeaderTestHelper::capture($header, $replace, $responseCode);
     }
 }
-
-// TODO: Find a better way to mock the head function in different namespaces
 
 namespace Gacela\Router\Handlers {
-    use function Gacela\Router\header as rootHeader;
+    use GacelaTest\Feature\HeaderTestHelper;
 
     function header(string $header, bool $replace = true, int $responseCode = 0): void
     {
-        rootHeader($header, $replace, $responseCode);
+        HeaderTestHelper::capture($header, $replace, $responseCode);
     }
 }
-
-// TODO: Find a better way to mock the head function in different namespaces
 
 namespace Gacela\Router\Controllers {
-    use function Gacela\Router\header as rootHeader;
+    use GacelaTest\Feature\HeaderTestHelper;
 
     function header(string $header, bool $replace = true, int $responseCode = 0): void
     {
-        rootHeader($header, $replace, $responseCode);
+        HeaderTestHelper::capture($header, $replace, $responseCode);
     }
 }
 
-// TODO: Find a better way to mock the head function in different namespaces
-
 namespace Gacela\Router\Entities {
-    use function Gacela\Router\header as rootHeader;
+    use GacelaTest\Feature\HeaderTestHelper;
 
     function header(string $header, bool $replace = true, int $responseCode = 0): void
     {
-        rootHeader($header, $replace, $responseCode);
+        HeaderTestHelper::capture($header, $replace, $responseCode);
     }
 }

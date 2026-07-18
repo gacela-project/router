@@ -14,9 +14,14 @@ use Stringable;
 use function is_object;
 use function is_string;
 
+/**
+ * @psalm-import-type RawMiddleware from MiddlewareInterface
+ *
+ * @phpstan-import-type RawMiddleware from MiddlewareInterface
+ */
 final class Route
 {
-    /** @var list<MiddlewareInterface|class-string<MiddlewareInterface>|string> */
+    /** @var list<RawMiddleware> */
     private array $middlewares = [];
 
     /**
@@ -38,15 +43,14 @@ final class Route
     {
         $params = (new RouteParams($this))->getAll();
 
-        if (!is_object($this->controller)) {
+        $controller = $this->controller;
+        if (!is_object($controller)) {
             $creator = new Container($bindings->getAllBindings());
             /** @var object $controller */
-            $controller = $creator->get($this->controller);
-            $response = $controller->{$this->action}(...$params);
-        } else {
-            /** @var string|Stringable $response */
-            $response = $this->controller->{$this->action}(...$params);
+            $controller = $creator->get($controller);
         }
+
+        $response = $controller->{$this->action}(...$params);
 
         if (!is_string($response) && !($response instanceof Stringable)) {
             throw UnsupportedResponseTypeException::fromType($response);
@@ -74,7 +78,7 @@ final class Route
     }
 
     /**
-     * @param MiddlewareInterface|class-string<MiddlewareInterface>|string $middleware
+     * @param RawMiddleware $middleware
      */
     public function middleware(MiddlewareInterface|string $middleware): self
     {
@@ -83,7 +87,7 @@ final class Route
     }
 
     /**
-     * @return list<MiddlewareInterface|class-string<MiddlewareInterface>|string>
+     * @return list<RawMiddleware>
      */
     public function getMiddlewares(): array
     {
