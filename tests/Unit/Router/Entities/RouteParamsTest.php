@@ -19,6 +19,17 @@ final class RouteParamsTest extends TestCase
         self::clearActionParamsCache();
     }
 
+    /**
+     * The cache is process-global, and one test below seeds it with a type the
+     * real signature does not declare. Without this, that entry leaks into any
+     * later test resolving the same action, which under `executionOrder=random`
+     * fails somewhere else entirely.
+     */
+    protected function tearDown(): void
+    {
+        self::clearActionParamsCache();
+    }
+
     public function test_reflects_a_controller_action_only_once(): void
     {
         $route = new Route(Request::METHOD_GET, 'expected/{param}', FakeController::class, 'stringParamAction');
