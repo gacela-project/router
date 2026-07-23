@@ -1,7 +1,7 @@
 # Responses
 
-An action may return a `string`, any `Stringable`, or one of the built-in response
-entities. Returning anything else throws `UnsupportedResponseTypeException`.
+An action may return a `string`, an `array`, any `Stringable`, or one of the built-in
+response entities. Returning anything else throws `UnsupportedResponseTypeException`.
 
 ## Plain string
 
@@ -43,6 +43,31 @@ public function __invoke(): JsonResponse
 ```
 
 Encoding uses `JSON_THROW_ON_ERROR`, so invalid data throws a `JsonException`.
+
+## Returning an array
+
+Returning a plain `array` is the same thing without the ceremony: it is wrapped in a
+`JsonResponse`, so the body is JSON and `Content-Type: application/json` is set.
+
+```php
+public function __invoke(): array
+{
+    return ['hello' => 'world'];   // {"hello":"world"}
+}
+```
+
+Reach for `JsonResponse` directly when you need extra headers alongside the JSON:
+
+```php
+public function __invoke(): JsonResponse
+{
+    return new JsonResponse(['hello' => 'world'], ['Cache-Control: no-store']);
+}
+```
+
+An empty array encodes as `[]`, not `{}`, since PHP cannot tell an empty list from an
+empty map. `JsonResponse` only accepts an `array`, so to emit `{}` return a
+`Response` with the literal body and header instead.
 
 ## Custom Stringable
 

@@ -15,7 +15,7 @@ final class UnsupportedResponseTypeException extends RuntimeException
     {
         $type = self::inferType($var);
 
-        return new self("Unsupported response type '{$type}'. Must be a string or implement Stringable interface.");
+        return new self("Unsupported response type '{$type}'. Must be a string, an array, or implement Stringable interface.");
     }
 
     private static function inferType(mixed $var): string
