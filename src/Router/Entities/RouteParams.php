@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace Gacela\Router\Entities;
 
+use BackedEnum;
+use Gacela\Router\Exceptions\InvalidEnumValueException;
 use Gacela\Router\Exceptions\UnsupportedParamTypeException;
 use ReflectionClass;
+use ReflectionEnum;
 
 use function count;
 use function is_object;
+use function is_subclass_of;
 
 final class RouteParams
 {
@@ -19,7 +23,7 @@ final class RouteParams
      * Signatures never change within a process, so each controller action is
      * reflected once. One entry per unique `Controller::action`.
      *
-     * @var array<string, list<array{name: string, type: string}>>
+     * @var array<string, list<array{name: string, type: string, enumBacking: string|null}>>
      */
     private static array $actionParamsCache = [];
 
@@ -62,17 +66,22 @@ final class RouteParams
 
         $pathParams = array_combine($pathParamKeys, $pathParamValues);
 
-        foreach (self::actionParams($this->route) as ['name' => $paramName, 'type' => $paramType]) {
-            if (isset($pathParams[$paramName])) {
-                $value = match ($paramType) {
-                    'string' => $pathParams[$paramName],
-                    'int' => (int)$pathParams[$paramName],
-                    'float' => (float)$pathParams[$paramName],
-                    'bool' => (bool)json_decode($pathParams[$paramName]),
-                    default => throw UnsupportedParamTypeException::fromType($paramType),
-                };
+        foreach (self::actionParams($this->route) as $actionParam) {
+            ['name' => $paramName, 'type' => $paramType, 'enumBacking' => $enumBacking] = $actionParam;
 
-                $params[$paramName] = $value;
+            if (isset($pathParams[$paramName])) {
+                /** @var string $rawValue */
+                $rawValue = $pathParams[$paramName];
+
+                $params[$paramName] = $enumBacking === null
+                    ? match ($paramType) {
+                        'string' => $rawValue,
+                        'int' => (int)$rawValue,
+                        'float' => (float)$rawValue,
+                        'bool' => (bool)json_decode($rawValue),
+                        default => throw UnsupportedParamTypeException::fromType($paramType),
+                    }
+                : self::toBackedEnum($paramType, $enumBacking, $rawValue);
             }
         }
 
@@ -80,7 +89,7 @@ final class RouteParams
     }
 
     /**
-     * @return list<array{name: string, type: string}>
+     * @return list<array{name: string, type: string, enumBacking: string|null}>
      */
     private static function actionParams(Route $route): array
     {
@@ -97,7 +106,7 @@ final class RouteParams
     /**
      * @param object|class-string $controller
      *
-     * @return list<array{name: string, type: string}>
+     * @return list<array{name: string, type: string, enumBacking: string|null}>
      */
     private static function reflectActionParams(object|string $controller, string $action): array
     {
@@ -114,9 +123,45 @@ final class RouteParams
             $actionParams[] = [
                 'name' => $actionParam->getName(),
                 'type' => $paramType,
+                'enumBacking' => self::enumBackingType($paramType),
             ];
         }
 
         return $actionParams;
+    }
+
+    /**
+     * 'int' or 'string' for a backed enum, null for anything else. Resolved here
+     * so it lands in the cache with the rest of the signature, keeping reflection
+     * out of the per-request path.
+     */
+    private static function enumBackingType(string $paramType): ?string
+    {
+        if (!is_subclass_of($paramType, BackedEnum::class)) {
+            return null;
+        }
+
+        /** @var class-string<BackedEnum> $paramType */
+        return (string)(new ReflectionEnum($paramType))->getBackingType();
+    }
+
+    /**
+     * A path value is always a string, so an int-backed enum needs it converted
+     * first: under strict_types, tryFrom() would reject the string outright.
+     */
+    private static function toBackedEnum(string $enumClass, string $enumBacking, string $rawValue): BackedEnum
+    {
+        /** @var class-string<BackedEnum> $enumClass */
+        $backedValue = $enumBacking === 'int'
+            // Not a plain (int) cast: that turns 'abc' into 0 and would silently
+            // bind a case backed by 0.
+            ? filter_var($rawValue, FILTER_VALIDATE_INT)
+            : $rawValue;
+
+        $case = $backedValue === false
+            ? null
+            : $enumClass::tryFrom($backedValue);
+
+        return $case ?? throw InvalidEnumValueException::forEnum($enumClass, $rawValue);
     }
 }

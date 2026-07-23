@@ -58,7 +58,8 @@ $routes->get('posts/{id}/comments/{commentId?}', CommentController::class, 'show
 ## Parameters passed to the action
 
 Matched parameters are passed to the action **by name** and cast to the action's
-declared argument type. Supported types: `string`, `int`, `float`, `bool`.
+declared argument type. Supported types: `string`, `int`, `float`, `bool`, and any
+**backed enum**.
 
 ```php
 $routes->get('users/{id}', UserController::class, 'show');
@@ -75,8 +76,49 @@ final class UserController
 - An optional parameter that is absent from the URL falls back to the argument's
   default value.
 - An action argument without a type throws `UnsupportedParamTypeException`.
-- A parameter typed as something other than the four supported scalars throws
-  `UnsupportedParamTypeException`.
+- A parameter typed as something other than the supported scalars or a backed enum
+  throws `UnsupportedParamTypeException`. A **pure** enum is not supported, since it
+  has no value to match the URL against.
+
+### Backed enums
+
+Type the argument as the enum and the URL segment is resolved to a case:
+
+```php
+enum Status: string
+{
+    case Active = 'active';
+    case Archived = 'archived';
+}
+
+$routes->get('orders/{status}', OrderController::class, 'list');
+
+final class OrderController
+{
+    public function list(Status $status): string   // GET /orders/active -> Status::Active
+    {
+        return $status->name;
+    }
+}
+```
+
+Int-backed enums work the same way; the URL segment must be a valid integer, so
+`/orders/abc` is rejected rather than being coerced to `0`.
+
+A URL value with no matching case throws `InvalidEnumValueException`, which is a
+clear error rather than a raw `ValueError`. Map it to whatever response suits you:
+
+```php
+$handlers->handle(InvalidEnumValueException::class, static function (): string {
+    header('HTTP/1.0 404 Not Found');
+
+    return '';
+});
+```
+
+Emit the response from inside the handler as above. A handler that **throws** — to
+re-route to `NotFound404Exception`, say — does not work: handlers already run inside
+the router's catch, so anything thrown there escapes `run()` uncaught.
 
 Each action's signature is read by reflection **once per process** and reused for
 every later request to the same `Controller::action`. Signatures are static, so this
