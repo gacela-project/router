@@ -119,5 +119,4 @@ final class ArrayResponseTest extends HeaderTestCase
         // No JSON content type is invented for a string.
         self::assertSame([], $this->headers());
     }
-
 }

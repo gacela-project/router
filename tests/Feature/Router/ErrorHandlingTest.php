@@ -257,7 +257,7 @@ final class ErrorHandlingTest extends HeaderTestCase
      * @param mixed $type
      */
     #[DataProvider('nonStringProvider')]
-    public function test_throws_exception_if_response_is_not_a_string_or_stringable($given, $type): void
+    public function test_throws_exception_if_response_is_not_a_string_array_or_stringable($given, $type): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
