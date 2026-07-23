@@ -8,11 +8,20 @@ use Gacela\Router\Exceptions\UnsupportedParamTypeException;
 use ReflectionClass;
 
 use function count;
+use function is_object;
 
 final class RouteParams
 {
     public const MANDATORY_PARAM_PATTERN = '#({.*[^?]})#';
     public const OPTIONAL_PARAM_PATTERN = '#(/?{.*\?})#';
+
+    /**
+     * Signatures never change within a process, so each controller action is
+     * reflected once. One entry per unique `Controller::action`.
+     *
+     * @var array<string, list<array{name: string, type: string}>>
+     */
+    private static array $actionParamsCache = [];
 
     /** @var array<string, mixed> */
     private array $params;
@@ -52,19 +61,8 @@ final class RouteParams
         }
 
         $pathParams = array_combine($pathParamKeys, $pathParamValues);
-        $actionParams = (new ReflectionClass($this->route->controller()))
-            ->getMethod($this->route->action())
-            ->getParameters();
 
-        foreach ($actionParams as $actionParam) {
-            /** @var string|null $paramType */
-            $paramType = $actionParam->getType()?->__toString();
-
-            if ($paramType === null) {
-                throw UnsupportedParamTypeException::nonTyped();
-            }
-
-            $paramName = $actionParam->getName();
+        foreach (self::actionParams($this->route) as ['name' => $paramName, 'type' => $paramType]) {
             if (isset($pathParams[$paramName])) {
                 $value = match ($paramType) {
                     'string' => $pathParams[$paramName],
@@ -79,5 +77,46 @@ final class RouteParams
         }
 
         return $params;
+    }
+
+    /**
+     * @return list<array{name: string, type: string}>
+     */
+    private static function actionParams(Route $route): array
+    {
+        $controller = $route->controller();
+        $action = $route->action();
+        $controllerClass = is_object($controller) ? $controller::class : $controller;
+
+        // An unresolvable signature throws before assigning, so it is never
+        // cached and keeps throwing on later requests, as it did before.
+        return self::$actionParamsCache[$controllerClass . '::' . $action]
+            ??= self::reflectActionParams($controller, $action);
+    }
+
+    /**
+     * @param object|class-string $controller
+     *
+     * @return list<array{name: string, type: string}>
+     */
+    private static function reflectActionParams(object|string $controller, string $action): array
+    {
+        $actionParams = [];
+
+        foreach ((new ReflectionClass($controller))->getMethod($action)->getParameters() as $actionParam) {
+            /** @var string|null $paramType */
+            $paramType = $actionParam->getType()?->__toString();
+
+            if ($paramType === null) {
+                throw UnsupportedParamTypeException::nonTyped();
+            }
+
+            $actionParams[] = [
+                'name' => $actionParam->getName(),
+                'type' => $paramType,
+            ];
+        }
+
+        return $actionParams;
     }
 }

@@ -78,6 +78,10 @@ final class UserController
 - A parameter typed as something other than the four supported scalars throws
   `UnsupportedParamTypeException`.
 
+Each action's signature is read by reflection **once per process** and reused for
+every later request to the same `Controller::action`. Signatures are static, so this
+is invisible, but it does mean a signature swapped at runtime is not picked up.
+
 ## Redirects
 
 ```php

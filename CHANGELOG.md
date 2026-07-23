@@ -7,6 +7,7 @@
 - `Request::method()` returns the current HTTP method
 
 ### Changed
+- Controller action signatures are reflected once per `Controller::action` and cached for the process, instead of on every matched request. Resolving the parameters of a 3-argument action is ~2.5x faster
 - Routes with no `{param}` now resolve by an exact map lookup keyed by HTTP method, running no regex at all, and dynamic routes are only scanned within the request's method bucket. With 100 competing routes and the match registered last, a static lookup goes from 101 regex evaluations to 0 (see `tests/benchmark-routing.php`)
 - A static route now wins over a dynamic one that would also match, whatever the registration order. Between two dynamic routes the first registered still wins
 - A regex metacharacter in a static path is now matched literally. `$routes->get('a.c', ...)` previously also matched `/abc`, because the path was compiled into a regex where `.` was a wildcard
