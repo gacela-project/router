@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- Requesting a known path with an unregistered HTTP method now responds `405 Method Not Allowed` with an `Allow` header, instead of `404`. Backed by a new `MethodNotAllowed405Exception` (carrying `allowedMethods()`) and a built-in `MethodNotAllowed405ExceptionHandler`, both overridable through `Handlers::handle()`. A path that matches no route under any method is still a `404`
 - `Throwable::class` can be registered with `Handlers::handle()` as a catch-all for anything the router does not have a more specific handler for
 - `Request::method()` returns the current HTTP method
 

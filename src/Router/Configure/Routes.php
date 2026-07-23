@@ -106,11 +106,35 @@ final class Routes
      */
     public function findMatching(Request $request): ?Route
     {
-        $method = $request->method();
-        $path = $request->path();
+        return $this->matchIn($request->method(), $request);
+    }
 
+    /**
+     * The methods this request's path would have matched, for an `Allow` header.
+     * Empty when the path itself is unknown, which is a 404 rather than a 405.
+     *
+     * @return list<string>
+     */
+    public function allowedMethodsFor(Request $request): array
+    {
+        $allowedMethods = [];
+
+        // Driven by ALL_METHODS rather than by the buckets, so the result is in a
+        // canonical order and each method appears once however it was registered.
+        foreach (Request::ALL_METHODS as $method) {
+            if ($this->matchIn($method, $request) !== null) {
+                $allowedMethods[] = $method;
+            }
+        }
+
+        return $allowedMethods;
+    }
+
+    private function matchIn(string $method, Request $request): ?Route
+    {
         // Registered paths carry no leading slash, request paths do. The root
         // route is stored under '/', and an empty request path means the root.
+        $path = $request->path();
         $key = $path === '' ? '/' : $path;
 
         $staticRoute = $this->staticRoutes[$method][$key] ?? null;
@@ -118,8 +142,9 @@ final class Routes
             return $staticRoute;
         }
 
+        // The bucket already fixes the method, so only the path is left to check.
         foreach ($this->dynamicRoutes[$method] ?? [] as $route) {
-            if ($route->requestMatches($request)) {
+            if ($route->pathMatches($request)) {
                 return $route;
             }
         }

@@ -16,15 +16,42 @@ $handlers->handle(TypeError::class, static fn (TypeError $e): string => "Bad typ
 2. the fallback handler: `Exception::class` when an exception was thrown,
    `Throwable::class` when an `Error` was.
 
-Three handlers are registered out of the box:
+Four handlers are registered out of the box:
 
 - `NotFound404Exception` → `NotFound404ExceptionHandler`
+- `MethodNotAllowed405Exception` → `MethodNotAllowed405ExceptionHandler`
 - `Exception` (fallback for exceptions) → `FallbackExceptionHandler`
 - `Throwable` (fallback for errors) → `FallbackExceptionHandler`
 
 So an unmatched route (which throws `NotFound404Exception`) produces a 404 response
 without any configuration, and an uncaught `TypeError` produces a 500 rather than
 escaping the router.
+
+## 404 vs 405
+
+The two are distinguished by whether the **path** is known:
+
+- No route matches the path under **any** method → `NotFound404Exception` → **404**.
+- The path matches, but not for this method → `MethodNotAllowed405Exception` → **405**,
+  with an `Allow` header listing every method the path does accept.
+
+```php
+$routes->get('users/{id}', UserController::class, 'show');
+
+// DELETE /users/7  ->  405, Allow: GET
+// GET    /nothing  ->  404
+```
+
+Methods in `Allow` are de-duplicated and listed in a canonical order, not in
+registration order. `MethodNotAllowed405Exception::allowedMethods()` returns the same
+list if you replace the handler:
+
+```php
+$handlers->handle(
+    MethodNotAllowed405Exception::class,
+    static fn (MethodNotAllowed405Exception $e): string => 'Try: ' . implode(', ', $e->allowedMethods()),
+);
+```
 
 An `Error` never falls back to the `Exception::class` handler. A handler registered
 there is free to type-hint `Exception`, so handing it an `Error` would fail inside
