@@ -54,7 +54,7 @@ final class RouteParamsTest extends TestCase
         // action actually declares.
         self::seedActionParamsCache(
             FakeController::class . '::stringParamAction',
-            [['name' => 'param', 'type' => 'int']],
+            [['name' => 'param', 'type' => 'int', 'enumBacking' => null]],
         );
 
         self::assertSame(['param' => 42], self::resolve($route, '/expected/42'));
@@ -128,7 +128,7 @@ final class RouteParamsTest extends TestCase
                 self::resolve($route, '/expected/value');
                 self::fail('Expected UnsupportedParamTypeException');
             } catch (UnsupportedParamTypeException $exception) {
-                self::assertSame('Unsupported non-typed param. Must be a scalar.', $exception->getMessage());
+                self::assertSame('Unsupported non-typed param. Must be a scalar or a backed enum.', $exception->getMessage());
             }
         }
 
@@ -145,7 +145,7 @@ final class RouteParamsTest extends TestCase
                 self::resolve($route, '/expected/value');
                 self::fail('Expected UnsupportedParamTypeException');
             } catch (UnsupportedParamTypeException $exception) {
-                self::assertSame("Unsupported param type 'array'. Must be a scalar.", $exception->getMessage());
+                self::assertSame("Unsupported param type 'array'. Must be a scalar or a backed enum.", $exception->getMessage());
             }
         }
     }
@@ -178,7 +178,7 @@ final class RouteParamsTest extends TestCase
     }
 
     /**
-     * @param list<array{name: string, type: string}> $actionParams
+     * @param list<array{name: string, type: string, enumBacking: string|null}> $actionParams
      */
     private static function seedActionParamsCache(string $key, array $actionParams): void
     {

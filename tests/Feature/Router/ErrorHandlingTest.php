@@ -299,7 +299,7 @@ final class ErrorHandlingTest extends HeaderTestCase
         });
         $router->run();
 
-        $this->expectOutputString('Unsupported non-typed param. Must be a scalar.');
+        $this->expectOutputString('Unsupported non-typed param. Must be a scalar or a backed enum.');
     }
 
     public function test_throws_exception_when_param_is_no_scalar(): void
@@ -317,7 +317,7 @@ final class ErrorHandlingTest extends HeaderTestCase
         });
         $router->run();
 
-        $this->expectOutputString("Unsupported param type 'array'. Must be a scalar.");
+        $this->expectOutputString("Unsupported param type 'array'. Must be a scalar or a backed enum.");
     }
 
     public function test_configure_throws_unsupported_closure_param(): void
