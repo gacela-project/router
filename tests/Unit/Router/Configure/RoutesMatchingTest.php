@@ -172,8 +172,8 @@ final class RoutesMatchingTest extends TestCase
         $routes = new Routes();
         $routes->get('/', FakeController::class, 'basicAction');
 
-        // Request::path() yields '' for an empty REQUEST_URI, which the root
-        // route's old '#^/?$#' pattern matched too.
+        // Request::path() normalises an empty REQUEST_URI to '/', so the root
+        // route is what an empty request path resolves to.
         $route = $routes->findMatching(self::request(Request::METHOD_GET, ''));
 
         self::assertNotNull($route);
