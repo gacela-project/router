@@ -127,11 +127,30 @@ final class Routes
 
     /**
      * The route this request's path resolves to *under the given method*, which
-     * is not necessarily the method the request was made with. Static paths
-     * resolve by map lookup, running no regex at all; anything with a {param}
-     * falls back to scanning that method's bucket in registration order.
+     * is not necessarily the method the request was made with.
      */
     private function matchIn(string $method, Request $request): ?Route
+    {
+        $route = $this->lookup($method, $request);
+        if ($route !== null) {
+            return $route;
+        }
+
+        // HTTP requires HEAD to behave like GET, so a HEAD with no route of its
+        // own is served by the GET one. An explicit HEAD route wins, since the
+        // lookup above already had its chance.
+        if ($method === Request::METHOD_HEAD) {
+            return $this->lookup(Request::METHOD_GET, $request);
+        }
+
+        return null;
+    }
+
+    /**
+     * Static paths resolve by map lookup, running no regex at all; anything with
+     * a {param} falls back to scanning that method's bucket in registration order.
+     */
+    private function lookup(string $method, Request $request): ?Route
     {
         // Registered paths carry no leading slash, request paths do. The root
         // route is stored under '/', and an empty request path means the root.

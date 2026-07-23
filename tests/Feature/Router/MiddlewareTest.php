@@ -245,6 +245,12 @@ final class MiddlewareTest extends HeaderTestCase
     public static function anyMethodProvider(): Generator
     {
         foreach (Request::ALL_METHODS as $method) {
+            // The middleware runs for HEAD as well, but its output is withheld,
+            // so it cannot be observed here. HeadRequestTest covers that.
+            if ($method === Request::METHOD_HEAD) {
+                continue;
+            }
+
             yield $method => [$method];
         }
     }

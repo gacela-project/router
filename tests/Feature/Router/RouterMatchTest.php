@@ -232,6 +232,12 @@ final class RouterMatchTest extends TestCase
     public static function anyHttpMethodProvider(): Generator
     {
         foreach (Request::ALL_METHODS as $method) {
+            // HEAD matches too, but HTTP forbids it a body, so it cannot assert
+            // on output here. HeadRequestTest covers it.
+            if ($method === Request::METHOD_HEAD) {
+                continue;
+            }
+
             yield $method => [$method];
         }
     }
