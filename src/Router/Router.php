@@ -39,6 +39,10 @@ final class Router implements RouterInterface
         $this->handlers = new Handlers();
         $this->middlewares = new Middlewares();
 
+        // Routes is mutable and shared, so a generator built now still sees
+        // every route registered later by the configure closure.
+        $this->bindings->bind(UrlGenerator::class, new UrlGenerator($this->routes));
+
         if (!is_null($fn)) {
             $this->configure($fn);
         }

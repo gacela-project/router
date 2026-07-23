@@ -20,6 +20,8 @@ final class Route
     /** @var list<MiddlewareInterface|class-string<MiddlewareInterface>|string> */
     private array $middlewares = [];
 
+    private ?string $name = null;
+
     /** @var array<string> */
     private readonly array $methods;
 
@@ -92,6 +94,18 @@ final class Route
     {
         $this->middlewares[] = $middleware;
         return $this;
+    }
+
+    public function name(string $name): self
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
     }
 
     /**

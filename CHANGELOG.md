@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- Routes can be named with `->name('user.show')`, and `UrlGenerator::generate()` builds their urls, filling `{params}` by name and omitting absent optionals. `UrlGenerator` is bound automatically, so a controller can type-hint it. Unknown names, duplicate names, missing mandatory params and unsupported param types all throw `UrlGenerationException`
 - A path parameter binds to a backed enum when the action argument is typed as one, for both string- and int-backed enums. A URL value with no matching case throws `InvalidEnumValueException` rather than a raw `ValueError`, and an int-backed enum rejects a non-numeric segment instead of coercing it to `0`. Pure enums remain unsupported, having no value to match against
 - A controller action may return an `array`, which is wrapped in a `JsonResponse`: the body is JSON-encoded and `Content-Type: application/json` is set. `string`, `Stringable`, `Response` and `JsonResponse` returns are unchanged, and anything else still throws `UnsupportedResponseTypeException`
 - `HEAD` requests are served by the matching `GET` route when no `HEAD` route is registered, per HTTP. The route and its middlewares run so their headers are sent, and the body is withheld from every `HEAD` response, error pages included. An explicit `HEAD` route still takes precedence, and `HEAD` is now advertised in the `Allow` header of a 405 for any path serving `GET`
