@@ -109,6 +109,11 @@ final class Route
         return $this->methodMatches($request) && $this->pathMatches($request);
     }
 
+    public function pathMatches(Request $request): bool
+    {
+        return (bool)preg_match($this->getPathPattern(), $request->path());
+    }
+
     private function methodMatches(Request $request): bool
     {
         foreach ($this->methods as $method) {
@@ -118,10 +123,5 @@ final class Route
         }
 
         return false;
-    }
-
-    private function pathMatches(Request $request): bool
-    {
-        return (bool)preg_match($this->getPathPattern(), $request->path());
     }
 }

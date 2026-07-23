@@ -43,55 +43,8 @@ final class ErrorHandlingTest extends HeaderTestCase
         ], $this->headers());
     }
 
-    public function test_respond_404_status_when_method_does_not_match(): void
-    {
-        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
-        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
-
-        $router = new Router(static function (Routes $routes): void {
-            $routes->post('expected/uri', FakeController::class, 'basicAction');
-        });
-        $router->run();
-
-        self::assertSame([
-            [
-                'header' => 'HTTP/1.0 404 Not Found',
-                'replace' => true,
-                'response_code' => 0,
-            ],
-        ], $this->headers());
-    }
-
-    #[DataProvider('notMatchesMethodsProvider')]
-    public function test_respond_404_status_when_not_matches_match_methods(string $testMethod, array $givenMethods): void
-    {
-        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
-        $_SERVER['REQUEST_METHOD'] = $testMethod;
-
-        $router = new Router(static function (Routes $routes) use ($givenMethods): void {
-            $routes->match($givenMethods, 'expected/uri', FakeController::class, 'basicAction');
-        });
-        $router->run();
-
-        self::assertSame([
-            [
-                'header' => 'HTTP/1.0 404 Not Found',
-                'replace' => true,
-                'response_code' => 0,
-            ],
-        ], $this->headers());
-    }
-
-    public static function notMatchesMethodsProvider(): Generator
-    {
-        yield [Request::METHOD_PUT, [Request::METHOD_GET, Request::METHOD_POST]];
-        yield [Request::METHOD_OPTIONS, [Request::METHOD_GET, Request::METHOD_POST]];
-        yield [Request::METHOD_GET, [Request::METHOD_PATCH, Request::METHOD_PUT, Request::METHOD_DELETE, Request::METHOD_POST]];
-        yield [Request::METHOD_CONNECT, [
-            Request::METHOD_GET, Request::METHOD_DELETE, Request::METHOD_HEAD, Request::METHOD_OPTIONS,
-            Request::METHOD_PATCH, Request::METHOD_POST, Request::METHOD_PUT, Request::METHOD_TRACE,
-        ]];
-    }
+    // A known path requested with an unregistered method is a 405, not a 404.
+    // See MethodNotAllowedTest.
 
     public function test_respond_500_status_when_unhandled_exception(): void
     {

@@ -13,6 +13,7 @@ use Gacela\Router\Configure\Middlewares;
 use Gacela\Router\Configure\Routes;
 use Gacela\Router\Entities\Request;
 use Gacela\Router\Entities\Route;
+use Gacela\Router\Exceptions\MethodNotAllowed405Exception;
 use Gacela\Router\Exceptions\NonCallableHandlerException;
 use Gacela\Router\Exceptions\NotFound404Exception;
 use Gacela\Router\Exceptions\UnsupportedRouterConfigureCallableParamException;
@@ -83,8 +84,18 @@ final class Router implements RouterInterface
 
     private function findRoute(Request $request): Route
     {
-        return $this->routes->findMatching($request)
-            ?? throw new NotFound404Exception();
+        $route = $this->routes->findMatching($request);
+        if ($route !== null) {
+            return $route;
+        }
+
+        // The path exists, just not for this method: that is a 405, not a 404.
+        $allowedMethods = $this->routes->allowedMethodsFor($request);
+        if ($allowedMethods !== []) {
+            throw MethodNotAllowed405Exception::fromAllowedMethods($allowedMethods);
+        }
+
+        throw new NotFound404Exception();
     }
 
     private function handleThrowable(Throwable $throwable): string
