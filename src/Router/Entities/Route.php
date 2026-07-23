@@ -11,6 +11,7 @@ use Gacela\Router\Middleware\MiddlewareInterface;
 use Gacela\Router\Validators\PathPatternGenerator;
 use Stringable;
 
+use function is_array;
 use function is_object;
 use function is_string;
 
@@ -49,8 +50,14 @@ final class Route
             $controller = $creator->get($this->controller);
             $response = $controller->{$this->action}(...$params);
         } else {
-            /** @var string|Stringable $response */
+            /** @var mixed $response */
             $response = $this->controller->{$this->action}(...$params);
+        }
+
+        // Returning an array is the common JSON case, so encode it rather than
+        // making every action wrap it by hand.
+        if (is_array($response)) {
+            return new JsonResponse($response);
         }
 
         if (!is_string($response) && !($response instanceof Stringable)) {

@@ -272,14 +272,15 @@ final class ErrorHandlingTest extends HeaderTestCase
         });
         $router->run();
 
-        $this->expectOutputString("Unsupported response type '{$type}'. Must be a string or implement Stringable interface.");
+        $this->expectOutputString(
+            "Unsupported response type '{$type}'. Must be a string, an array, or implement Stringable interface.",
+        );
     }
 
     public static function nonStringProvider(): Generator
     {
         yield [42, 'integer'];
         yield [false, 'boolean'];
-        yield [[], 'array'];
         yield [new stdClass(), 'stdClass'];
     }
 
