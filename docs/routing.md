@@ -169,6 +169,15 @@ $routes->get('page', PageController::class);
 - Because a path serving `GET` also serves `HEAD`, `HEAD` appears in the `Allow`
   header of a [405](error-handling.md) for that path.
 
+## Named routes
+
+A route can be named and its url built later. See
+[Named routes and URLs](url-generation.md).
+
+```php
+$routes->get('users/{id}', UserController::class, 'show')->name('user.show');
+```
+
 ## What happens on no match
 
 If no route matches the current request, the router throws `NotFound404Exception`,
