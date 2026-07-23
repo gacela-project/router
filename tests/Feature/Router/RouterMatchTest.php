@@ -11,6 +11,7 @@ use Gacela\Router\Exceptions\UnsupportedHttpMethodException;
 use Gacela\Router\Router;
 use GacelaTest\Feature\Router\Fixtures\FakeController;
 use Generator;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 final class RouterMatchTest extends TestCase
@@ -203,9 +204,7 @@ final class RouterMatchTest extends TestCase
         $router->run();
     }
 
-    /**
-     * @dataProvider anyHttpMethodProvider
-     */
+    #[DataProvider('anyHttpMethodProvider')]
     public function test_any_http_method(string $httpMethod): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
@@ -219,22 +218,14 @@ final class RouterMatchTest extends TestCase
         $router->run();
     }
 
-    public function anyHttpMethodProvider(): Generator
+    public static function anyHttpMethodProvider(): Generator
     {
-        yield ['METHOD_GET' => Request::METHOD_GET];
-        yield ['METHOD_CONNECT' => Request::METHOD_CONNECT];
-        yield ['METHOD_DELETE' => Request::METHOD_DELETE];
-        yield ['METHOD_HEAD' => Request::METHOD_HEAD];
-        yield ['METHOD_OPTIONS' => Request::METHOD_OPTIONS];
-        yield ['METHOD_PATCH' => Request::METHOD_PATCH];
-        yield ['METHOD_POST' => Request::METHOD_POST];
-        yield ['METHOD_PUT' => Request::METHOD_PUT];
-        yield ['METHOD_TRACE' => Request::METHOD_TRACE];
+        foreach (Request::ALL_METHODS as $method) {
+            yield $method => [$method];
+        }
     }
 
-    /**
-     * @dataProvider matchesMethodsProvider
-     */
+    #[DataProvider('matchesMethodsProvider')]
     public function test_match_matches_all_its_methods(string $testMethod, array $givenMethods): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
@@ -248,7 +239,7 @@ final class RouterMatchTest extends TestCase
         $router->run();
     }
 
-    public function matchesMethodsProvider(): Generator
+    public static function matchesMethodsProvider(): Generator
     {
         yield [Request::METHOD_GET, [Request::METHOD_GET, Request::METHOD_POST]];
         yield [Request::METHOD_POST, [Request::METHOD_GET, Request::METHOD_POST]];

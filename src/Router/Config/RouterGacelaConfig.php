@@ -14,7 +14,7 @@ final class RouterGacelaConfig
     {
         $router = new Router();
 
-        $config->addBinding(RouterInterface::class, $router);
-        $config->addBinding(Router::class, $router);
+        $config->addBindingIf(RouterInterface::class, $router);
+        $config->addBindingIf(Router::class, $router);
     }
 }

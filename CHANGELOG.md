@@ -2,8 +2,23 @@
 
 ## [Unreleased]
 
+## [0.13.0](https://github.com/gacela-project/router/compare/0.12.1...0.13.0) - 2026-07-23
+
+### Added
 - Middleware support with `MiddlewareInterface`
 - Middleware groups for reusable middleware stacks
+
+### Changed
+- Upgrade `gacela-project/gacela` to `^1.19` and `gacela-project/container` to `^0.10`
+- `RouterGacelaConfig` now uses `addBindingIf`, so an application can override the `Router`/`RouterInterface` bindings
+- Resolve the incoming `Request` once per `run()` and pass it through route matching (removes redundant `Request::fromGlobals()` calls)
+- Extract `PathPatternGenerator` and harden `PathValidator`
+- Upgrade dev tooling: PHPUnit `^10.5`, PHPStan `^2.2`, Psalm `^6.16`, php-cs-fixer `^3.95`; migrate test metadata to PHP 8 attributes
+
+## [0.12.1](https://github.com/gacela-project/router/compare/0.12.0...0.12.1) - 2023-12-21
+
+- Require PHP `>=8.1`
+- Allow an optional default value on `Request::get()`
 
 ## [0.12.0](https://github.com/gacela-project/router/compare/0.11.0...0.12.0) - 2023-06-16
 

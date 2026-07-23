@@ -6,21 +6,18 @@ namespace GacelaTest\Unit\Router\Validators;
 
 use Gacela\Router\Validators\PathValidator;
 use Generator;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 final class PathValidatorTest extends TestCase
 {
-    /**
-     * @dataProvider validPathProvider
-     */
+    #[DataProvider('validPathProvider')]
     public function test_valid_paths(string $path): void
     {
         self::assertTrue(PathValidator::isValid($path));
     }
 
-    /**
-     * @dataProvider invalidPathProvider
-     */
+    #[DataProvider('invalidPathProvider')]
     public function test_invalid_paths(string $path): void
     {
         self::assertFalse(PathValidator::isValid($path));

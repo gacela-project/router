@@ -8,12 +8,11 @@ use Gacela\Router\Configure\Routes;
 use Gacela\Router\Entities\Request;
 use Gacela\Router\Router;
 use GacelaTest\Feature\HeaderTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 final class RouterRedirectTest extends HeaderTestCase
 {
-    /**
-     * @dataProvider destinationProvider
-     */
+    #[DataProvider('destinationProvider')]
     public function test_simple_redirect(string $destination): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
@@ -33,9 +32,7 @@ final class RouterRedirectTest extends HeaderTestCase
         ], $this->headers());
     }
 
-    /**
-     * @dataProvider destinationProvider
-     */
+    #[DataProvider('destinationProvider')]
     public function test_redirect_with_status_code(string $destination, int $statusCode): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
@@ -55,9 +52,7 @@ final class RouterRedirectTest extends HeaderTestCase
         ], $this->headers());
     }
 
-    /**
-     * @dataProvider destinationProvider
-     */
+    #[DataProvider('destinationProvider')]
     public function test_redirect_with_custom_method(string $destination, int $statusCode, string $method): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
@@ -79,7 +74,7 @@ final class RouterRedirectTest extends HeaderTestCase
         ], $this->headers());
     }
 
-    public function destinationProvider(): iterable
+    public static function destinationProvider(): iterable
     {
         yield ['https://gacela-project.com/', 301, Request::METHOD_GET];
         yield ['https://chemaclass.com/', 308, Request::METHOD_POST];

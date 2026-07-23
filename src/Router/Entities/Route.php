@@ -34,9 +34,9 @@ final class Route
     /**
      * @psalm-suppress MixedMethodCall
      */
-    public function run(Bindings $bindings): string|Stringable
+    public function run(Bindings $bindings, Request $request): string|Stringable
     {
-        $params = (new RouteParams($this))->getAll();
+        $params = (new RouteParams($this, $request))->getAll();
 
         if (!is_object($this->controller)) {
             $creator = new Container($bindings->getAllBindings());
@@ -99,20 +99,18 @@ final class Route
         return $this->pathPattern;
     }
 
-    public function requestMatches(): bool
+    public function requestMatches(Request $request): bool
     {
-        return $this->methodMatches() && $this->pathMatches();
+        return $this->methodMatches($request) && $this->pathMatches($request);
     }
 
-    private function methodMatches(): bool
+    private function methodMatches(Request $request): bool
     {
-        return Request::fromGlobals()->isMethod($this->method);
+        return $request->isMethod($this->method);
     }
 
-    private function pathMatches(): bool
+    private function pathMatches(Request $request): bool
     {
-        $path = Request::fromGlobals()->path();
-
-        return (bool)preg_match($this->getPathPattern(), $path);
+        return (bool)preg_match($this->getPathPattern(), $request->path());
     }
 }
