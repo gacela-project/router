@@ -87,123 +87,17 @@ $router = new Router(function (Routes $routes, Bindings $bindings, Handlers $han
 $router->run();
 ```
 
-### HTTP methods
+### Documentation
 
-Every HTTP verb has a helper on `Routes`, plus `any()` (matches all verbs) and `match()` (matches a given list):
+Full docs live in the [`docs/`](docs/README.md) folder:
 
-```php
-$routes->get($path, $controller, $action = '__invoke');
-$routes->post(...);  $routes->put(...);    $routes->patch(...);
-$routes->delete(...); $routes->head(...);  $routes->options(...);
-$routes->connect(...); $routes->trace(...);
-$routes->any($path, $controller, $action = '__invoke');
-$routes->match(['GET', 'POST'], $path, $controller, $action = '__invoke');
-```
-
-The `$controller` can be a `class-string` (its dependencies are auto-resolved) or an already-built object. The `$action` defaults to `__invoke`.
-
-### Route parameters
-
-Use `{name}` for mandatory and `{name?}` for optional parameters. The matched values are passed to the action by name, and cast to the action's typed argument (`string`, `int`, `float`, `bool`):
-
-```php
-$routes->get('users/{id}', UserController::class, 'show');
-// -> public function show(int $id): string
-
-$routes->get('archive/{year?}', ArchiveController::class, 'list');
-// -> public function list(int $year = 2023): string
-```
-
-Optional parameters must come after all mandatory ones; an invalid path throws `MalformedPathException`.
-
-### Responses
-
-An action may return a `string`, any `Stringable`, or one of the built-in response entities:
-
-```php
-use Gacela\Router\Entities\Response;
-use Gacela\Router\Entities\JsonResponse;
-
-// Plain string
-return 'Hello world';
-
-// Response with custom headers
-return new Response('<h1>Hi</h1>', ['Content-Type: text/html']);
-
-// JsonResponse (adds "Content-Type: application/json" for you)
-return new JsonResponse(['hello' => 'world']);
-```
-
-Returning anything else throws `UnsupportedResponseTypeException`.
-
-### Accessing the request
-
-Type-hint `Request` in your controller constructor and it will be injected:
-
-```php
-use Gacela\Router\Entities\Request;
-
-final class Controller
-{
-    public function __construct(private Request $request) {}
-
-    public function __invoke(): string
-    {
-        // POST params take precedence over GET
-        return (string) $this->request->get('name', 'default');
-    }
-}
-```
-
-### Error handling
-
-Map an exception `class-string` to a handler (`class-string` or `callable`). Two handlers are registered out of the box: `NotFound404Exception` and a fallback for any `Exception`.
-
-```php
-$handlers->handle(NotFound404Exception::class, NotFound404ExceptionHandler::class);
-$handlers->handle(MyException::class, static fn (MyException $e): string => "Oops: {$e->getMessage()}");
-```
-
-### Middleware
-
-A middleware implements `MiddlewareInterface` and wraps the next handler:
-
-```php
-use Gacela\Router\Middleware\MiddlewareInterface;
-use Gacela\Router\Entities\Request;
-
-final class TimingMiddleware implements MiddlewareInterface
-{
-    public function handle(Request $request, Closure $next): string
-    {
-        $start = microtime(true);
-        $response = $next($request);
-        header('X-Response-Time: ' . round((microtime(true) - $start) * 1000, 2) . 'ms');
-
-        return $response;
-    }
-}
-```
-
-Register it globally (`$middlewares->add(...)`), per route (`->middleware(...)`), or as a reusable group (`$middlewares->group('web', [...])` then `->middleware('web')`). Global middlewares run before route middlewares.
-
-### Use it within Gacela
-
-The package ships a `RouterGacelaConfig` adapter that binds `Router` and `RouterInterface` into the [Gacela](https://gacela-project.com/) container (using `addBindingIf`, so your app can override them). Extend it from your `gacela.php` and resolve the router anywhere:
-
-```php
-use Gacela\Framework\Gacela;
-use Gacela\Router\Config\RouterGacelaConfig;
-use Gacela\Router\Router;
-
-Gacela::bootstrap($appRootDir, static function (GacelaConfig $config): void {
-    $config->extendGacelaConfig(RouterGacelaConfig::class);
-});
-
-Gacela::get(Router::class)->run();
-```
-
-Because the router is a shared instance, plugins/modules can add their own routes in separate steps via `RouterInterface::configure()`.
+- [Getting started](docs/getting-started.md)
+- [Routing](docs/routing.md) — HTTP methods, controllers, path patterns and parameters
+- [Responses](docs/responses.md) — strings, `Stringable`, `Response`, `JsonResponse`
+- [The request](docs/request.md) — reading input and injecting `Request`
+- [Middleware](docs/middleware.md) — global, per-route and grouped
+- [Error handling](docs/error-handling.md) — mapping exceptions to handlers
+- [Use it within Gacela](docs/gacela-integration.md) — the `RouterGacelaConfig` adapter and plugins
 
 ### Working demo
 
