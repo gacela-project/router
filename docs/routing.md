@@ -86,6 +86,24 @@ $routes->redirect('old', '/new', 301);                          // custom status
 $routes->redirect('form', '/thanks', 302, 'POST');              // limited to one method
 ```
 
+## Match order
+
+A path with no `{param}` is **static** and resolves by an exact map lookup, keyed by
+HTTP method. Anything with a parameter is **dynamic** and is matched by regex, scanning
+only the routes registered for the request's method, in registration order.
+
+Two consequences worth knowing:
+
+- A static route wins over a dynamic one that would also match, regardless of which was
+  registered first. `$routes->get('users/{id}', ...)` followed by
+  `$routes->get('users/me', ...)` resolves `/users/me` to the second.
+- Between two dynamic routes that both match, the first registered wins.
+
+```php
+$routes->get('users/{id}', UserController::class);   // dynamic
+$routes->get('users/me', ProfileController::class);  // static, wins for /users/me
+```
+
 ## What happens on no match
 
 If no route matches the current request, the router throws `NotFound404Exception`,

@@ -33,6 +33,21 @@ final class Routes
     private array $routes = [];
 
     /**
+     * Paths with no {param}, keyed for an O(1) lookup.
+     *
+     * @var array<string, array<string, Route>> method => path => route
+     */
+    private array $staticRoutes = [];
+
+    /**
+     * Paths with at least one {param}, still matched by regex, but only the
+     * bucket for the request's method is ever scanned.
+     *
+     * @var array<string, list<Route>> method => routes
+     */
+    private array $dynamicRoutes = [];
+
+    /**
      * @param array<mixed> $arguments
      *
      * @psalm-suppress MixedArgument
@@ -85,6 +100,34 @@ final class Routes
     }
 
     /**
+     * Static paths resolve by map lookup, so the common case runs no regex at
+     * all. Anything with a {param} falls back to scanning that method's bucket
+     * in registration order.
+     */
+    public function findMatching(Request $request): ?Route
+    {
+        $method = $request->method();
+        $path = $request->path();
+
+        // Registered paths carry no leading slash, request paths do. The root
+        // route is stored under '/', and an empty request path means the root.
+        $key = $path === '' ? '/' : $path;
+
+        $staticRoute = $this->staticRoutes[$method][$key] ?? null;
+        if ($staticRoute instanceof Route) {
+            return $staticRoute;
+        }
+
+        foreach ($this->dynamicRoutes[$method] ?? [] as $route) {
+            if ($route->requestMatches($request)) {
+                return $route;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * @param string[]|string $methods
      * @param object|class-string $controller
      */
@@ -120,7 +163,35 @@ final class Routes
         // ->middleware() chaining has to cover every method it was declared with.
         $route = new Route($methods, $path, $controller, $action, $pathPattern);
         $this->routes[] = $route;
+        $this->index($route, $methods, $path);
 
         return $route;
+    }
+
+    /**
+     * @param array<string> $methods
+     */
+    private function index(Route $route, array $methods, string $path): void
+    {
+        $isDynamic = str_contains($path, '{');
+        $key = self::staticKey($path);
+
+        foreach ($methods as $method) {
+            if ($isDynamic) {
+                $this->dynamicRoutes[$method][] = $route;
+                continue;
+            }
+
+            // First registration wins, matching the previous linear scan.
+            $this->staticRoutes[$method][$key] ??= $route;
+        }
+    }
+
+    /**
+     * '' (the root) becomes '/', 'a/b' becomes '/a/b'.
+     */
+    private static function staticKey(string $path): string
+    {
+        return '/' . $path;
     }
 }

@@ -4,6 +4,12 @@
 
 ### Added
 - `Throwable::class` can be registered with `Handlers::handle()` as a catch-all for anything the router does not have a more specific handler for
+- `Request::method()` returns the current HTTP method
+
+### Changed
+- Routes with no `{param}` now resolve by an exact map lookup keyed by HTTP method, running no regex at all, and dynamic routes are only scanned within the request's method bucket. With 100 competing routes and the match registered last, a static lookup goes from 101 regex evaluations to 0 (see `tests/benchmark-routing.php`)
+- A static route now wins over a dynamic one that would also match, whatever the registration order. Between two dynamic routes the first registered still wins
+- A regex metacharacter in a static path is now matched literally. `$routes->get('a.c', ...)` previously also matched `/abc`, because the path was compiled into a regex where `.` was a wildcard
 
 ### Fixed
 - `Error` thrown while handling a request is now caught and dispatched to a handler like any `Exception`. `Router::run()` caught only `Exception`, so a `TypeError`, `ArgumentCountError` or `DivisionByZeroError` escaped the `Handlers` mechanism and surfaced as a PHP fatal error page with a 200 status instead of a 500

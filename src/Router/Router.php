@@ -83,13 +83,8 @@ final class Router implements RouterInterface
 
     private function findRoute(Request $request): Route
     {
-        foreach ($this->routes->getAllRoutes() as $route) {
-            if ($route->requestMatches($request)) {
-                return $route;
-            }
-        }
-
-        throw new NotFound404Exception();
+        return $this->routes->findMatching($request)
+            ?? throw new NotFound404Exception();
     }
 
     private function handleThrowable(Throwable $throwable): string
