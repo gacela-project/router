@@ -152,19 +152,16 @@ final class RouteParams
     private static function toBackedEnum(string $enumClass, string $enumBacking, string $rawValue): BackedEnum
     {
         /** @var class-string<BackedEnum> $enumClass */
-        if ($enumBacking !== 'int') {
-            return $enumClass::tryFrom($rawValue)
-                ?? throw InvalidEnumValueException::forEnum($enumClass, $rawValue);
-        }
+        $backedValue = $enumBacking === 'int'
+            // Not a plain (int) cast: that turns 'abc' into 0 and would silently
+            // bind a case backed by 0.
+            ? filter_var($rawValue, FILTER_VALIDATE_INT)
+            : $rawValue;
 
-        // Not a plain (int) cast: that turns 'abc' into 0 and would silently bind
-        // a case backed by 0.
-        $intValue = filter_var($rawValue, FILTER_VALIDATE_INT);
-        if ($intValue === false) {
-            throw InvalidEnumValueException::forEnum($enumClass, $rawValue);
-        }
+        $case = $backedValue === false
+            ? null
+            : $enumClass::tryFrom($backedValue);
 
-        return $enumClass::tryFrom($intValue)
-            ?? throw InvalidEnumValueException::forEnum($enumClass, $rawValue);
+        return $case ?? throw InvalidEnumValueException::forEnum($enumClass, $rawValue);
     }
 }
