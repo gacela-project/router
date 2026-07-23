@@ -85,12 +85,13 @@ final class RouteParams
     private static function actionParams(Route $route): array
     {
         $controller = $route->controller();
+        $action = $route->action();
         $controllerClass = is_object($controller) ? $controller::class : $controller;
 
         // An unresolvable signature throws before assigning, so it is never
         // cached and keeps throwing on later requests, as it did before.
-        return self::$actionParamsCache[$controllerClass . '::' . $route->action()]
-            ??= self::reflectActionParams($controller, $route->action());
+        return self::$actionParamsCache[$controllerClass . '::' . $action]
+            ??= self::reflectActionParams($controller, $action);
     }
 
     /**

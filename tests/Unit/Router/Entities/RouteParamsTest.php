@@ -156,14 +156,14 @@ final class RouteParamsTest extends TestCase
     private static function actionParamsCache(): array
     {
         /** @var array<string, mixed> $cache */
-        $cache = (new ReflectionProperty(RouteParams::class, 'actionParamsCache'))->getValue();
+        $cache = self::cacheProperty()->getValue();
 
         return $cache;
     }
 
     private static function clearActionParamsCache(): void
     {
-        (new ReflectionProperty(RouteParams::class, 'actionParamsCache'))->setValue(null, []);
+        self::cacheProperty()->setValue(null, []);
     }
 
     /**
@@ -171,7 +171,11 @@ final class RouteParamsTest extends TestCase
      */
     private static function seedActionParamsCache(string $key, array $actionParams): void
     {
-        (new ReflectionProperty(RouteParams::class, 'actionParamsCache'))
-            ->setValue(null, [$key => $actionParams]);
+        self::cacheProperty()->setValue(null, [$key => $actionParams]);
+    }
+
+    private static function cacheProperty(): ReflectionProperty
+    {
+        return new ReflectionProperty(RouteParams::class, 'actionParamsCache');
     }
 }
