@@ -39,6 +39,14 @@ Per-route middleware runs only for that route (chain it after the route definiti
 $routes->get('admin', AdminController::class)->middleware(new AuthMiddleware());
 ```
 
+When a route is declared for several HTTP methods, the chained middleware covers
+every one of them:
+
+```php
+$routes->match(['GET', 'POST'], 'admin', AdminController::class)->middleware(new AuthMiddleware());
+$routes->any('admin', AdminController::class)->middleware(new AuthMiddleware());
+```
+
 ## Groups
 
 Define a reusable stack once and reference it by name:

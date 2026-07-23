@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Fixed
+- `->middleware()` on a route declared with several HTTP methods now applies to all of them. `$routes->match(['GET', 'POST'], ...)` and `$routes->any(...)` used to register one route per method while returning only the first, so the chained middleware silently covered the first method only
+
 ## [0.13.0](https://github.com/gacela-project/router/compare/0.12.1...0.13.0) - 2026-07-23
 
 ### Added
