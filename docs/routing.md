@@ -108,6 +108,25 @@ $routes->get('users/{id}', UserController::class);   // dynamic
 $routes->get('users/me', ProfileController::class);  // static, wins for /users/me
 ```
 
+## HEAD requests
+
+`HEAD` is served by the matching `GET` route when no `HEAD` route of its own is
+registered, as HTTP requires. The route and its middlewares run normally, so every
+header they set is sent; only the body is withheld.
+
+```php
+$routes->get('page', PageController::class);
+
+// GET  /page  ->  200, headers + body
+// HEAD /page  ->  200, headers, empty body
+```
+
+- An explicitly registered `HEAD` route takes precedence over the `GET` one.
+- `any()` already covers `HEAD`, so it is matched directly.
+- The body is withheld for **every** `HEAD` response, error pages included.
+- Because a path serving `GET` also serves `HEAD`, `HEAD` appears in the `Allow`
+  header of a [405](error-handling.md) for that path.
+
 ## What happens on no match
 
 If no route matches the current request, the router throws `NotFound404Exception`,

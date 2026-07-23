@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- `HEAD` requests are served by the matching `GET` route when no `HEAD` route is registered, per HTTP. The route and its middlewares run so their headers are sent, and the body is withheld from every `HEAD` response, error pages included. An explicit `HEAD` route still takes precedence, and `HEAD` is now advertised in the `Allow` header of a 405 for any path serving `GET`
 - Requesting a known path with an unregistered HTTP method now responds `405 Method Not Allowed` with an `Allow` header, instead of `404`. Backed by a new `MethodNotAllowed405Exception` (carrying `allowedMethods()`) and a built-in `MethodNotAllowed405ExceptionHandler`, both overridable through `Handlers::handle()`. A path that matches no route under any method is still a `404`
 - `Throwable::class` can be registered with `Handlers::handle()` as a catch-all for anything the router does not have a more specific handler for
 - `Request::method()` returns the current HTTP method

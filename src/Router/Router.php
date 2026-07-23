@@ -63,8 +63,19 @@ final class Router implements RouterInterface
     #[Override]
     public function run(): void
     {
+        $request = Request::fromGlobals();
+        $output = $this->resolveOutput($request);
+
+        // HTTP forbids a body on a HEAD response, error responses included. The
+        // route and its middlewares still ran, so their headers are already out.
+        if (!$request->isMethod(Request::METHOD_HEAD)) {
+            echo $output;
+        }
+    }
+
+    private function resolveOutput(Request $request): string
+    {
         try {
-            $request = Request::fromGlobals();
             $route = $this->findRoute($request);
 
             $resolvedGlobalMiddlewares = $this->resolveMiddlewares($this->middlewares->getAll());
@@ -74,11 +85,11 @@ final class Router implements RouterInterface
 
             $pipeline = new MiddlewarePipeline($allMiddlewares);
 
-            echo $pipeline->handle($request, function () use ($route, $request): string {
+            return $pipeline->handle($request, function () use ($route, $request): string {
                 return (string) $route->run($this->bindings, $request);
             });
         } catch (Throwable $throwable) {
-            echo $this->handleThrowable($throwable);
+            return $this->handleThrowable($throwable);
         }
     }
 

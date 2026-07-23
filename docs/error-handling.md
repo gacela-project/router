@@ -38,12 +38,14 @@ The two are distinguished by whether the **path** is known:
 ```php
 $routes->get('users/{id}', UserController::class, 'show');
 
-// DELETE /users/7  ->  405, Allow: GET
+// DELETE /users/7  ->  405, Allow: GET, HEAD
+// HEAD   /users/7  ->  200, served by the GET route, empty body
 // GET    /nothing  ->  404
 ```
 
 Methods in `Allow` are de-duplicated and listed in a canonical order, not in
-registration order. `MethodNotAllowed405Exception::allowedMethods()` returns the same
+registration order. A path that serves `GET` also serves `HEAD`
+(see [Routing](routing.md#head-requests)), so `HEAD` is listed alongside it. `MethodNotAllowed405Exception::allowedMethods()` returns the same
 list if you replace the handler:
 
 ```php

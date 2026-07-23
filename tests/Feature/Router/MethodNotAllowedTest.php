@@ -26,9 +26,10 @@ final class MethodNotAllowedTest extends HeaderTestCase
         });
         $router->run();
 
+        // HEAD is advertised because the path supports GET; see HeadRequestTest.
         self::assertSame([
             ['header' => 'HTTP/1.1 405 Method Not Allowed', 'replace' => true, 'response_code' => 0],
-            ['header' => 'Allow: GET', 'replace' => true, 'response_code' => 0],
+            ['header' => 'Allow: GET, HEAD', 'replace' => true, 'response_code' => 0],
         ], $this->headers());
     }
 
@@ -63,10 +64,11 @@ final class MethodNotAllowedTest extends HeaderTestCase
         });
         $router->run();
 
-        // Declared POST-then-GET, reported in the canonical order of ALL_METHODS.
+        // Declared POST-then-GET, reported in the canonical order of ALL_METHODS,
+        // plus the HEAD that GET implies.
         self::assertSame([
             ['header' => 'HTTP/1.1 405 Method Not Allowed', 'replace' => true, 'response_code' => 0],
-            ['header' => 'Allow: GET, POST', 'replace' => true, 'response_code' => 0],
+            ['header' => 'Allow: GET, HEAD, POST', 'replace' => true, 'response_code' => 0],
         ], $this->headers());
     }
 
@@ -84,7 +86,7 @@ final class MethodNotAllowedTest extends HeaderTestCase
 
         self::assertSame([
             ['header' => 'HTTP/1.1 405 Method Not Allowed', 'replace' => true, 'response_code' => 0],
-            ['header' => 'Allow: GET', 'replace' => true, 'response_code' => 0],
+            ['header' => 'Allow: GET, HEAD', 'replace' => true, 'response_code' => 0],
         ], $this->headers());
     }
 
@@ -113,8 +115,8 @@ final class MethodNotAllowedTest extends HeaderTestCase
 
     public static function notMatchesMethodsProvider(): Generator
     {
-        yield [Request::METHOD_PUT, [Request::METHOD_GET, Request::METHOD_POST], 'GET, POST'];
-        yield [Request::METHOD_OPTIONS, [Request::METHOD_GET, Request::METHOD_POST], 'GET, POST'];
+        yield [Request::METHOD_PUT, [Request::METHOD_GET, Request::METHOD_POST], 'GET, HEAD, POST'];
+        yield [Request::METHOD_OPTIONS, [Request::METHOD_GET, Request::METHOD_POST], 'GET, HEAD, POST'];
         yield [
             Request::METHOD_GET,
             [Request::METHOD_PATCH, Request::METHOD_PUT, Request::METHOD_DELETE, Request::METHOD_POST],
@@ -196,13 +198,13 @@ final class MethodNotAllowedTest extends HeaderTestCase
 
             $handlers->handle(
                 MethodNotAllowed405Exception::class,
-                static fn (MethodNotAllowed405Exception $exception): string => 'Try: '
+                static fn (MethodNotAllowed405Exception $exception): string => "'{$exception->getMessage()}' Try: "
                     . implode('/', $exception->allowedMethods()),
             );
         });
         $router->run();
 
-        $this->expectOutputString('Try: GET');
+        $this->expectOutputString("'Error 405 - Method Not Allowed' Try: GET/HEAD");
         self::assertSame([], $this->headers());
     }
 }
