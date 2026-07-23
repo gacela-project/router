@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Gacela\Router\Configure;
 
+use Closure;
 use Gacela\Router\Controllers\RedirectController;
 use Gacela\Router\Entities\Request;
 use Gacela\Router\Entities\Route;
@@ -31,6 +32,9 @@ final class Routes
 {
     /** @var list<Route> */
     private array $routes = [];
+
+    /** @var list<string> Active group prefixes, outermost first. */
+    private array $prefixes = [];
 
     /**
      * Paths with no {param}, keyed for an O(1) lookup.
@@ -89,6 +93,27 @@ final class Routes
         } else {
             $this->addRoute([$method], $uri, new RedirectController($destination, $status));
         }
+    }
+
+    /**
+     * Register routes under a shared path prefix. Groups nest, composing their
+     * prefixes outermost-first.
+     *
+     * @param Closure(self):void $fn
+     */
+    public function group(string $prefix, Closure $fn): self
+    {
+        $this->prefixes[] = $prefix;
+
+        try {
+            $fn($this);
+        } finally {
+            // Popped even when a registration throws, so a caught failure does
+            // not leave the prefix applying to everything after it.
+            array_pop($this->prefixes);
+        }
+
+        return $this;
     }
 
     /**
@@ -183,6 +208,8 @@ final class Routes
         string $action = '__invoke',
         ?string $pathPattern = null,
     ): Route {
+        $path = $this->prefixed($path);
+
         if (!PathValidator::isValid($path)) {
             throw MalformedPathException::withPath($path);
         }
@@ -211,6 +238,25 @@ final class Routes
         $this->index($route, $methods, $path);
 
         return $route;
+    }
+
+    /**
+     * Prepend any active group prefixes. '/' is a group's own root, so it adds
+     * no segment of its own.
+     */
+    private function prefixed(string $path): string
+    {
+        if ($this->prefixes === []) {
+            return $path;
+        }
+
+        $segments = $this->prefixes;
+
+        if ($path !== '/') {
+            $segments[] = $path;
+        }
+
+        return implode('/', $segments);
     }
 
     /**

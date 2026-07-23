@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- `Routes::group()` registers routes under a shared path prefix, so it no longer has to be repeated per route. Groups nest and compose outermost-first, `'/'` inside a group resolves to the prefix itself, and a prefix may carry `{params}` that reach the action. The composed path is validated, so a malformed prefix throws `MalformedPathException` naming the full path
 - Routes can be named with `->name('user.show')`, and `UrlGenerator::generate()` builds their urls, filling `{params}` by name and omitting absent optionals. `UrlGenerator` is bound automatically, so a controller can type-hint it. Unknown names, duplicate names, missing mandatory params and unsupported param types all throw `UrlGenerationException`
 - A path parameter binds to a backed enum when the action argument is typed as one, for both string- and int-backed enums. A URL value with no matching case throws `InvalidEnumValueException` rather than a raw `ValueError`, and an int-backed enum rejects a non-numeric segment instead of coercing it to `0`. Pure enums remain unsupported, having no value to match against
 - A controller action may return an `array`, which is wrapped in a `JsonResponse`: the body is JSON-encoded and `Content-Type: application/json` is set. `string`, `Stringable`, `Response` and `JsonResponse` returns are unchanged, and anything else still throws `UnsupportedResponseTypeException`
