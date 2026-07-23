@@ -47,6 +47,15 @@ final class PathValidatorTest extends TestCase
         yield 'hyphens in path' => ['api-v2/user-profile'];
         yield 'underscores in path' => ['api_v2/user_profile'];
         yield 'numbers in path' => ['api/v123/users'];
+
+        // '0' is falsy in PHP, so a loose emptiness check wrongly rejects it.
+        yield 'zero as the only segment' => ['0'];
+        yield 'zero as a trailing segment' => ['products/0'];
+        yield 'zero as a middle segment' => ['page/0/items'];
+        yield 'zero as a leading segment' => ['0/items'];
+        yield 'zero before a param' => ['0/{id}'];
+        yield 'zero after a param' => ['{id}/0'];
+        yield 'several zero segments' => ['0/0/0'];
     }
 
     public static function invalidPathProvider(): Generator
