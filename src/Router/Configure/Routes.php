@@ -99,11 +99,6 @@ final class Routes
         return $this->routes;
     }
 
-    /**
-     * Static paths resolve by map lookup, so the common case runs no regex at
-     * all. Anything with a {param} falls back to scanning that method's bucket
-     * in registration order.
-     */
     public function findMatching(Request $request): ?Route
     {
         return $this->matchIn($request->method(), $request);
@@ -130,6 +125,12 @@ final class Routes
         return $allowedMethods;
     }
 
+    /**
+     * The route this request's path resolves to *under the given method*, which
+     * is not necessarily the method the request was made with. Static paths
+     * resolve by map lookup, running no regex at all; anything with a {param}
+     * falls back to scanning that method's bucket in registration order.
+     */
     private function matchIn(string $method, Request $request): ?Route
     {
         // Registered paths carry no leading slash, request paths do. The root
