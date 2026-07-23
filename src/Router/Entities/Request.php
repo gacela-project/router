@@ -52,12 +52,17 @@ final class Request
         return new self($get, $post, $server);
     }
 
-    public function isMethod(string $method): bool
+    public function method(): string
     {
         /** @var string $requestMethod */
         $requestMethod = $this->server['REQUEST_METHOD'];
 
-        return $requestMethod === $method;
+        return $requestMethod;
+    }
+
+    public function isMethod(string $method): bool
+    {
+        return $this->method() === $method;
     }
 
     public function path(): string
