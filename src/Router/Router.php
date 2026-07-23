@@ -63,8 +63,8 @@ final class Router implements RouterInterface
     public function run(): void
     {
         try {
-            $route = $this->findRoute();
             $request = Request::fromGlobals();
+            $route = $this->findRoute($request);
 
             $resolvedGlobalMiddlewares = $this->resolveMiddlewares($this->middlewares->getAll());
             $resolvedRouteMiddlewares = $this->resolveMiddlewares($route->getMiddlewares());
@@ -73,18 +73,18 @@ final class Router implements RouterInterface
 
             $pipeline = new MiddlewarePipeline($allMiddlewares);
 
-            echo $pipeline->handle($request, function () use ($route): string {
-                return (string) $route->run($this->bindings);
+            echo $pipeline->handle($request, function () use ($route, $request): string {
+                return (string) $route->run($this->bindings, $request);
             });
         } catch (Exception $exception) {
             echo $this->handleException($exception);
         }
     }
 
-    private function findRoute(): Route
+    private function findRoute(Request $request): Route
     {
         foreach ($this->routes->getAllRoutes() as $route) {
-            if ($route->requestMatches()) {
+            if ($route->requestMatches($request)) {
                 return $route;
             }
         }

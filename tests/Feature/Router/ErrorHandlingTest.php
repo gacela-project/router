@@ -17,6 +17,7 @@ use GacelaTest\Feature\Router\Fixtures\FakeController;
 use GacelaTest\Feature\Router\Fixtures\FakeControllerWithUnhandledException;
 use GacelaTest\Feature\Router\Fixtures\UnhandledException;
 use Generator;
+use PHPUnit\Framework\Attributes\DataProvider;
 use stdClass;
 
 final class ErrorHandlingTest extends HeaderTestCase
@@ -58,9 +59,7 @@ final class ErrorHandlingTest extends HeaderTestCase
         ], $this->headers());
     }
 
-    /**
-     * @dataProvider notMatchesMethodsProvider
-     */
+    #[DataProvider('notMatchesMethodsProvider')]
     public function test_respond_404_status_when_not_matches_match_methods(string $testMethod, array $givenMethods): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
@@ -80,7 +79,7 @@ final class ErrorHandlingTest extends HeaderTestCase
         ], $this->headers());
     }
 
-    public function notMatchesMethodsProvider(): Generator
+    public static function notMatchesMethodsProvider(): Generator
     {
         yield [Request::METHOD_PUT, [Request::METHOD_GET, Request::METHOD_POST]];
         yield [Request::METHOD_OPTIONS, [Request::METHOD_GET, Request::METHOD_POST]];
@@ -212,11 +211,10 @@ final class ErrorHandlingTest extends HeaderTestCase
     }
 
     /**
-     * @dataProvider nonStringProvider
-     *
      * @param mixed $given
      * @param mixed $type
      */
+    #[DataProvider('nonStringProvider')]
     public function test_throws_exception_if_response_is_not_a_string_or_stringable($given, $type): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
@@ -235,7 +233,7 @@ final class ErrorHandlingTest extends HeaderTestCase
         $this->expectOutputString("Unsupported response type '{$type}'. Must be a string or implement Stringable interface.");
     }
 
-    public function nonStringProvider(): Generator
+    public static function nonStringProvider(): Generator
     {
         yield [42, 'integer'];
         yield [false, 'boolean'];

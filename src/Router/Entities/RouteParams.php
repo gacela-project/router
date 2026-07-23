@@ -17,8 +17,10 @@ final class RouteParams
     /** @var array<string, mixed> */
     private array $params;
 
-    public function __construct(private Route $route)
-    {
+    public function __construct(
+        private Route $route,
+        private Request $request,
+    ) {
         $this->params = $this->getParams();
     }
 
@@ -40,7 +42,7 @@ final class RouteParams
         $pathParamValues = [];
 
         preg_match($this->route->getPathPattern(), '/' . $this->route->path(), $pathParamKeys);
-        preg_match($this->route->getPathPattern(), Request::fromGlobals()->path(), $pathParamValues);
+        preg_match($this->route->getPathPattern(), $this->request->path(), $pathParamValues);
 
         unset($pathParamValues[0], $pathParamKeys[0]);
         $pathParamKeys = array_map(static fn ($key) => trim($key, '{?}'), $pathParamKeys);

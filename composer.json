@@ -5,21 +5,21 @@
     "license": "MIT",
     "require": {
         "php": ">=8.1",
-        "gacela-project/container": "^0.6"
+        "gacela-project/container": "^0.10"
     },
     "require-dev": {
         "ext-mbstring": "*",
-        "friendsofphp/php-cs-fixer": "^3.89",
-        "gacela-project/gacela": "^1.9",
+        "friendsofphp/php-cs-fixer": "^3.95",
+        "gacela-project/gacela": "^1.19",
         "infection/infection": "^0.29",
-        "phpstan/phpstan": "^2.1",
-        "phpunit/phpunit": "^9.6",
+        "phpstan/phpstan": "^2.2",
+        "phpunit/phpunit": "^10.5",
         "psalm/plugin-phpunit": "^0.19",
-        "symfony/var-dumper": "^5.4",
-        "vimeo/psalm": "^6.0"
+        "symfony/var-dumper": "^6.4",
+        "vimeo/psalm": "^6.16"
     },
     "suggest": {
-        "gacela-project/gacela": "^1.7"
+        "gacela-project/gacela": "^1.19"
     },
     "autoload": {
         "psr-4": {

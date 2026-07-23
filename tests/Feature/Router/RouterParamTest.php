@@ -10,6 +10,7 @@ use Gacela\Router\Router;
 use GacelaTest\Feature\Router\Fixtures\FakeController;
 use GacelaTest\Feature\Router\Fixtures\FakeControllerWithRequest;
 use Generator;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 final class RouterParamTest extends TestCase
@@ -46,9 +47,7 @@ final class RouterParamTest extends TestCase
         $router->run();
     }
 
-    /**
-     * @dataProvider stringProvider
-     */
+    #[DataProvider('stringProvider')]
     public function test_pass_string_params_to_the_action(string $string): void
     {
         $_SERVER['REQUEST_URI'] = "https://example.org/expected/string/is/{$string}";
@@ -62,7 +61,7 @@ final class RouterParamTest extends TestCase
         $router->run();
     }
 
-    public function stringProvider(): Generator
+    public static function stringProvider(): Generator
     {
         for ($try = 0; $try < self::PROVIDER_TRIES; ++$try) {
             $randomString = 'word-' . mt_rand();
@@ -96,9 +95,7 @@ final class RouterParamTest extends TestCase
         $router->run();
     }
 
-    /**
-     * @dataProvider intProvider
-     */
+    #[DataProvider('intProvider')]
     public function test_pass_int_params_to_the_action(string $int): void
     {
         $_SERVER['REQUEST_URI'] = "https://example.org/expected/integer/is/{$int}";
@@ -112,7 +109,7 @@ final class RouterParamTest extends TestCase
         $router->run();
     }
 
-    public function intProvider(): Generator
+    public static function intProvider(): Generator
     {
         for ($try = 0; $try < self::PROVIDER_TRIES; ++$try) {
             $randomInt = (string)random_int(1, 9999);
@@ -120,9 +117,7 @@ final class RouterParamTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider floatProvider
-     */
+    #[DataProvider('floatProvider')]
     public function test_pass_float_params_to_the_action(string $float): void
     {
         $_SERVER['REQUEST_URI'] = "https://example.org/expected/float/is/{$float}";
@@ -136,7 +131,7 @@ final class RouterParamTest extends TestCase
         $router->run();
     }
 
-    public function floatProvider(): Generator
+    public static function floatProvider(): Generator
     {
         for ($try = 0; $try < self::PROVIDER_TRIES; ++$try) {
             $randomFloat = (string)mt_rand();
@@ -144,9 +139,7 @@ final class RouterParamTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider boolProvider
-     */
+    #[DataProvider('boolProvider')]
     public function test_pass_bool_params_to_the_action(string $given, string $expected): void
     {
         $_SERVER['REQUEST_URI'] = "https://example.org/expected/bool/is/{$given}";
@@ -160,7 +153,7 @@ final class RouterParamTest extends TestCase
         $router->run();
     }
 
-    public function boolProvider(): iterable
+    public static function boolProvider(): iterable
     {
         yield 'true' => ['given' => 'true', 'expected' => 'true'];
         yield 'false' => ['given' => 'false', 'expected' => 'false'];
