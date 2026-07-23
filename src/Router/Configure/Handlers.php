@@ -8,6 +8,7 @@ use Exception;
 use Gacela\Router\Exceptions\NotFound404Exception;
 use Gacela\Router\Handlers\FallbackExceptionHandler;
 use Gacela\Router\Handlers\NotFound404ExceptionHandler;
+use Throwable;
 
 final class Handlers
 {
@@ -19,7 +20,7 @@ final class Handlers
         $this->addBuiltInHandlers();
     }
     /**
-     * @param class-string<Exception> $exception
+     * @param class-string<Throwable> $exception
      * @param callable|class-string $handler
      */
     public function handle(string $exception, callable|string $handler): self
@@ -40,5 +41,6 @@ final class Handlers
     {
         $this->handle(NotFound404Exception::class, NotFound404ExceptionHandler::class);
         $this->handle(Exception::class, FallbackExceptionHandler::class);
+        $this->handle(Throwable::class, FallbackExceptionHandler::class);
     }
 }

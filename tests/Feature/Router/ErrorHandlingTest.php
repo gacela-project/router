@@ -14,11 +14,14 @@ use Gacela\Router\Exceptions\UnsupportedResponseTypeException;
 use Gacela\Router\Router;
 use GacelaTest\Feature\HeaderTestCase;
 use GacelaTest\Feature\Router\Fixtures\FakeController;
+use GacelaTest\Feature\Router\Fixtures\FakeControllerWithError;
 use GacelaTest\Feature\Router\Fixtures\FakeControllerWithUnhandledException;
 use GacelaTest\Feature\Router\Fixtures\UnhandledException;
 use Generator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use stdClass;
+use Throwable;
+use TypeError;
 
 final class ErrorHandlingTest extends HeaderTestCase
 {
@@ -107,6 +110,92 @@ final class ErrorHandlingTest extends HeaderTestCase
                 'response_code' => 0,
             ],
         ], $this->headers());
+    }
+
+    public function test_respond_500_status_when_unhandled_error(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $router = new Router(static function (Routes $routes): void {
+            $routes->get('expected/uri', FakeControllerWithError::class);
+        });
+        $router->run();
+
+        self::assertSame([
+            [
+                'header' => 'HTTP/1.1 500 Internal Server Error',
+                'replace' => true,
+                'response_code' => 0,
+            ],
+        ], $this->headers());
+    }
+
+    public function test_handle_error_by_its_own_class(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $router = new Router(static function (Routes $routes, Handlers $handlers): void {
+            $routes->get('expected/uri', FakeControllerWithError::class);
+
+            $handlers->handle(
+                TypeError::class,
+                static fn (TypeError $error): string => "Handled '{$error->getMessage()}'!",
+            );
+        });
+        $router->run();
+
+        $this->expectOutputString("Handled 'failed'!");
+    }
+
+    public function test_custom_throwable_fallback_handler_catches_an_error(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $router = new Router(static function (Routes $routes, Handlers $handlers): void {
+            $routes->get('expected/uri', FakeControllerWithError::class);
+
+            $handlers->handle(Throwable::class, static fn (): string => 'Handled!');
+        });
+        $router->run();
+
+        $this->expectOutputString('Handled!');
+    }
+
+    public function test_error_does_not_reach_the_exception_fallback_handler(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        // A handler registered for Exception::class may type-hint Exception, so an
+        // Error must not be routed to it. It falls through to the Throwable one.
+        $router = new Router(static function (Routes $routes, Handlers $handlers): void {
+            $routes->get('expected/uri', FakeControllerWithError::class);
+
+            $handlers->handle(Exception::class, static fn (Exception $exception): string => 'Exception handler!');
+            $handlers->handle(Throwable::class, static fn (Throwable $throwable): string => 'Throwable handler!');
+        });
+        $router->run();
+
+        $this->expectOutputString('Throwable handler!');
+    }
+
+    public function test_exception_still_prefers_the_exception_fallback_over_the_throwable_one(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $router = new Router(static function (Routes $routes, Handlers $handlers): void {
+            $routes->get('expected/uri', FakeControllerWithUnhandledException::class);
+
+            $handlers->handle(Exception::class, static fn (): string => 'Exception handler!');
+            $handlers->handle(Throwable::class, static fn (): string => 'Throwable handler!');
+        });
+        $router->run();
+
+        $this->expectOutputString('Exception handler!');
     }
 
     public function test_handle_handled_exception_with_anonymous_function(): void

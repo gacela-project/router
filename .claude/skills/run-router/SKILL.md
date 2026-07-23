@@ -206,13 +206,25 @@ survived mutant fails the run.
   `Gacela\Router\Entities`. **If you add a `header()` call from a new namespace,
   that file needs a matching stub or the call silently escapes the capture.**
 
-- **`Router::run()` catches `Exception`, not `Throwable`.** Any `Error` subclass
-  — `TypeError`, `ArgumentCountError`, `DivisionByZeroError` — blows straight
-  past the `Handlers` mechanism. Over HTTP that surfaces as **HTTP 200 with a PHP
-  fatal-error page in the body**, not a 500 (verified with and without Xdebug).
-  A common way to trigger it: register a controller action with a required
-  parameter on a route whose path has no matching `{placeholder}` — route params
-  come from the path pattern only, never from the query string or POST body.
+- **`Error` and `Exception` take different fallback handlers.** `Router::run()`
+  catches `Throwable`, but an `Error` is never routed to the `Exception::class`
+  handler, because handlers registered there are free to type-hint `Exception`.
+  Exact-class match first, then `Exception::class` for an exception and
+  `Throwable::class` for an `Error`. If you are adding a handler and it seems not
+  to fire for a `TypeError`, that is why: register `TypeError::class` or
+  `Throwable::class`. Resolution is **exact class only** in both cases, never a
+  parent walk, so `handle(RuntimeException::class, ...)` does not catch a
+  subclass of it.
+
+- **Route params come from the path pattern only**, never from the query string
+  or POST body. A controller action with a required parameter on a route whose
+  path has no matching `{placeholder}` throws `ArgumentCountError`. That is now
+  caught and rendered as a 500 rather than escaping the router, so it fails
+  quietly. Check the status, not just the body:
+
+  ```bash
+  php .claude/skills/run-router/driver.php request GET /boom --routes=/tmp/err-routes.php   # → 500
+  ```
 
 - **The dev vendor tree floods stderr on PHP >= 8.4.** `thecodingmachine/safe`
   (transitive via psalm) is eagerly loaded by Composer's `files` autoloader and
@@ -256,10 +268,12 @@ survived mutant fails the run.
   The driver refuses to start rather than let your requests land on whatever
   else is listening — which is what happened before this check existed.
 
-- **`Fatal error: Uncaught ArgumentCountError: Too few arguments to function
-  X::y(), 0 passed`** from a `call`/`request`: the action needs a parameter the
-  route path doesn't provide. Add the `{placeholder}` to the path or give the
-  parameter a default.
+- **A route returns 500 with an empty body**: something threw and hit
+  `FallbackExceptionHandler`. The body is empty by design, so the cause is not in
+  the response. Register a handler to see it:
+  `$handlers->handle(Throwable::class, static fn (Throwable $t): string => $t->getMessage());`
+  A frequent cause is `ArgumentCountError` from an action whose required
+  parameter has no matching `{placeholder}` in the route path.
 
 - **Deprecation wall from `thecodingmachine/safe` when running phpunit
   directly**: prefix with `php -d error_reporting='E_ALL & ~E_DEPRECATED'`, or
