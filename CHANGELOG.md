@@ -19,6 +19,7 @@
 - A regex metacharacter in a static path is now matched literally. `$routes->get('a.c', ...)` previously also matched `/abc`, because the path was compiled into a regex where `.` was a wildcard
 
 ### Fixed
+- A path segment of `0` is no longer rejected as malformed. `PathValidator` tested segments with `!$part`, and `'0'` is falsy in PHP, so `products/0`, `page/0/items` and `0` all threw `MalformedPathException`
 - `Request::path()` no longer throws a `TypeError` when `REQUEST_URI` is missing or malformed. `parse_url()` returns `null` for a uri with no path and `false` for one it cannot parse, neither of which satisfies the `string` return type; all such cases now resolve to `/`. `Request::method()` had the same flaw and returns `''` when `REQUEST_METHOD` is absent or not a string, which matches no route
 - `Error` thrown while handling a request is now caught and dispatched to a handler like any `Exception`. `Router::run()` caught only `Exception`, so a `TypeError`, `ArgumentCountError` or `DivisionByZeroError` escaped the `Handlers` mechanism and surfaced as a PHP fatal error page with a 200 status instead of a 500
 - `->middleware()` on a route declared with several HTTP methods now applies to all of them. `$routes->match(['GET', 'POST'], ...)` and `$routes->any(...)` used to register one route per method while returning only the first, so the chained middleware silently covered the first method only

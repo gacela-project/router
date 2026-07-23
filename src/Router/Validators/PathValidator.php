@@ -43,7 +43,8 @@ final class PathValidator
         $parts = explode('/', $path);
 
         foreach ($parts as $part) {
-            if (!$part) {
+            // Strictly against '': a '0' segment is falsy but perfectly valid.
+            if ($part === '') {
                 return true;
             }
         }
@@ -51,15 +52,17 @@ final class PathValidator
         return false;
     }
 
+    /**
+     * Only reached once hasValidFormat() has ruled out empty segments, so it
+     * does not re-check them: duplicating that made both checks individually
+     * removable without any test noticing.
+     */
     private static function hasValidParameterOrder(string $path): bool
     {
         $parts = explode('/', $path);
         $optionalParamFound = false;
 
         foreach ($parts as $part) {
-            if (!$part) { // Empty part found
-                return false;
-            }
             if (preg_match(RouteParams::OPTIONAL_PARAM_PATTERN, $part)) { // Optional argument found
                 $optionalParamFound = true;
             } elseif ($optionalParamFound) { // Mandatory argument or static part found after an optional argument

@@ -195,6 +195,28 @@ final class RouterMatchTest extends TestCase
         $router->run();
     }
 
+    #[DataProvider('zeroSegmentProvider')]
+    public function test_a_zero_path_segment_registers_and_matches(string $path, string $uri): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org' . $uri;
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $this->expectOutputString('Expected!');
+
+        $router = new Router(static function (Routes $routes) use ($path): void {
+            $routes->get($path, FakeController::class, 'basicAction');
+        });
+        $router->run();
+    }
+
+    public static function zeroSegmentProvider(): Generator
+    {
+        yield 'only segment' => ['0', '/0'];
+        yield 'trailing segment' => ['products/0', '/products/0'];
+        yield 'middle segment' => ['page/0/items', '/page/0/items'];
+        yield 'leading segment' => ['0/items', '/0/items'];
+    }
+
     public function test_thrown_exception_when_method_does_not_exist(): void
     {
         $this->expectException(UnsupportedHttpMethodException::class);
