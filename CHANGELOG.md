@@ -2,7 +2,11 @@
 
 ## [Unreleased]
 
+### Added
+- `Throwable::class` can be registered with `Handlers::handle()` as a catch-all for anything the router does not have a more specific handler for
+
 ### Fixed
+- `Error` thrown while handling a request is now caught and dispatched to a handler like any `Exception`. `Router::run()` caught only `Exception`, so a `TypeError`, `ArgumentCountError` or `DivisionByZeroError` escaped the `Handlers` mechanism and surfaced as a PHP fatal error page with a 200 status instead of a 500
 - `->middleware()` on a route declared with several HTTP methods now applies to all of them. `$routes->match(['GET', 'POST'], ...)` and `$routes->any(...)` used to register one route per method while returning only the first, so the chained middleware silently covered the first method only
 
 ## [0.13.0](https://github.com/gacela-project/router/compare/0.12.1...0.13.0) - 2026-07-23

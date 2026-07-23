@@ -1,25 +1,38 @@
 # Error handling
 
-Any `Exception` thrown while the router runs is caught and dispatched to a handler.
-Map an exception `class-string` to a handler with `Handlers::handle()`:
+Any `Throwable` thrown while the router runs is caught and dispatched to a handler,
+`Error` as well as `Exception`. Map a `class-string` to a handler with
+`Handlers::handle()`:
 
 ```php
 $handlers->handle(MyException::class, MyExceptionHandler::class);
 $handlers->handle(OtherException::class, static fn (OtherException $e): string => "Oops: {$e->getMessage()}");
+$handlers->handle(TypeError::class, static fn (TypeError $e): string => "Bad type: {$e->getMessage()}");
 ```
 
 ## How a handler is chosen
 
-1. The handler registered for the thrown exception's exact class, or
-2. the fallback handler registered for `Exception::class`.
+1. The handler registered for the thrown throwable's exact class, or
+2. the fallback handler: `Exception::class` when an exception was thrown,
+   `Throwable::class` when an `Error` was.
 
-Two handlers are registered out of the box:
+Three handlers are registered out of the box:
 
 - `NotFound404Exception` → `NotFound404ExceptionHandler`
-- `Exception` (fallback) → `FallbackExceptionHandler`
+- `Exception` (fallback for exceptions) → `FallbackExceptionHandler`
+- `Throwable` (fallback for errors) → `FallbackExceptionHandler`
 
 So an unmatched route (which throws `NotFound404Exception`) produces a 404 response
-without any configuration.
+without any configuration, and an uncaught `TypeError` produces a 500 rather than
+escaping the router.
+
+An `Error` never falls back to the `Exception::class` handler. A handler registered
+there is free to type-hint `Exception`, so handing it an `Error` would fail inside
+the handler itself. Register `Throwable::class` if you want one true catch-all:
+
+```php
+$handlers->handle(Throwable::class, static fn (Throwable $t): string => "Oops: {$t->getMessage()}");
+```
 
 ## Handler shape
 

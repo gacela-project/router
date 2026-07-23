@@ -19,8 +19,8 @@ use Gacela\Router\Exceptions\UnsupportedRouterConfigureCallableParamException;
 use Gacela\Router\Middleware\MiddlewarePipeline;
 use Override;
 use ReflectionFunction;
+use Throwable;
 
-use function get_class;
 use function is_callable;
 use function is_null;
 
@@ -76,8 +76,8 @@ final class Router implements RouterInterface
             echo $pipeline->handle($request, function () use ($route, $request): string {
                 return (string) $route->run($this->bindings, $request);
             });
-        } catch (Exception $exception) {
-            echo $this->handleException($exception);
+        } catch (Throwable $throwable) {
+            echo $this->handleThrowable($throwable);
         }
     }
 
@@ -92,13 +92,13 @@ final class Router implements RouterInterface
         throw new NotFound404Exception();
     }
 
-    private function handleException(Exception $exception): string
+    private function handleThrowable(Throwable $throwable): string
     {
-        $handler = $this->findHandler($exception);
+        $handler = $this->findHandler($throwable);
 
         if (is_callable($handler)) {
             /** @var string $result */
-            $result = $handler($exception);
+            $result = $handler($throwable);
             return $result;
         }
 
@@ -107,20 +107,28 @@ final class Router implements RouterInterface
 
         if (is_callable($instance)) {
             /** @var string $result */
-            $result = $instance($exception);
+            $result = $instance($throwable);
             return $result;
         }
 
-        throw NonCallableHandlerException::fromException($exception::class);
+        throw NonCallableHandlerException::fromException($throwable::class);
     }
 
     /**
+     * A handler registered for Exception::class is free to type-hint Exception,
+     * so an Error must never be routed to it. Errors fall back to Throwable.
+     *
      * @return callable|class-string
      */
-    private function findHandler(Exception $exception): string|callable
+    private function findHandler(Throwable $throwable): string|callable
     {
-        return $this->handlers->getAllHandlers()[get_class($exception)]
-            ?? $this->handlers->getAllHandlers()[Exception::class];
+        $handlers = $this->handlers->getAllHandlers();
+
+        $fallback = $throwable instanceof Exception
+            ? Exception::class
+            : Throwable::class;
+
+        return $handlers[$throwable::class] ?? $handlers[$fallback];
     }
 
     /**
