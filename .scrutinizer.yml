@@ -1,0 +1,38 @@
+build:
+  nodes:
+    analysis:
+      environment:
+        php:
+          version: 8.1
+        variables:
+          XDEBUG_MODE: 'coverage'
+      tests:
+        override:
+          - php-scrutinizer-run
+          -
+            command: 'vendor/bin/phpunit --coverage-clover=coverage.clover'
+            coverage:
+              file: 'coverage.clover'
+              format: 'clover'
+
+filter:
+  paths:
+    - 'src/*'
+  excluded_paths:
+    - 'tests/*'
+    - 'vendor/*'
+
+checks:
+  php:
+    code_rating: true
+    duplication: true
+
+coding_style:
+  php:
+    indentation:
+      general:
+        use_tabs: false
+        size: 4
+    spaces:
+      around_operators:
+        concatenation: true
