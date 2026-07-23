@@ -33,7 +33,7 @@ final class RoutesMatchingTest extends TestCase
 
         self::assertNotNull($route);
         self::assertSame('expected/uri', $route->path());
-        self::assertSame(0, self::regexCalls());
+        self::assertSame(0, countedPregMatchCalls());
     }
 
     public function test_root_route_matches_without_any_regex(): void
@@ -45,7 +45,7 @@ final class RoutesMatchingTest extends TestCase
 
         self::assertNotNull($route);
         self::assertSame('', $route->path());
-        self::assertSame(0, self::regexCalls());
+        self::assertSame(0, countedPregMatchCalls());
     }
 
     public function test_dynamic_route_still_matches_by_regex(): void
@@ -57,7 +57,7 @@ final class RoutesMatchingTest extends TestCase
 
         self::assertNotNull($route);
         self::assertSame('expected/{param}', $route->path());
-        self::assertGreaterThan(0, self::regexCalls());
+        self::assertGreaterThan(0, countedPregMatchCalls());
     }
 
     public function test_only_the_requested_method_is_scanned(): void
@@ -72,7 +72,7 @@ final class RoutesMatchingTest extends TestCase
 
         self::assertNotNull($route);
         // Only the single GET route is a candidate; the ten POST ones are never tried.
-        self::assertSame(1, self::regexCalls());
+        self::assertSame(1, countedPregMatchCalls());
     }
 
     public function test_static_route_wins_over_a_dynamic_one(): void
@@ -136,7 +136,7 @@ final class RoutesMatchingTest extends TestCase
         $routes->get('expected/uri', FakeController::class, 'basicAction');
 
         self::assertNull($routes->findMatching(self::request(Request::METHOD_POST, '/expected/uri')));
-        self::assertSame(0, self::regexCalls());
+        self::assertSame(0, countedPregMatchCalls());
     }
 
     public function test_a_multi_method_static_route_is_reachable_from_every_method(): void
@@ -200,11 +200,6 @@ final class RoutesMatchingTest extends TestCase
             static fn ($route): string => $route->path(),
             $all,
         ));
-    }
-
-    private static function regexCalls(): int
-    {
-        return countedPregMatchCalls();
     }
 
     private static function request(string $method, string $uri): Request

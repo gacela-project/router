@@ -114,7 +114,7 @@ final class Routes
         $key = $path === '' ? '/' : $path;
 
         $staticRoute = $this->staticRoutes[$method][$key] ?? null;
-        if ($staticRoute instanceof Route) {
+        if ($staticRoute !== null) {
             return $staticRoute;
         }
 
