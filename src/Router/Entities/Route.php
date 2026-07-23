@@ -19,16 +19,21 @@ final class Route
     /** @var list<MiddlewareInterface|class-string<MiddlewareInterface>|string> */
     private array $middlewares = [];
 
+    /** @var array<string> */
+    private readonly array $methods;
+
     /**
+     * @param string|array<string> $methods
      * @param object|class-string $controller
      */
     public function __construct(
-        private readonly string $method,
+        string|array $methods,
         private readonly string $path,
         private readonly object|string $controller,
         private readonly string $action = '__invoke',
         private ?string $pathPattern = null,
     ) {
+        $this->methods = is_string($methods) ? [$methods] : $methods;
     }
 
     /**
@@ -106,7 +111,13 @@ final class Route
 
     private function methodMatches(Request $request): bool
     {
-        return $request->isMethod($this->method);
+        foreach ($this->methods as $method) {
+            if ($request->isMethod($method)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function pathMatches(Request $request): bool

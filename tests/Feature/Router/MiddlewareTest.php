@@ -12,7 +12,9 @@ use Gacela\Router\Middleware\MiddlewareInterface;
 use Gacela\Router\Router;
 use GacelaTest\Feature\HeaderTestCase;
 use GacelaTest\Feature\Router\Fixtures\FakeMiddleware;
+use Generator;
 use Override;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 final class MiddlewareTest extends HeaderTestCase
 {
@@ -194,6 +196,57 @@ final class MiddlewareTest extends HeaderTestCase
         $output = ob_get_clean();
 
         self::assertSame('[ONE][TWO]CONTENT[/TWO][/ONE]', $output);
+    }
+
+    #[DataProvider('matchedMethodsProvider')]
+    public function test_route_middleware_applies_to_every_matched_method(string $requestMethod): void
+    {
+        $router = new Router(static function (Routes $routes): void {
+            $routes
+                ->match([Request::METHOD_GET, Request::METHOD_POST], 'multi', static fn () => 'CONTENT')
+                ->middleware(self::createAnonMiddleware('MW'));
+        });
+
+        $_SERVER['REQUEST_METHOD'] = $requestMethod;
+        $_SERVER['REQUEST_URI'] = '/multi';
+
+        ob_start();
+        $router->run();
+        $output = ob_get_clean();
+
+        self::assertSame('[MW]CONTENT[/MW]', $output);
+    }
+
+    public static function matchedMethodsProvider(): Generator
+    {
+        yield 'GET' => [Request::METHOD_GET];
+        yield 'POST' => [Request::METHOD_POST];
+    }
+
+    #[DataProvider('anyMethodProvider')]
+    public function test_route_middleware_applies_to_every_method_of_an_any_route(string $requestMethod): void
+    {
+        $router = new Router(static function (Routes $routes): void {
+            $routes
+                ->any('everything', static fn () => 'CONTENT')
+                ->middleware(self::createAnonMiddleware('MW'));
+        });
+
+        $_SERVER['REQUEST_METHOD'] = $requestMethod;
+        $_SERVER['REQUEST_URI'] = '/everything';
+
+        ob_start();
+        $router->run();
+        $output = ob_get_clean();
+
+        self::assertSame('[MW]CONTENT[/MW]', $output);
+    }
+
+    public static function anyMethodProvider(): Generator
+    {
+        foreach (Request::ALL_METHODS as $method) {
+            yield $method => [$method];
+        }
     }
 
     private static function createAnonMiddleware(string $tag): MiddlewareInterface

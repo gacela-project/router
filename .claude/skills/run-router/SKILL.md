@@ -222,38 +222,19 @@ survived mutant fails the run.
   sets `error_reporting(E_ALL & ~E_DEPRECATED)` before touching the autoloader;
   run raw `vendor/bin/*` tools with `php -d error_reporting='E_ALL & ~E_DEPRECATED'`.
 
-- **`->middleware()` on a multi-method route only binds the first method.**
-  `Routes::addRoute` creates one `Route` per method and returns only the first,
-  so the chained middleware never reaches the others. Verified:
+- **One registration is one `Route`, whatever the method count.**
+  `$routes->match(['GET','POST'], ...)` and `$routes->any(...)` build a single
+  `Route` holding every declared method, so a chained `->middleware()` covers all
+  of them. It used to build one `Route` per method and return only the first,
+  which silently dropped the middleware on every method but the first. If you
+  touch `Routes::addRoute` or `Route::methodMatches`, check both methods of a
+  multi-method route, not just the first:
 
   ```bash
-  cat > /tmp/mw-routes.php <<'PHP'
-  <?php
-  use Gacela\Router\Configure\Routes;
-  use Gacela\Router\Entities\Request;
-  use Gacela\Router\Middleware\MiddlewareInterface;
-
-  final class MwController { public function __invoke(): string { return 'base'; } }
-
-  final class TagMiddleware implements MiddlewareInterface
-  {
-      public function handle(Request $request, Closure $next): string
-      {
-          return '[mw]' . $next($request);
-      }
-  }
-
-  return static function (Routes $routes): void {
-      $routes->match(['GET', 'POST'], 'multi', MwController::class)->middleware(new TagMiddleware());
-  };
-  PHP
-
+  # /tmp/mw-routes.php: match(['GET','POST'], 'multi', C::class)->middleware(new TagMiddleware())
   php .claude/skills/run-router/driver.php call GET  /multi --routes=/tmp/mw-routes.php   # → [mw]base
-  php .claude/skills/run-router/driver.php call POST /multi --routes=/tmp/mw-routes.php   # → base
+  php .claude/skills/run-router/driver.php call POST /multi --routes=/tmp/mw-routes.php   # → [mw]base
   ```
-
-  Same applies to `$routes->any(...)`. Use `$middlewares->add(...)` or a group if
-  you need it on every method.
 
 - **`'/'` is stored as `''`.** `Routes::addRoute` rewrites it. Match against
   `Request::path()` output when debugging a route that "should" match.

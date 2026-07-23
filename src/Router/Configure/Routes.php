@@ -104,23 +104,23 @@ final class Routes
         }
         $methods = array_map(static fn ($method) => strtoupper($method), $methods);
 
-        $path = ($path === '/') ? '' : $path;
+        if ($methods === []) {
+            throw new RuntimeException('No routes were created');
+        }
 
-        $firstRoute = null;
         foreach ($methods as $method) {
             if (!in_array($method, Request::ALL_METHODS, true)) {
                 throw UnsupportedHttpMethodException::withName($method);
             }
-
-            $route = new Route($method, $path, $controller, $action, $pathPattern);
-            $this->routes[] = $route;
-
-            // Store the first route to return for middleware chaining
-            if ($firstRoute === null) {
-                $firstRoute = $route;
-            }
         }
 
-        return $firstRoute ?? throw new RuntimeException('No routes were created');
+        $path = ($path === '/') ? '' : $path;
+
+        // One Route per registration, not per method: a route returned for
+        // ->middleware() chaining has to cover every method it was declared with.
+        $route = new Route($methods, $path, $controller, $action, $pathPattern);
+        $this->routes[] = $route;
+
+        return $route;
     }
 }

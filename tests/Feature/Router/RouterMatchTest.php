@@ -13,6 +13,7 @@ use GacelaTest\Feature\Router\Fixtures\FakeController;
 use Generator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 final class RouterMatchTest extends TestCase
 {
@@ -202,6 +203,16 @@ final class RouterMatchTest extends TestCase
             $routes->invalidName('invalid', FakeController::class);
         });
         $router->run();
+    }
+
+    public function test_thrown_exception_when_no_method_is_given(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('No routes were created');
+
+        new Router(static function (Routes $routes): void {
+            $routes->match([], 'expected/uri', FakeController::class, 'basicAction');
+        });
     }
 
     #[DataProvider('anyHttpMethodProvider')]
