@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Gacela\Router\Entities;
 
+use function is_string;
+
 final class Request
 {
     public const METHOD_CONNECT = 'CONNECT';
@@ -27,6 +29,9 @@ final class Request
         self::METHOD_PUT,
         self::METHOD_TRACE,
     ];
+
+    /** Where an absent or unusable REQUEST_URI resolves to. */
+    private const DEFAULT_PATH = '/';
 
     /**
      * @param array<string, mixed> $query
@@ -52,12 +57,13 @@ final class Request
         return new self($get, $post, $server);
     }
 
+    /**
+     * The empty string when REQUEST_METHOD is absent or not a string, which
+     * matches no route rather than crashing on the way in.
+     */
     public function method(): string
     {
-        /** @var string $requestMethod */
-        $requestMethod = $this->server['REQUEST_METHOD'];
-
-        return $requestMethod;
+        return $this->serverString('REQUEST_METHOD');
     }
 
     public function isMethod(string $method): bool
@@ -65,14 +71,20 @@ final class Request
         return $this->method() === $method;
     }
 
+    /**
+     * The path of REQUEST_URI, or '/' when there is nothing usable to read.
+     *
+     * parse_url() returns null when the uri carries no path ('https://host',
+     * '?a=1') and false when it cannot parse it at all ('//', 'http://:80'),
+     * so neither can be handed back through a string return type.
+     */
     public function path(): string
     {
-        /** @var string $requestUri */
-        $requestUri = $this->server['REQUEST_URI'];
-        /** @var string $parsedUrl */
-        $parsedUrl = parse_url($requestUri, PHP_URL_PATH);
+        $path = parse_url($this->serverString('REQUEST_URI'), PHP_URL_PATH);
 
-        return $parsedUrl;
+        return is_string($path) && $path !== ''
+            ? $path
+            : self::DEFAULT_PATH;
     }
 
     public function get(string $key, mixed $default = null): mixed
@@ -85,5 +97,17 @@ final class Request
         }
 
         return $default;
+    }
+
+    /**
+     * A $_SERVER value, or '' when the key is absent or does not hold a string.
+     *
+     * @psalm-suppress MixedAssignment narrowed on the next line
+     */
+    private function serverString(string $key): string
+    {
+        $value = $this->server[$key] ?? null;
+
+        return is_string($value) ? $value : '';
     }
 }

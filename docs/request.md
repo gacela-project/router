@@ -24,6 +24,24 @@ final class SearchController
 }
 ```
 
+## Method and path
+
+```php
+$request->method();   // 'GET'
+$request->path();     // '/users/7'
+$request->isMethod(Request::METHOD_POST);
+```
+
+Both are defensive about a hostile or incomplete environment, so the router never
+crashes on the way in:
+
+- A missing or non-string `REQUEST_METHOD` yields `''`, which matches no route.
+- `path()` returns `'/'` whenever there is nothing usable to read: `REQUEST_URI`
+  absent or not a string, a uri carrying no path at all (`https://example.org`,
+  `?a=1`), or one `parse_url()` cannot parse (`//`, `http://:80`).
+
+Query strings and fragments are stripped, so `/users/7?a=1#top` gives `/users/7`.
+
 ## Reading input
 
 ```php
