@@ -4,16 +4,18 @@ declare(strict_types=1);
 
 namespace GacelaTest\Feature\Router;
 
+use Closure;
 use Gacela\Router\Configure\Handlers;
 use Gacela\Router\Configure\Middlewares;
 use Gacela\Router\Configure\Routes;
 use Gacela\Router\Entities\Request;
 use Gacela\Router\Entities\Response;
 use Gacela\Router\Exceptions\NotFound404Exception;
+use Gacela\Router\Middleware\MiddlewareInterface;
 use Gacela\Router\Router;
 use GacelaTest\Feature\HeaderTestCase;
 use GacelaTest\Feature\Router\Fixtures\FakeController;
-use GacelaTest\Feature\Router\Fixtures\FakeMiddleware;
+use Override;
 
 final class HeadRequestTest extends HeaderTestCase
 {
@@ -105,7 +107,7 @@ final class HeadRequestTest extends HeaderTestCase
         ], $this->headers());
     }
 
-    public function test_head_middlewares_still_run(): void
+    public function test_head_still_runs_the_route_and_its_middlewares(): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_HEAD;
@@ -113,19 +115,39 @@ final class HeadRequestTest extends HeaderTestCase
         $this->expectOutputString('');
 
         $ran = new class() {
-            public bool $value = false;
+            public bool $middleware = false;
+
+            public bool $controller = false;
         };
 
-        $router = new Router(static function (Routes $routes, Middlewares $middlewares) use ($ran): void {
-            $middlewares->add(new FakeMiddleware());
+        $middleware = new class($ran) implements MiddlewareInterface {
+            public function __construct(
+                private readonly object $ran,
+            ) {
+            }
+
+            #[Override]
+            public function handle(Request $request, Closure $next): string
+            {
+                $this->ran->middleware = true;
+
+                return $next($request);
+            }
+        };
+
+        $router = new Router(static function (Routes $routes, Middlewares $middlewares) use ($ran, $middleware): void {
+            $middlewares->add($middleware);
             $routes->get('expected/uri', static function () use ($ran): string {
-                $ran->value = true;
+                $ran->controller = true;
+
                 return 'CONTENT';
             });
         });
         $router->run();
 
-        self::assertTrue($ran->value);
+        // Both ran; only the body they produced is withheld.
+        self::assertTrue($ran->middleware);
+        self::assertTrue($ran->controller);
     }
 
     public function test_head_on_an_unknown_path_is_still_404(): void
