@@ -12,6 +12,7 @@ use Gacela\Router\UrlGenerator;
 use GacelaTest\Feature\Router\Fixtures\FakeController;
 use GacelaTest\Feature\Router\Fixtures\FakeIntEnum;
 use GacelaTest\Feature\Router\Fixtures\FakeStringEnum;
+use GacelaTest\Feature\Router\Fixtures\FakeUrlGeneratingController;
 use Generator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -204,21 +205,8 @@ final class NamedRouteTest extends TestCase
 
         $router = new Router(static function (Routes $routes): void {
             $routes->get('users/{id}', FakeController::class, 'basicAction')->name('users.show');
-            $routes->get('here', UrlGeneratingController::class);
+            $routes->get('here', FakeUrlGeneratingController::class);
         });
         $router->run();
-    }
-}
-
-final class UrlGeneratingController
-{
-    public function __construct(
-        private readonly UrlGenerator $urlGenerator,
-    ) {
-    }
-
-    public function __invoke(): string
-    {
-        return $this->urlGenerator->generate('users.show', ['id' => 7]);
     }
 }
