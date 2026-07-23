@@ -169,6 +169,48 @@ $routes->get('page', PageController::class);
 - Because a path serving `GET` also serves `HEAD`, `HEAD` appears in the `Allow`
   header of a [405](error-handling.md) for that path.
 
+## Route groups
+
+`group()` registers routes under a shared path prefix, so it is not repeated on
+every route:
+
+```php
+$routes->group('admin', static function (Routes $routes): void {
+    $routes->get('/', DashboardController::class);      // /admin
+    $routes->get('users', UserController::class);       // /admin/users
+});
+```
+
+- `'/'` inside a group is the group's own root, so it resolves to the prefix itself.
+- Groups **nest**, composing outermost-first.
+- Registrations after the group are unaffected; the prefix only applies inside the
+  closure.
+
+```php
+$routes->group('admin', static function (Routes $routes): void {
+    $routes->group('v1', static function (Routes $routes): void {
+        $routes->get('users', UserController::class);   // /admin/v1/users
+    });
+});
+
+$routes->get('public', PublicController::class);        // /public
+```
+
+A prefix may itself contain parameters, which reach the action like any other:
+
+```php
+$routes->group('tenants/{tenant}', static function (Routes $routes): void {
+    $routes->get('info', TenantController::class, 'info');   // /tenants/acme/info
+});
+```
+
+The **composed** path is what gets validated, so a prefix with a leading or trailing
+slash, or an empty segment, throws `MalformedPathException` naming the full path it
+tried to build.
+
+Shared middleware is not part of a group: attach it per route with `->middleware()`,
+or define a [middleware group](middleware.md#groups) and reference it by name.
+
 ## Named routes
 
 A route can be named and its url built later. See
