@@ -12,7 +12,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 
 final class RouterRedirectTest extends HeaderTestCase
 {
-    #[DataProvider('destinationProvider')]
+    #[DataProvider('destinationOnlyProvider')]
     public function test_simple_redirect(string $destination): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
@@ -32,7 +32,7 @@ final class RouterRedirectTest extends HeaderTestCase
         ], $this->headers());
     }
 
-    #[DataProvider('destinationProvider')]
+    #[DataProvider('destinationAndStatusProvider')]
     public function test_redirect_with_status_code(string $destination, int $statusCode): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/optional/uri';
@@ -72,6 +72,31 @@ final class RouterRedirectTest extends HeaderTestCase
                 'response_code' => $statusCode,
             ],
         ], $this->headers());
+    }
+
+    /**
+     * The destination alone, for the test that takes only that.
+     *
+     * Derived from destinationProvider() rather than written out again, so the
+     * cases stay in one place. Sharing the three-column provider directly is
+     * what PHPUnit 12 now reports: a provider must not feed a test fewer
+     * arguments than it yields.
+     */
+    public static function destinationOnlyProvider(): iterable
+    {
+        foreach (self::destinationProvider() as $case) {
+            yield [$case[0]];
+        }
+    }
+
+    /**
+     * The destination and its status code. See destinationOnlyProvider().
+     */
+    public static function destinationAndStatusProvider(): iterable
+    {
+        foreach (self::destinationProvider() as $case) {
+            yield [$case[0], $case[1]];
+        }
     }
 
     public static function destinationProvider(): iterable

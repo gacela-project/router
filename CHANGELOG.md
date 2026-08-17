@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **BC** Requires PHP `>=8.3` (was `>=8.1`), matching the floor Gacela 2.0 set
+- **BC** Requires `gacela-project/container: ^2.1` (was `^0.10`) and, for the optional Gacela integration, `gacela-project/gacela: ^2.4` (was `^1.19`). `RouterGacelaConfig` needed no change: it already used `addBinding()`, the name Gacela 2.0 kept
+- Dev tooling moved to PHPUnit 12 and Infection 0.34, and CI runs on PHP 8.3–8.5
+
+### Fixed
+
+- `RouterRedirectTest`'s three-column data provider fed two tests that declare fewer arguments. PHPUnit 12 reports it; before, the extra columns were silently dropped. Each test now takes a provider yielding exactly what it declares, derived from the one set of cases
+
 ### Added
 - `Routes::group()` registers routes under a shared path prefix, so it no longer has to be repeated per route. Groups nest and compose outermost-first, `'/'` inside a group resolves to the prefix itself, and a prefix may carry `{params}` that reach the action. The composed path is validated, so a malformed prefix throws `MalformedPathException` naming the full path
 - Routes can be named with `->name('user.show')`, and `UrlGenerator::generate()` builds their urls, filling `{params}` by name and omitting absent optionals. `UrlGenerator` is bound automatically, so a controller can type-hint it. Unknown names, duplicate names, missing mandatory params and unsupported param types all throw `UrlGenerationException`

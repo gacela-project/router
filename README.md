@@ -33,7 +33,8 @@ For a POC, we value simplicity over a rich-feature library.
 
 ### Requirements
 
-- PHP `>=8.1`
+- PHP `>=8.3`
+- Optional Gacela integration: `gacela-project/gacela: ^2.4`
 
 ### Installation
 
