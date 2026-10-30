@@ -95,6 +95,38 @@ final class RouterParamTest extends TestCase
         $router->run();
     }
 
+    #[DataProvider('trailingOptionalProvider')]
+    public function test_an_omitted_trailing_optional_keeps_every_other_param_bound(
+        string $path,
+        string $action,
+        string $uri,
+        string $expected,
+    ): void {
+        $_SERVER['REQUEST_URI'] = $uri;
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $this->expectOutputString($expected);
+
+        $router = new Router(static function (Routes $routes) use ($path, $action): void {
+            $routes->get($path, FakeController::class, $action);
+        });
+        $router->run();
+    }
+
+    public static function trailingOptionalProvider(): Generator
+    {
+        $withComment = 'posts/{id}/comments/{commentId?}';
+
+        yield 'mandatory, optional omitted' => [$withComment, 'mandatoryThenOptionalAction', '/posts/5/comments', 'id=5 commentId=-1'];
+        yield 'mandatory, optional given' => [$withComment, 'mandatoryThenOptionalAction', '/posts/5/comments/9', 'id=5 commentId=9'];
+        yield 'only optionals, none given' => ['{a?}/{b?}', 'twoOptionalsAction', '/', 'a=A b=B'];
+        yield 'only optionals, first given' => ['{a?}/{b?}', 'twoOptionalsAction', '/x', 'a=x b=B'];
+        yield 'only optionals, both given' => ['{a?}/{b?}', 'twoOptionalsAction', '/x/y', 'a=x b=y'];
+        yield 'static prefix, none given' => ['a/{a?}/{b?}', 'twoOptionalsAction', '/a', 'a=A b=B'];
+        yield 'static prefix, first given' => ['a/{a?}/{b?}', 'twoOptionalsAction', '/a/1', 'a=1 b=B'];
+        yield 'static prefix, both given' => ['a/{a?}/{b?}', 'twoOptionalsAction', '/a/1/2', 'a=1 b=2'];
+    }
+
     #[DataProvider('intProvider')]
     public function test_pass_int_params_to_the_action(string $int): void
     {

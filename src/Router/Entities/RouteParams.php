@@ -10,7 +10,6 @@ use Gacela\Router\Exceptions\UnsupportedParamTypeException;
 use ReflectionClass;
 use ReflectionEnum;
 
-use function count;
 use function is_object;
 use function is_subclass_of;
 
@@ -51,20 +50,24 @@ final class RouteParams
     private function getParams(): array
     {
         $params = [];
-        $pathParamKeys = [];
-        $pathParamValues = [];
 
-        preg_match($this->route->getPathPattern(), '/' . $this->route->path(), $pathParamKeys);
-        preg_match($this->route->getPathPattern(), $this->request->path(), $pathParamValues);
+        // Unmatched trailing optionals come back as null instead of vanishing, so
+        // every value keeps its position against the names read from the route.
+        preg_match(
+            $this->route->getPathPattern(),
+            $this->request->path(),
+            $pathParamValues,
+            PREG_UNMATCHED_AS_NULL,
+        );
 
-        unset($pathParamValues[0], $pathParamKeys[0]);
-        $pathParamKeys = array_map(static fn ($key) => trim($key, '{?}'), $pathParamKeys);
+        $pathParams = [];
+        foreach (self::pathParamNames($this->route->path()) as $position => $name) {
+            $value = $pathParamValues[$position + 1] ?? null;
 
-        while (count($pathParamValues) !== count($pathParamKeys)) {
-            array_shift($pathParamKeys);
+            if ($value !== null) {
+                $pathParams[$name] = $value;
+            }
         }
-
-        $pathParams = array_combine($pathParamKeys, $pathParamValues);
 
         foreach (self::actionParams($this->route) as $actionParam) {
             ['name' => $paramName, 'type' => $paramType, 'enumBacking' => $enumBacking] = $actionParam;
@@ -86,6 +89,24 @@ final class RouteParams
         }
 
         return $params;
+    }
+
+    /**
+     * The {name} and {name?} placeholders of a route path, in order.
+     *
+     * @return list<string>
+     */
+    private static function pathParamNames(string $path): array
+    {
+        $names = [];
+
+        foreach (explode('/', $path) as $segment) {
+            if (preg_match(self::MANDATORY_PARAM_PATTERN, $segment) || preg_match(self::OPTIONAL_PARAM_PATTERN, $segment)) {
+                $names[] = trim($segment, '{?}');
+            }
+        }
+
+        return $names;
     }
 
     /**

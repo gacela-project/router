@@ -10,6 +10,7 @@
 
 ### Fixed
 
+- An omitted trailing optional parameter no longer unbinds the mandatory ones before it: `posts/{id}/comments/{commentId?}` called as `/posts/5/comments` now passes `id = 5` instead of failing with an `ArgumentCountError`, and `{a?}/{b?}` called as `/x` binds `a`, not `b`
 - `RouterRedirectTest`'s three-column data provider fed two tests that declare fewer arguments. PHPUnit 12 reports it; before, the extra columns were silently dropped. Each test now takes a provider yielding exactly what it declares, derived from the one set of cases
 
 ### Added
