@@ -7,7 +7,7 @@
  * running the Router, so the driver can invoke it in-process.
  *
  * Write your own copy of this file to exercise a change you are working on:
- *   php .agnostic-ai/skills/run-router/driver.php call GET /foo --routes=/tmp/my-routes.php
+ *   php .claude/skills/run-router/driver.php call GET /foo --routes=/tmp/my-routes.php
  */
 
 declare(strict_types=1);
