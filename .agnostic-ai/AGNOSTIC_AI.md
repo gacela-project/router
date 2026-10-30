@@ -21,3 +21,9 @@ Update docs and CHANGELOG.md for user-visible changes. Specs-only checks: agnost
 ## Specs
 
 Edit .agnostic-ai/ and agnostic-ai.yaml, then run agnostic-ai sync. Generated Claude and Codex files are ignored; run sync in each clone. Use router-gh-issue for one issue, router-gh-issues for a queue, and run-router for runtime checks.
+
+## Task tools
+
+Use router-debug to trace a failing request, router-verify to choose checks, and router-benchmark for matcher performance. The shared behavior checklist is .agnostic-ai/references/http-contract.md.
+
+When delegation is authorized, router-legolas investigates one question and router-aragorn reviews a diff. Give each a scope and validation budget; coordinate expensive checks in the main session. Both inherit the session model. Their read-only instructions are a behavior constraint, not a sandbox guarantee.

@@ -22,12 +22,15 @@ mutation-report.html
 /.agnostic-ai/local/
 /.agnostic-ai/packs/
 /.claude/agent-memory-local/
+/.claude/agents/
+/.claude/rules/
 /.claude/scheduled_tasks.lock
 /.claude/scheduled_tasks.lock.bak
 /.claude/settings.local.json
 /.claude/settings.local.json.bak
 /.claude/skills/
 /.claude/worktrees/
+/.codex/agents/
 /.codex/config.toml
 /.codex/config.toml.bak
 /AGENTS.md
@@ -35,4 +38,10 @@ mutation-report.html
 /CLAUDE.md
 /CLAUDE.md.bak
 /agnostic-ai.local.yaml
+/example/AGENTS.md
+/example/AGENTS.md.bak
+/src/AGENTS.md
+/src/AGENTS.md.bak
+/tests/AGENTS.md
+/tests/AGENTS.md.bak
 # <<< agnostic-ai (managed) <<<

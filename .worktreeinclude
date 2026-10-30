@@ -5,10 +5,16 @@
 /.agnostic-ai/local/
 /.agnostic-ai/packs/
 /.claude/agent-memory-local/
+/.claude/agents/
+/.claude/rules/
 /.claude/settings.local.json
 /.claude/skills/
+/.codex/agents/
 /.codex/config.toml
 /AGENTS.md
 /CLAUDE.md
 /agnostic-ai.local.yaml
+/example/AGENTS.md
+/src/AGENTS.md
+/tests/AGENTS.md
 # <<< agnostic-ai (managed) <<<
