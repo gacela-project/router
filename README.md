@@ -6,12 +6,6 @@ A minimalistic HTTP router, ideal for your proof-of-concept projects and decoupl
   <a href="https://github.com/gacela-project/router/actions">
     <img src="https://github.com/gacela-project/router/workflows/CI/badge.svg" alt="GitHub Build Status">
   </a>
-  <a href="https://scrutinizer-ci.com/g/gacela-project/router/?branch=main">
-    <img src="https://scrutinizer-ci.com/g/gacela-project/router/badges/quality-score.png?b=main" alt="Scrutinizer Code Quality">
-  </a>
-  <a href="https://scrutinizer-ci.com/g/gacela-project/router/?branch=main">
-    <img src="https://scrutinizer-ci.com/g/gacela-project/router/badges/coverage.png?b=main" alt="Scrutinizer Code Coverage">
-  </a>
   <a href="https://shepherd.dev/github/gacela-project/router">
     <img src="https://shepherd.dev/github/gacela-project/router/coverage.svg" alt="Psalm Type-coverage Status">
   </a>
