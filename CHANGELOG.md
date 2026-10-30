@@ -10,6 +10,7 @@
 
 ### Fixed
 
+- `JsonResponse` keeps a `Content-Type` header the caller passes, whatever its case or parameters, instead of sending its own `Content-Type: application/json` after it and overwriting it. `content-type: application/json; charset=utf-8` used to be replaced by the bare default
 - `RouterRedirectTest`'s three-column data provider fed two tests that declare fewer arguments. PHPUnit 12 reports it; before, the extra columns were silently dropped. Each test now takes a provider yielding exactly what it declares, derived from the one set of cases
 
 ### Added

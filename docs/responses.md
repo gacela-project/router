@@ -31,7 +31,8 @@ public function __invoke(): Response
 ## JsonResponse
 
 `JsonResponse` extends `Response`. It JSON-encodes the given array and adds
-`Content-Type: application/json` automatically (unless you already supplied it).
+`Content-Type: application/json` automatically, unless you already supplied a `Content-Type`
+header of any value (the name is matched case-insensitively), in which case yours is kept.
 
 ```php
 use Gacela\Router\Entities\JsonResponse;
