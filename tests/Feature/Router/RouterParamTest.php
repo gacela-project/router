@@ -127,6 +127,19 @@ final class RouterParamTest extends TestCase
         yield 'static prefix, both given' => ['a/{a?}/{b?}', 'twoOptionalsAction', '/a/1/2', 'a=1 b=2'];
     }
 
+    public function test_a_custom_pattern_with_an_extra_capture_still_maps_params_by_name(): void
+    {
+        $_SERVER['REQUEST_URI'] = '/api/42';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $this->expectOutputString("The 'int' param is '42'!");
+
+        $router = new Router(static function (Routes $routes): void {
+            $routes->get('api/{param}', FakeController::class, 'intParamAction', '#^/(api)/([^/]+)$#');
+        });
+        $router->run();
+    }
+
     #[DataProvider('intProvider')]
     public function test_pass_int_params_to_the_action(string $int): void
     {

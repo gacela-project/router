@@ -50,22 +50,22 @@ final class RouteParams
     private function getParams(): array
     {
         $params = [];
+        $pathParamKeys = [];
+        $pathParamValues = [];
 
-        // Unmatched trailing optionals come back as null instead of vanishing, so
-        // every value keeps its position against the names read from the route.
-        preg_match(
-            $this->route->getPathPattern(),
-            $this->request->path(),
-            $pathParamValues,
-            PREG_UNMATCHED_AS_NULL,
-        );
+        // Unmatched groups come back as null instead of vanishing, so a trailing
+        // optional left out of the request keeps every value at its key's position.
+        preg_match($this->route->getPathPattern(), '/' . $this->route->path(), $pathParamKeys, PREG_UNMATCHED_AS_NULL);
+        preg_match($this->route->getPathPattern(), $this->request->path(), $pathParamValues, PREG_UNMATCHED_AS_NULL);
+
+        unset($pathParamKeys[0], $pathParamValues[0]);
 
         $pathParams = [];
-        foreach (self::pathParamNames($this->route->path()) as $position => $name) {
-            $value = $pathParamValues[$position + 1] ?? null;
+        foreach ($pathParamKeys as $position => $key) {
+            $value = $pathParamValues[$position] ?? null;
 
-            if ($value !== null) {
-                $pathParams[$name] = $value;
+            if ($key !== null && $value !== null) {
+                $pathParams[trim($key, '{?}')] = $value;
             }
         }
 
@@ -89,24 +89,6 @@ final class RouteParams
         }
 
         return $params;
-    }
-
-    /**
-     * The {name} and {name?} placeholders of a route path, in order.
-     *
-     * @return list<string>
-     */
-    private static function pathParamNames(string $path): array
-    {
-        $names = [];
-
-        foreach (explode('/', $path) as $segment) {
-            if (preg_match(self::MANDATORY_PARAM_PATTERN, $segment) || preg_match(self::OPTIONAL_PARAM_PATTERN, $segment)) {
-                $names[] = trim($segment, '{?}');
-            }
-        }
-
-        return $names;
     }
 
     /**
