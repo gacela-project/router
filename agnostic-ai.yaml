@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Chemaclass/agnostic-ai/v0.90.0/docs/schemas/config.schema.json
+requires: "0.90.0"
+version: 1
+builtins: [handoff]
+
+targets:
+  - claude
+  - codex
+
+on-unsupported: warn
+
+gitignore:
+  enabled: true

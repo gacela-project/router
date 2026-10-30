@@ -19,10 +19,10 @@
  *   serve   foreground `php -S` (the human path), same as `composer serve`.
  *
  * Usage:
- *   php .claude/skills/run-router/driver.php call    <METHOD> <PATH> [--routes=FILE] [--data=k=v&k2=v2]
- *   php .claude/skills/run-router/driver.php request <METHOD> <PATH> [--routes=FILE] [--data=k=v&k2=v2] [--port=N]
- *   php .claude/skills/run-router/driver.php smoke   [--routes=FILE] [--port=N]
- *   php .claude/skills/run-router/driver.php serve   [--routes=FILE] [--port=8081]
+ *   php .agnostic-ai/skills/run-router/driver.php call    <METHOD> <PATH> [--routes=FILE] [--data=k=v&k2=v2]
+ *   php .agnostic-ai/skills/run-router/driver.php request <METHOD> <PATH> [--routes=FILE] [--data=k=v&k2=v2] [--port=N]
+ *   php .agnostic-ai/skills/run-router/driver.php smoke   [--routes=FILE] [--port=N]
+ *   php .agnostic-ai/skills/run-router/driver.php serve   [--routes=FILE] [--port=8081]
  */
 
 declare(strict_types=1);
@@ -73,7 +73,7 @@ function commandHelp(): int
       call    <METHOD> <PATH> [--routes=FILE] [--data=k=v&k2=v2]
               In-process. Body + header() calls, no server. FILE must `return`
               a Closure (same shape you pass to `new Router(...)`).
-              Default FILE: .claude/skills/run-router/routes.default.php
+              Default FILE: .agnostic-ai/skills/run-router/routes.default.php
 
       request <METHOD> <PATH> [--routes=FILE] [--data=k=v&k2=v2] [--port=N]
               Real HTTP. Real status line + headers + body. Without --routes it
@@ -142,7 +142,7 @@ function commandCall(array $positional, array $options): int
         fwrite(STDERR, sprintf(
             "routes file must `return` a Closure, got: %s\n"
             . "(a front controller that calls \$router->run() itself cannot be reused here -- "
-            . "see .claude/skills/run-router/routes.default.php for the shape)\n",
+            . "see .agnostic-ai/skills/run-router/routes.default.php for the shape)\n",
             get_debug_type($fn),
         ));
         return 2;
