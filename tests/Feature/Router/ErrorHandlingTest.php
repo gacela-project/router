@@ -43,6 +43,21 @@ final class ErrorHandlingTest extends HeaderTestCase
         ], $this->headers());
     }
 
+    public function test_an_authority_lookalike_uri_does_not_reach_the_route_it_ends_with(): void
+    {
+        $_SERVER['REQUEST_URI'] = '//evil.example/admin';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $this->expectOutputString('');
+
+        $router = new Router(static function (Routes $routes): void {
+            $routes->get('admin', FakeController::class, 'basicAction');
+        });
+        $router->run();
+
+        self::assertContains('HTTP/1.0 404 Not Found', array_column($this->headers(), 'header'));
+    }
+
     // A known path requested with an unregistered method is a 405, not a 404.
     // See MethodNotAllowedTest.
 

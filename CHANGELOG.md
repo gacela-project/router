@@ -10,6 +10,7 @@
 
 ### Fixed
 
+- A `REQUEST_URI` such as `//evil.example/admin` no longer resolves to the `/admin` route. A uri starting with `/` is now read as sent, up to `?` or `#`, instead of going through `parse_url()`, which took the leading `//` for a host and let the request slip past path rules enforced by a front proxy. Absolute-form uris still go through `parse_url()`, and a path of only slashes still resolves to `/`
 - `RouterRedirectTest`'s three-column data provider fed two tests that declare fewer arguments. PHPUnit 12 reports it; before, the extra columns were silently dropped. Each test now takes a provider yielding exactly what it declares, derived from the one set of cases
 
 ### Added
