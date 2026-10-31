@@ -4,17 +4,10 @@ declare(strict_types=1);
 
 namespace Gacela\Router\Configure;
 
-use Gacela\Router\Entities\Request;
-
 final class Bindings
 {
     /** @var array<class-string, callable|class-string|object> */
     private array $bindings = [];
-
-    public function __construct()
-    {
-        $this->addBuiltInBindings();
-    }
 
     /**
      * @param class-string $name
@@ -32,10 +25,5 @@ final class Bindings
     public function getAllBindings(): array
     {
         return $this->bindings;
-    }
-
-    private function addBuiltInBindings(): void
-    {
-        $this->bind(Request::class, Request::fromGlobals());
     }
 }
