@@ -25,9 +25,10 @@ A handler for a base class therefore also catches its subclasses:
 $handlers->handle(RuntimeException::class, MyRuntimeHandler::class);   // also UnexpectedValueException, ...
 ```
 
-Three handlers are registered out of the box:
+Four handlers are registered out of the box:
 
 - `NotFound404Exception` → `NotFound404ExceptionHandler`
+- `InvalidParamValueException` → `InvalidParamValueExceptionHandler` (404, see [Routing](routing.md#parameters-passed-to-the-action))
 - `MethodNotAllowed405Exception` → `MethodNotAllowed405ExceptionHandler`
 - `Throwable` (catch-all) → `FallbackExceptionHandler`
 

@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Gacela\Router\Exceptions;
 
-use RuntimeException;
-
-final class InvalidEnumValueException extends RuntimeException
+final class InvalidEnumValueException extends InvalidParamValueException
 {
     /**
      * @param class-string $enumClass

@@ -60,9 +60,27 @@ $routes->get('posts/{id}/comments/{commentId?}', CommentController::class, 'show
 
 ## Parameters passed to the action
 
-Matched parameters are passed to the action **by name** and cast to the action's
+Matched parameters are passed to the action **by name**, converted to the action's
 declared argument type. Supported types: `string`, `int`, `float`, `bool`, and any
 **backed enum**.
+
+A segment that does not fit its type is refused, not coerced: `/users/abc` for an `int`
+argument never reaches the action, rather than arriving as `0`.
+
+| Type | Accepted |
+|---|---|
+| `int` | an integer with an optional sign and no leading zeros: `7`, `-3`, `+7`. `01` is refused |
+| `float` | a number: `2`, `1.5`, `.5`, `1.`, `-2.25`, `1e3`, and `007`, which is `7` |
+| `bool` | `1`, `true`, `on`, `yes` for true and `0`, `false`, `off`, `no` for false, in any case |
+| backed enum | the backing value of a case |
+
+Spaces around an `int` or `float` value are ignored. Anything else throws `InvalidParamValueException`, which the built-in handler answers with a
+**404**: a segment that does not fit the type names no resource. Replace the handler to answer
+differently:
+
+```php
+$handlers->handle(InvalidParamValueException::class, static fn (): string => 'No such thing');
+```
 
 ```php
 $routes->get('users/{id}', UserController::class, 'show');
@@ -108,8 +126,9 @@ final class OrderController
 Int-backed enums work the same way; the URL segment must be a valid integer, so
 `/orders/abc` is rejected rather than being coerced to `0`.
 
-A URL value with no matching case throws `InvalidEnumValueException`, which is a
-clear error rather than a raw `ValueError`. Map it to whatever response suits you:
+A URL value with no matching case throws `InvalidEnumValueException`, a subclass of
+`InvalidParamValueException`, so the same built-in 404 answers it. It is a clear error
+rather than a raw `ValueError`. Map it on its own to whatever response suits you:
 
 ```php
 $handlers->handle(InvalidEnumValueException::class, static function (): string {
