@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Gacela\Router\Configure;
 
+use Gacela\Router\Exceptions\InvalidParamValueException;
 use Gacela\Router\Exceptions\MethodNotAllowed405Exception;
 use Gacela\Router\Exceptions\NotFound404Exception;
 use Gacela\Router\Handlers\FallbackExceptionHandler;
+use Gacela\Router\Handlers\InvalidParamValueExceptionHandler;
 use Gacela\Router\Handlers\MethodNotAllowed405ExceptionHandler;
 use Gacela\Router\Handlers\NotFound404ExceptionHandler;
 use Throwable;
@@ -42,6 +44,7 @@ final class Handlers
     {
         $this->handle(NotFound404Exception::class, NotFound404ExceptionHandler::class);
         $this->handle(MethodNotAllowed405Exception::class, MethodNotAllowed405ExceptionHandler::class);
+        $this->handle(InvalidParamValueException::class, InvalidParamValueExceptionHandler::class);
         $this->handle(Throwable::class, FallbackExceptionHandler::class);
     }
 }

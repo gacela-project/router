@@ -6,6 +6,7 @@ namespace Gacela\Router\Entities;
 
 use BackedEnum;
 use Gacela\Router\Exceptions\InvalidEnumValueException;
+use Gacela\Router\Exceptions\InvalidParamValueException;
 use Gacela\Router\Exceptions\UnsupportedParamTypeException;
 use ReflectionClass;
 use ReflectionEnum;
@@ -77,14 +78,8 @@ final class RouteParams
                 $rawValue = $pathParams[$paramName];
 
                 $params[$paramName] = $enumBacking === null
-                    ? match ($paramType) {
-                        'string' => $rawValue,
-                        'int' => (int)$rawValue,
-                        'float' => (float)$rawValue,
-                        'bool' => (bool)json_decode($rawValue),
-                        default => throw UnsupportedParamTypeException::fromType($paramType),
-                    }
-                : self::toBackedEnum($paramType, $enumBacking, $rawValue);
+                    ? self::toScalar($paramName, $paramType, $rawValue)
+                    : self::toBackedEnum($paramType, $enumBacking, $rawValue);
             }
         }
 
@@ -146,6 +141,23 @@ final class RouteParams
 
         /** @var class-string<BackedEnum> $paramType */
         return (string)(new ReflectionEnum($paramType))->getBackingType();
+    }
+
+    /**
+     * A path value is always a string. Casting it would turn 'abc' into 0 and
+     * '12abc' into 12, so a value that does not fit its type is refused instead.
+     */
+    private static function toScalar(string $name, string $type, string $rawValue): string|int|float|bool
+    {
+        $value = match ($type) {
+            'string' => $rawValue,
+            'int' => filter_var($rawValue, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE),
+            'float' => filter_var($rawValue, FILTER_VALIDATE_FLOAT, FILTER_NULL_ON_FAILURE),
+            'bool' => filter_var($rawValue, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE),
+            default => throw UnsupportedParamTypeException::fromType($type),
+        };
+
+        return $value ?? throw InvalidParamValueException::forParam($name, $type, $rawValue);
     }
 
     /**
