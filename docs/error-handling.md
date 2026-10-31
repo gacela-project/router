@@ -78,7 +78,7 @@ $handlers->handle(Throwable::class, static fn (Throwable $t): string => "Oops: {
 A handler is either:
 
 - a **`callable`** that receives the exception and returns a string, or
-- a **`class-string`** of an invokable class — it is resolved through the container
+- a **`class-string`** of an invokable class, which is resolved through the container
   and invoked with the exception.
 
 If the resolved handler is not callable, a `NonCallableHandlerException` is thrown.

@@ -6,7 +6,7 @@
 
 - **BC** Requires PHP `>=8.3` (was `>=8.1`), matching the floor Gacela 2.0 set
 - **BC** Requires `gacela-project/container: ^2.1` (was `^0.10`) and, for the optional Gacela integration, `gacela-project/gacela: ^2.4` (was `^1.19`). `RouterGacelaConfig` needed no change: it already used `addBinding()`, the name Gacela 2.0 kept
-- Dev tooling moved to PHPUnit 12 and Infection 0.34, and CI runs on PHP 8.3–8.5
+- Dev tooling moved to PHPUnit 12 and Infection 0.34, and CI runs on PHP 8.3 to 8.5
 
 ### Fixed
 

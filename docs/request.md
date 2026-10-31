@@ -65,9 +65,9 @@ $request->get('name', 'guest');   // ... else the provided default
 
 Other methods used internally by the router:
 
-- `Request::fromGlobals(): self` — build a request from the current superglobals.
-- `path(): string` — the URL path (`REQUEST_URI` without query string).
-- `isMethod(string $method): bool` — whether the request method equals `$method`.
+- `Request::fromGlobals(): self` builds a request from the current superglobals.
+- `path(): string` is the URL path (`REQUEST_URI` without the query string).
+- `isMethod(string $method): bool` tells whether the request method equals `$method`.
 
 The HTTP method constants (`Request::METHOD_GET`, `METHOD_POST`, …) and
 `Request::ALL_METHODS` are also available.

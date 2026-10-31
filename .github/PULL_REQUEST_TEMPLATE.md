@@ -1,7 +1,13 @@
-## 📚 Description
+Closes #
 
-Replace this text with a short description of your feature/bugfix. 
+## What changed and why
 
-## 🔖 Changes
+## How you checked it
 
-- List individual changes in more detail
+<!-- Commands you ran, requests you sent, tests that fail without the change. -->
+
+## Checklist
+
+- [ ] `composer test` passes
+- [ ] A test fails without the change
+- [ ] `docs/` and `CHANGELOG.md` are updated for any change a user can see

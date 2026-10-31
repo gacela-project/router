@@ -1,68 +1,57 @@
-# Contributing to Gacela
+# Contributing
 
-## Welcome!
+Thanks for helping. Bug reports, fixes, docs and new ideas are all welcome.
 
-We look forward to your contributions!
+## Set up
 
-## We have a Code of Conduct
-
-Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
-
-## Any contributions you make will be under the MIT License
-
-When you submit code changes, your submissions are understood to be under the same [MIT](https://github.com/gacela-project/gacela/blob/master/LICENSE) that covers the project. By contributing to this project, you agree that your contributions will be licensed under its MIT.
-
-## Write bug reports with detail, background, and sample code
-
-In your bug report, please provide the following:
-
-* A quick summary and/or background
-* Steps to reproduce
-    * Be specific!
-    * Give sample code if you can.
-* What you expected would happen
-* What actually happens
-* Notes (possibly including why you think this might be happening, or stuff you tried that didn't work)
-
-Please post code and output as text ([using proper markup](https://guides.github.com/features/mastering-markdown/)). 
-Do not post screenshots of code or output.
-
-## Workflow for Pull Requests
-
-1. Fork/clone the repository.
-2. Install the vendor dependencies with `composer update`.
-3. Create your branch from `master` if you plan to implement new functionality or change existing code significantly;
-   create your branch from the oldest branch that is affected by the bug if you plan to fix a bug.
-4. Implement your change and add tests for it.
-5. Ensure the test suite passes.
-6. Ensure the code complies with our coding guidelines (see below).
-7. Send that pull request!
-
-Please make sure you have [set up your username and email address](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup) for use with Git. Strings such as `silly nick name <root@localhost>` look really stupid in the commit history of a project.
-
-## Coding Guidelines
-
-This project comes with some configuration files (located at `/psalm.xml` & `/phpstan.neon`) that you can use to perform static analysis (with a focus on type checking):
+You need PHP 8.3 or newer and Composer.
 
 ```bash
-$ ./vendor/bin/psalm
-$ ./vendor/bin/phpstan
+git clone https://github.com/gacela-project/router.git
+cd router
+composer install
 ```
 
-This project comes with a configuration file (located at `/.php-cs-fixer.dist.php` in the repository) that you can use to (re)format your source code for compliance with this project's coding guidelines:
+To see the router work, run `composer serve` and open <http://localhost:8081>. The routes are in `example/example.php`.
 
-```bash
-$ ./vendor/bin/php-cs-fixer fix
-```
+## Run the checks
 
-Please understand that we will not accept a pull request when its changes violate this project's coding guidelines.
+Run `composer test` before you push. It checks formatting, then runs Psalm, PHPStan and PHPUnit, the same as CI.
 
-## Running Gacela's test suite
+| Command | What it does |
+|---|---|
+| `composer test` | Formatting check, Psalm, PHPStan and PHPUnit |
+| `composer test-phpunit -- --filter name` | One test or one test class |
+| `composer csfix` | Fixes formatting with php-cs-fixer |
+| `composer infection` | Mutation tests. Needs Xdebug or PCOV. CI runs it too and fails below 96% |
 
-Once you've installed all composer dependencies, you can simply test all suites running the following composer script:
+Run Psalm and PHPStan one after the other, not at the same time.
 
-```bash
-$ composer test-all
-```
+## Make a change
 
-You can see more composer scripts inside the `/composer.json` file.
+1. Branch from `main`. Name the branch `fix/<issue>-short-name`, `feat/<issue>-short-name` or `docs/<issue>-short-name`.
+2. Add a test next to the ones for the same code. `tests/Unit` covers one class, and `tests/Feature` drives the router through `Router::run()`. Tests that check headers extend `HeaderTestCase`.
+3. If users can see the change, update the matching page in `docs/` and add a line under `[Unreleased]` in `CHANGELOG.md`.
+4. Commit with a [conventional commit](https://www.conventionalcommits.org/) message, for example `fix(routing): match a trailing optional param only at a segment boundary`. Mark a breaking change with `!` after the type.
+5. Open a pull request and fill in the template. CI runs formatting, static analysis and the tests on PHP 8.3, 8.4 and 8.5, with locked and with the newest dependencies.
+
+Keep each pull request to one issue. Put unrelated findings in a new issue.
+
+## Report a bug
+
+Open an issue with:
+
+- what you did, with the smallest code that shows it
+- what you expected
+- what happened instead, as text and not as a screenshot
+- the PHP and router versions
+
+If you know why it happens, say so.
+
+## Work with an AI coding tool
+
+The shared instructions for Claude Code and Codex live in `.agnostic-ai/`. Edit them there and run `agnostic-ai sync`. The generated files, such as `CLAUDE.md` and `AGENTS.md`, are ignored by Git.
+
+## Code of conduct and license
+
+This project follows the [Code of Conduct](CODE_OF_CONDUCT.md). Your contributions are released under the [MIT license](../LICENSE).

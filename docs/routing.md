@@ -21,7 +21,7 @@ An unknown HTTP method throws `UnsupportedHttpMethodException`.
 
 `$controller` can be:
 
-- a **`class-string`** — the class is instantiated through the container and its
+- a **`class-string`**: the class is instantiated through the container and its
   constructor dependencies are auto-resolved (see [Use it within Gacela](gacela-integration.md)
   and [The request](request.md)),
 - an already-built **object**, or
@@ -47,9 +47,9 @@ segments (e.g. `a//b`).
 
 Segments:
 
-- **Static** — `users/active`. Matched literally, so `v1.0/{id}` does not match `/v1X0/5`.
-- **Mandatory parameter** — `{name}`
-- **Optional parameter** — `{name?}`
+- **Static**: `users/active`. Matched literally, so `v1.0/{id}` does not match `/v1X0/5`.
+- **Mandatory parameter**: `{name}`
+- **Optional parameter**: `{name?}`
 
 All optional parameters must come after every mandatory one, otherwise the path is
 rejected.
@@ -143,8 +143,8 @@ $handlers->handle(InvalidEnumValueException::class, static function (): string {
 });
 ```
 
-Emit the response from inside the handler as above. A handler that **throws** — to
-re-route to `NotFound404Exception`, say — does not work: handlers already run inside
+Emit the response from inside the handler as above. A handler that **throws**, to
+re-route to `NotFound404Exception` for example, does not work: handlers already run inside
 the router's catch, so anything thrown there escapes `run()` uncaught.
 
 Each action's signature is read by reflection **once per process** and reused for
