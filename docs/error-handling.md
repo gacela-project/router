@@ -77,11 +77,25 @@ $handlers->handle(Throwable::class, static fn (Throwable $t): string => "Oops: {
 
 A handler is either:
 
-- a **`callable`** that receives the exception and returns a string, or
+- a **`callable`** that receives the exception and returns the response, or
 - a **`class-string`** of an invokable class, which is resolved through the container
   and invoked with the exception.
 
 If the resolved handler is not callable, a `NonCallableHandlerException` is thrown.
+
+A handler returns what an action may return: a `string`, an `array` (sent as JSON), any
+`Stringable`, or a [`Response`](responses.md) with its headers. Anything else throws
+`UnsupportedResponseTypeException`, which is not caught again, so it ends the request.
+
+```php
+$handlers->handle(
+    NotFound404Exception::class,
+    static fn (): Response => new Response('{"error":"not found"}', [
+        'HTTP/1.1 404 Not Found',
+        'Content-Type: application/json',
+    ]),
+);
+```
 
 ```php
 final class MyExceptionHandler

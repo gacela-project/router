@@ -6,12 +6,10 @@ namespace Gacela\Router\Entities;
 
 use Gacela\Container\Container;
 use Gacela\Router\Configure\Bindings;
-use Gacela\Router\Exceptions\UnsupportedResponseTypeException;
 use Gacela\Router\Middleware\MiddlewareInterface;
 use Gacela\Router\Validators\PathPatternGenerator;
 use Stringable;
 
-use function is_array;
 use function is_object;
 use function is_string;
 
@@ -46,30 +44,21 @@ final class Route
     {
         $params = (new RouteParams($this, $request))->getAll();
 
-        if (!is_object($this->controller)) {
+        if (is_object($this->controller)) {
+            $controller = $this->controller;
+        } else {
             // The request of this run, unless the user bound their own. Building it
             // here keeps a long-lived router from handing every controller the
             // request that existed when the router was constructed.
             $creator = new Container($bindings->getAllBindings() + [Request::class => $request]);
             /** @var object $controller */
             $controller = $creator->get($this->controller);
-            $response = $controller->{$this->action}(...$params);
-        } else {
-            /** @var mixed $response */
-            $response = $this->controller->{$this->action}(...$params);
         }
 
-        // Returning an array is the common JSON case, so encode it rather than
-        // making every action wrap it by hand.
-        if (is_array($response)) {
-            return new JsonResponse($response);
-        }
+        /** @var mixed $response */
+        $response = $controller->{$this->action}(...$params);
 
-        if (!is_string($response) && !($response instanceof Stringable)) {
-            throw UnsupportedResponseTypeException::fromType($response);
-        }
-
-        return $response;
+        return ResponseNormalizer::normalize($response);
     }
 
     public function path(): string
