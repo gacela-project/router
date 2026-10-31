@@ -23,6 +23,16 @@ final class FakeController
         return "The optional '{$type}' param is '{$param}'!";
     }
 
+    public function mandatoryThenOptionalAction(int $id, int $commentId = -1): string
+    {
+        return "id={$id} commentId={$commentId}";
+    }
+
+    public function twoOptionalsAction(string $a = 'A', string $b = 'B'): string
+    {
+        return "a={$a} b={$b}";
+    }
+
     public function intParamAction(int $param): string
     {
         $type = get_debug_type($param);
