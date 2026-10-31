@@ -119,6 +119,23 @@ final class RouteParamsTest extends TestCase
         }
     }
 
+    public function test_a_closure_with_an_untyped_param_throws(): void
+    {
+        $route = new Route(Request::METHOD_GET, 'expected/{param}', static fn ($param): string => (string)$param);
+
+        $this->expectException(UnsupportedParamTypeException::class);
+
+        self::resolve($route, '/expected/one');
+    }
+
+    public function test_closure_signatures_are_not_cached_under_a_shared_key(): void
+    {
+        $route = new Route(Request::METHOD_GET, 'expected/{param}', static fn (int $param): int => $param);
+
+        self::assertSame(['param' => 42], self::resolve($route, '/expected/42'));
+        self::assertSame([], self::actionParamsCache());
+    }
+
     public function test_a_non_typed_param_still_throws_on_every_attempt(): void
     {
         $route = new Route(Request::METHOD_GET, 'expected/{param}', FakeController::class, 'nonTypedParam');

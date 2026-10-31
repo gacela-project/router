@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Gacela\Router\Entities;
 
 use BackedEnum;
+use Closure;
 use Gacela\Router\Exceptions\InvalidEnumValueException;
 use Gacela\Router\Exceptions\InvalidParamValueException;
 use Gacela\Router\Exceptions\UnsupportedParamTypeException;
 use ReflectionClass;
 use ReflectionEnum;
+use ReflectionFunction;
 
 use function is_object;
 use function is_subclass_of;
@@ -93,6 +95,13 @@ final class RouteParams
     {
         $controller = $route->controller();
         $action = $route->action();
+
+        // Every closure is a Closure, so the class-keyed cache below would give
+        // them all one signature. Reflecting a single function is cheap enough.
+        if ($controller instanceof Closure) {
+            return self::reflectActionParams($controller, $action);
+        }
+
         $controllerClass = is_object($controller) ? $controller::class : $controller;
 
         // An unresolvable signature throws before assigning, so it is never
@@ -108,9 +117,13 @@ final class RouteParams
      */
     private static function reflectActionParams(object|string $controller, string $action): array
     {
+        $signature = $controller instanceof Closure
+            ? new ReflectionFunction($controller)
+            : (new ReflectionClass($controller))->getMethod($action);
+
         $actionParams = [];
 
-        foreach ((new ReflectionClass($controller))->getMethod($action)->getParameters() as $actionParam) {
+        foreach ($signature->getParameters() as $actionParam) {
             /** @var string|null $paramType */
             $paramType = $actionParam->getType()?->__toString();
 

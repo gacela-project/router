@@ -19,12 +19,17 @@ An unknown HTTP method throws `UnsupportedHttpMethodException`.
 
 ## Controllers
 
-`$controller` can be either:
+`$controller` can be:
 
 - a **`class-string`** — the class is instantiated through the container and its
   constructor dependencies are auto-resolved (see [Use it within Gacela](gacela-integration.md)
-  and [The request](request.md)), or
-- an already-built **object**.
+  and [The request](request.md)),
+- an already-built **object**, or
+- a **`Closure`**, which is invoked with its path parameters like any action:
+
+```php
+$routes->get('users/{id}', static fn (int $id): string => "User #{$id}");
+```
 
 `$action` is the method to call, defaulting to `__invoke`. A controller can be a
 plain invokable class or expose several actions:
