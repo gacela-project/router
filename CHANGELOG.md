@@ -11,6 +11,8 @@
 ### Fixed
 
 - `JsonResponse` keeps a `Content-Type` header the caller passes, whatever its case or parameters, instead of sending its own `Content-Type: application/json` after it and overwriting it. `content-type: application/json; charset=utf-8` used to be replaced by the bare default
+- A `REQUEST_URI` such as `//evil.example/admin` no longer resolves to the `/admin` route. A uri starting with `/` is now read as sent, up to `?` or `#`, instead of going through `parse_url()`, which took the leading `//` for a host and let the request slip past path rules enforced by a front proxy. Absolute-form uris still go through `parse_url()`, and a path of only slashes still resolves to `/`
+- An omitted trailing optional parameter no longer unbinds the mandatory ones before it: `posts/{id}/comments/{commentId?}` called as `/posts/5/comments` now passes `id = 5` instead of failing with an `ArgumentCountError`, and `{a?}/{b?}` called as `/x` binds `a`, not `b`
 - `RouterRedirectTest`'s three-column data provider fed two tests that declare fewer arguments. PHPUnit 12 reports it; before, the extra columns were silently dropped. Each test now takes a provider yielding exactly what it declares, derived from the one set of cases
 
 ### Added

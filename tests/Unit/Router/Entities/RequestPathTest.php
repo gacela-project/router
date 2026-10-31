@@ -25,6 +25,11 @@ final class RequestPathTest extends TestCase
         yield 'query stripped' => ['/expected/uri?a=1', '/expected/uri'];
         yield 'fragment stripped' => ['/expected/uri#frag', '/expected/uri'];
         yield 'url with root path' => ['https://example.org/', '/'];
+        yield 'query and fragment stripped' => ['/expected/uri?a=1#top', '/expected/uri'];
+        yield 'repeated slashes kept' => ['/a//b', '/a//b'];
+        yield 'dot segments kept' => ['/public/../admin', '/public/../admin'];
+        yield 'authority lookalike kept as a path' => ['//evil.example/admin', '//evil.example/admin'];
+        yield 'authority lookalike with query' => ['//evil.example/admin?a=1', '//evil.example/admin'];
     }
 
     public function test_a_missing_request_uri_falls_back_to_the_root(): void

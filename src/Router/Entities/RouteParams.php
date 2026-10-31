@@ -10,7 +10,6 @@ use Gacela\Router\Exceptions\UnsupportedParamTypeException;
 use ReflectionClass;
 use ReflectionEnum;
 
-use function count;
 use function is_object;
 use function is_subclass_of;
 
@@ -54,17 +53,21 @@ final class RouteParams
         $pathParamKeys = [];
         $pathParamValues = [];
 
-        preg_match($this->route->getPathPattern(), '/' . $this->route->path(), $pathParamKeys);
-        preg_match($this->route->getPathPattern(), $this->request->path(), $pathParamValues);
+        // Unmatched groups come back as null instead of vanishing, so a trailing
+        // optional left out of the request keeps every value at its key's position.
+        preg_match($this->route->getPathPattern(), '/' . $this->route->path(), $pathParamKeys, PREG_UNMATCHED_AS_NULL);
+        preg_match($this->route->getPathPattern(), $this->request->path(), $pathParamValues, PREG_UNMATCHED_AS_NULL);
 
-        unset($pathParamValues[0], $pathParamKeys[0]);
-        $pathParamKeys = array_map(static fn ($key) => trim($key, '{?}'), $pathParamKeys);
+        unset($pathParamKeys[0], $pathParamValues[0]);
 
-        while (count($pathParamValues) !== count($pathParamKeys)) {
-            array_shift($pathParamKeys);
+        $pathParams = [];
+        foreach ($pathParamKeys as $position => $key) {
+            $value = $pathParamValues[$position] ?? null;
+
+            if ($key !== null && $value !== null) {
+                $pathParams[trim($key, '{?}')] = $value;
+            }
         }
-
-        $pathParams = array_combine($pathParamKeys, $pathParamValues);
 
         foreach (self::actionParams($this->route) as $actionParam) {
             ['name' => $paramName, 'type' => $paramType, 'enumBacking' => $enumBacking] = $actionParam;
