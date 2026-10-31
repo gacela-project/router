@@ -147,6 +147,11 @@ Emit the response from inside the handler as above. A handler that **throws**, t
 re-route to `NotFound404Exception` for example, does not work: handlers already run inside
 the router's catch, so anything thrown there escapes `run()` uncaught.
 
+Path values are percent-decoded before they reach the action, so `/hello/caf%C3%A9%20bar`
+gives `'café bar'`. Matching happens first, on the raw path: `%2F` stays inside its segment
+and never splits it, so `/hello/a%2Fb` gives `'a/b'` and does not match `hello/{a}/{b}`. A `+`
+stays a `+`. Static segments are compared as sent, not decoded.
+
 Each action's signature is read by reflection **once per process** and reused for
 every later request to the same `Controller::action`. Signatures are static, so this
 is invisible, but it does mean a signature swapped at runtime is not picked up.

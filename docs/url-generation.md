@@ -60,6 +60,10 @@ $urlGenerator->generate('archive');                         // /archive
   query string.
 - Values may be scalars or **backed enums**, which contribute their `value`. `bool` is
   rejected, since neither `1` nor `true` is an obviously right URL segment.
+- Values are percent-encoded, so `'café bar'` becomes `caf%C3%A9%20bar` and `'a/b'` becomes
+  `a%2Fb`, which stays one segment. The router decodes them again, so a value round-trips.
+- An empty string counts as no value: it throws for a mandatory param and is omitted for an
+  optional one, since `/users/` would not match the route.
 
 ## Errors
 

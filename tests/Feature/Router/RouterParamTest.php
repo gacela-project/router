@@ -172,6 +172,30 @@ final class RouterParamTest extends TestCase
         self::assertSame(['user 7', 'post hello'], $outputs);
     }
 
+    #[DataProvider('encodedSegmentProvider')]
+    public function test_a_path_param_reaches_the_action_percent_decoded(string $segment, string $expected): void
+    {
+        $_SERVER['REQUEST_URI'] = "/hello/{$segment}";
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $this->expectOutputString("The 'string' param is '{$expected}'!");
+
+        $router = new Router(static function (Routes $routes): void {
+            $routes->get('hello/{param}', FakeController::class, 'stringParamAction');
+        });
+        $router->run();
+    }
+
+    public static function encodedSegmentProvider(): Generator
+    {
+        yield 'utf-8 and a space' => ['caf%C3%A9%20bar', 'café bar'];
+        yield 'an encoded slash' => ['a%2Fb', 'a/b'];
+        yield 'a plus stays a plus' => ['a+b', 'a+b'];
+        yield 'an encoded percent' => ['100%25', '100%'];
+        yield 'an invalid sequence stays as written' => ['%zz', '%zz'];
+        yield 'nothing to decode' => ['plain', 'plain'];
+    }
+
     #[DataProvider('intProvider')]
     public function test_pass_int_params_to_the_action(string $int): void
     {

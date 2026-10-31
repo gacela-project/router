@@ -50,6 +50,11 @@ final class NamedRouteTest extends TestCase
         yield 'optional provided' => ['archive/{year?}', ['year' => 2026], '/archive/2026'];
         yield 'optional omitted' => ['archive/{year?}', [], '/archive'];
         yield 'mandatory kept, optional omitted' => ['a/{one}/{two?}', ['one' => 'x'], '/a/x'];
+        yield 'a space and an accent' => ['hello/{name}', ['name' => 'café bar'], '/hello/caf%C3%A9%20bar'];
+        yield 'a slash stays in its segment' => ['hello/{name}', ['name' => 'a/b'], '/hello/a%2Fb'];
+        yield 'a plus is encoded' => ['hello/{name}', ['name' => 'a+b'], '/hello/a%2Bb'];
+        yield 'a percent is encoded' => ['hello/{name}', ['name' => '100%'], '/hello/100%25'];
+        yield 'an empty optional is omitted' => ['archive/{year?}', ['year' => ''], '/archive'];
         yield 'extra params ignored' => ['users/{id}', ['id' => 1, 'unused' => 'x'], '/users/1'];
     }
 
@@ -124,6 +129,46 @@ final class NamedRouteTest extends TestCase
         $this->expectExceptionMessage("Route name 'dup' is already taken.");
 
         (new UrlGenerator($routes))->generate('dup');
+    }
+
+    public function test_an_empty_mandatory_param_throws(): void
+    {
+        $routes = new Routes();
+        $routes->get('users/{id}', FakeController::class, 'basicAction')->name('user');
+
+        $this->expectException(UrlGenerationException::class);
+        $this->expectExceptionMessage("Missing param 'id' to generate the url for route 'user'.");
+
+        (new UrlGenerator($routes))->generate('user', ['id' => '']);
+    }
+
+    #[DataProvider('roundTripProvider')]
+    public function test_a_generated_url_binds_the_value_it_was_built_from(string $value): void
+    {
+        $routes = new Routes();
+        $routes->get('hello/{name}', static fn (string $name): string => $name)->name('hello');
+        $url = (new UrlGenerator($routes))->generate('hello', ['name' => $value]);
+
+        $_SERVER['REQUEST_URI'] = $url;
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $router = new Router(static function (Routes $routes): void {
+            $routes->get('hello/{name}', static fn (string $name): string => $name);
+        });
+
+        ob_start();
+        $router->run();
+
+        self::assertSame($value, ob_get_clean());
+    }
+
+    public static function roundTripProvider(): Generator
+    {
+        yield 'accent and space' => ['café bar'];
+        yield 'slash' => ['a/b'];
+        yield 'plus' => ['a+b'];
+        yield 'percent' => ['100%'];
+        yield 'question mark and hash' => ['why?#'];
     }
 
     public function test_a_missing_mandatory_param_throws(): void
