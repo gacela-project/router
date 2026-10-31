@@ -8,6 +8,7 @@ use Exception;
 use Gacela\Router\Configure\Handlers;
 use Gacela\Router\Configure\Routes;
 use Gacela\Router\Entities\Request;
+use Gacela\Router\Entities\Response;
 use Gacela\Router\Exceptions\NotFound404Exception;
 use Gacela\Router\Exceptions\UnsupportedParamTypeException;
 use Gacela\Router\Exceptions\UnsupportedResponseTypeException;
@@ -22,6 +23,7 @@ use JsonSerializable;
 use PHPUnit\Framework\Attributes\DataProvider;
 use RuntimeException;
 use stdClass;
+use Stringable;
 use Throwable;
 use TypeError;
 use UnexpectedValueException;
@@ -271,6 +273,72 @@ final class ErrorHandlingTest extends HeaderTestCase
 
         $this->expectOutputString('');
         self::assertSame(['HTTP/1.1 500 Internal Server Error'], array_column($this->headers(), 'header'));
+    }
+
+    public function test_a_handler_may_return_a_response_with_its_headers(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/unknown';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $router = new Router(static function (Handlers $handlers): void {
+            $handlers->handle(
+                NotFound404Exception::class,
+                static fn (): Response => new Response('custom 404', ['Content-Type: text/plain']),
+            );
+        });
+        $router->run();
+
+        $this->expectOutputString('custom 404');
+        self::assertSame(['Content-Type: text/plain'], array_column($this->headers(), 'header'));
+    }
+
+    public function test_a_handler_may_return_an_array_as_json(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/unknown';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $router = new Router(static function (Handlers $handlers): void {
+            $handlers->handle(NotFound404Exception::class, static fn (): array => ['error' => 'not found']);
+        });
+        $router->run();
+
+        $this->expectOutputString('{"error":"not found"}');
+        self::assertSame(['Content-Type: application/json'], array_column($this->headers(), 'header'));
+    }
+
+    public function test_a_handler_may_return_a_stringable(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/unknown';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $router = new Router(static function (Handlers $handlers): void {
+            $handlers->handle(
+                NotFound404Exception::class,
+                static fn (): Stringable => new class() implements Stringable {
+                    public function __toString(): string
+                    {
+                        return 'stringable 404';
+                    }
+                },
+            );
+        });
+        $router->run();
+
+        $this->expectOutputString('stringable 404');
+    }
+
+    public function test_a_handler_returning_an_unsupported_type_is_refused(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/unknown';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $this->expectException(UnsupportedResponseTypeException::class);
+        $this->expectExceptionMessage("Unsupported response type 'integer'.");
+
+        $router = new Router(static function (Handlers $handlers): void {
+            $handlers->handle(NotFound404Exception::class, static fn (): int => 404);
+        });
+        $router->run();
     }
 
     public function test_an_exception_handler_beats_the_throwable_one_for_an_exception(): void

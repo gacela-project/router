@@ -11,6 +11,7 @@ use Gacela\Router\Configure\Handlers;
 use Gacela\Router\Configure\Middlewares;
 use Gacela\Router\Configure\Routes;
 use Gacela\Router\Entities\Request;
+use Gacela\Router\Entities\ResponseNormalizer;
 use Gacela\Router\Entities\Route;
 use Gacela\Router\Exceptions\MethodNotAllowed405Exception;
 use Gacela\Router\Exceptions\NonCallableHandlerException;
@@ -116,22 +117,16 @@ final class Router implements RouterInterface
     {
         $handler = $this->findHandler($throwable);
 
-        if (is_callable($handler)) {
-            /** @var string $result */
-            $result = $handler($throwable);
-            return $result;
+        if (!is_callable($handler)) {
+            /** @psalm-suppress MixedAssignment */
+            $handler = Container::create($handler);
         }
 
-        /** @psalm-suppress MixedAssignment */
-        $instance = Container::create($handler);
-
-        if (is_callable($instance)) {
-            /** @var string $result */
-            $result = $instance($throwable);
-            return $result;
+        if (!is_callable($handler)) {
+            throw NonCallableHandlerException::fromException($throwable::class);
         }
 
-        throw NonCallableHandlerException::fromException($throwable::class);
+        return (string)ResponseNormalizer::normalize($handler($throwable));
     }
 
     /**
