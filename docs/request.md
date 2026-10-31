@@ -42,6 +42,14 @@ crashes on the way in:
 
 Query strings and fragments are stripped, so `/users/7?a=1#top` gives `/users/7`.
 
+A `REQUEST_URI` that starts with `/` is read as sent: the path is everything before `?` or
+`#`, untouched. In particular `//evil.example/admin` stays `//evil.example/admin` and matches
+no route, rather than being read as host `evil.example` plus `/admin`. A front proxy that
+guards `/admin` sees that request under a different path, so serving the `admin` route would
+bypass it. Dot segments and repeated slashes are not normalised here, since the proxy already
+decides those. A path made only of slashes (`//`, `///`) resolves to `/`. An absolute-form
+uri such as `https://host/path` is still parsed for its path.
+
 ## Reading input
 
 ```php

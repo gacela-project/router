@@ -74,15 +74,27 @@ final class Request
     /**
      * The path of REQUEST_URI, or '/' when there is nothing usable to read.
      *
-     * parse_url() returns null when the uri carries no path ('https://host',
-     * '?a=1') and false when it cannot parse it at all ('//', 'http://:80'),
-     * so neither can be handed back through a string return type.
+     * A uri starting with '/' is origin-form, which is what a server receives, so
+     * its path is everything before '?' or '#', untouched. Handing it to
+     * parse_url() would read '//host/admin' as a host plus '/admin' and serve a
+     * route the front proxy never saw under that path. Dot segments and repeated
+     * slashes are left alone for the same reason: the proxy decides those.
+     *
+     * Anything else (an absolute-form 'https://host/path') goes through
+     * parse_url(), which returns null when the uri carries no path ('https://host',
+     * '?a=1') and false when it cannot parse it at all ('http://:80'), so neither
+     * can be handed back through a string return type.
      */
     public function path(): string
     {
-        $path = parse_url($this->serverString('REQUEST_URI'), PHP_URL_PATH);
+        $uri = $this->serverString('REQUEST_URI');
 
-        return is_string($path) && $path !== ''
+        $path = str_starts_with($uri, '/')
+            ? substr($uri, 0, strcspn($uri, '?#'))
+            : parse_url($uri, PHP_URL_PATH);
+
+        // A run of slashes names no resource ('//' is a bare authority marker).
+        return is_string($path) && trim($path, '/') !== ''
             ? $path
             : self::DEFAULT_PATH;
     }
