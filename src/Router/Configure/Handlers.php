@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Gacela\Router\Configure;
 
-use Exception;
 use Gacela\Router\Exceptions\MethodNotAllowed405Exception;
 use Gacela\Router\Exceptions\NotFound404Exception;
 use Gacela\Router\Handlers\FallbackExceptionHandler;
@@ -43,7 +42,6 @@ final class Handlers
     {
         $this->handle(NotFound404Exception::class, NotFound404ExceptionHandler::class);
         $this->handle(MethodNotAllowed405Exception::class, MethodNotAllowed405ExceptionHandler::class);
-        $this->handle(Exception::class, FallbackExceptionHandler::class);
         $this->handle(Throwable::class, FallbackExceptionHandler::class);
     }
 }

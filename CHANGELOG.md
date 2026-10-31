@@ -10,6 +10,7 @@
 
 ### Fixed
 
+- A handler registered with `Handlers::handle()` now also catches the subclasses of its exception, and the closest registered handler wins: exact class, parent classes, interfaces, then `Throwable`. A `Throwable::class` handler is a true catch-all. The built-in `Exception` handler, which only matched exceptions with no handler of their own and masked a user's `Throwable` one, is gone. The built-in `Throwable` handler now answers 500 for all of them, so the response is unchanged. `Handlers::getAllHandlers()` no longer lists `Exception`
 - A controller receives the `Request` of the current `run()`. `Bindings` used to capture one when the router was constructed, so a router built once and run per request, as in a worker process, handed every controller the first request. A `Request` the user binds still takes precedence, and `Bindings` no longer binds one by itself
 - Static segments of a route that also has a `{param}` are matched literally. They went into the route regex unquoted, so `v1.0/{id}` matched `/v1X0/5`, and `api(v1)/{id}` or `a+b/{id}` never matched their own path. Routes with no `{param}` were never affected
 - A route ending in an optional parameter only matches at a segment boundary. `custom/{id?}` used to match `/customers` (binding `id = ers`) and `/custom5`, shadowing any route registered after it, and now matches only `/custom` and `/custom/{id}`. A route made only of optionals still matches `/`

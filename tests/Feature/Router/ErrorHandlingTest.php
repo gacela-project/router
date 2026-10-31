@@ -18,10 +18,13 @@ use GacelaTest\Feature\Router\Fixtures\FakeControllerWithError;
 use GacelaTest\Feature\Router\Fixtures\FakeControllerWithUnhandledException;
 use GacelaTest\Feature\Router\Fixtures\UnhandledException;
 use Generator;
+use JsonSerializable;
 use PHPUnit\Framework\Attributes\DataProvider;
+use RuntimeException;
 use stdClass;
 use Throwable;
 use TypeError;
+use UnexpectedValueException;
 
 final class ErrorHandlingTest extends HeaderTestCase
 {
@@ -117,7 +120,7 @@ final class ErrorHandlingTest extends HeaderTestCase
         $this->expectOutputString("Handled 'failed'!");
     }
 
-    public function test_custom_throwable_fallback_handler_catches_an_error(): void
+    public function test_a_throwable_handler_catches_an_error(): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
@@ -132,7 +135,7 @@ final class ErrorHandlingTest extends HeaderTestCase
         $this->expectOutputString('Handled!');
     }
 
-    public function test_error_does_not_reach_the_exception_fallback_handler(): void
+    public function test_an_error_does_not_reach_an_exception_handler(): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
@@ -150,7 +153,127 @@ final class ErrorHandlingTest extends HeaderTestCase
         $this->expectOutputString('Throwable handler!');
     }
 
-    public function test_exception_still_prefers_the_exception_fallback_over_the_throwable_one(): void
+    public function test_a_throwable_handler_catches_an_exception_with_no_closer_handler(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $router = new Router(static function (Routes $routes, Handlers $handlers): void {
+            $routes->get('expected/uri', FakeControllerWithUnhandledException::class);
+
+            $handlers->handle(Throwable::class, static fn (): string => 'Throwable handler!');
+        });
+        $router->run();
+
+        $this->expectOutputString('Throwable handler!');
+    }
+
+    public function test_a_handler_also_catches_the_subclasses_of_its_exception(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $router = new Router(static function (Routes $routes, Handlers $handlers): void {
+            $routes->get('expected/uri', static fn (): string => throw new UnexpectedValueException('failed'));
+
+            $handlers->handle(RuntimeException::class, static fn (): string => 'Runtime handler!');
+        });
+        $router->run();
+
+        $this->expectOutputString('Runtime handler!');
+    }
+
+    public function test_the_closest_handler_wins(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $router = new Router(static function (Routes $routes, Handlers $handlers): void {
+            $routes->get('expected/uri', static fn (): string => throw new UnexpectedValueException('failed'));
+
+            $handlers->handle(Throwable::class, static fn (): string => 'Throwable handler!');
+            $handlers->handle(Exception::class, static fn (): string => 'Exception handler!');
+            $handlers->handle(RuntimeException::class, static fn (): string => 'Runtime handler!');
+            $handlers->handle(UnexpectedValueException::class, static fn (): string => 'Exact handler!');
+        });
+        $router->run();
+
+        $this->expectOutputString('Exact handler!');
+    }
+
+    public function test_an_interface_handler_catches_an_exception_implementing_it(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $router = new Router(static function (Routes $routes, Handlers $handlers): void {
+            $routes->get('expected/uri', static fn (): string => throw new class('failed') extends Exception implements JsonSerializable {
+                public function jsonSerialize(): string
+                {
+                    return 'unused';
+                }
+            });
+
+            $handlers->handle(Throwable::class, static fn (): string => 'Throwable handler!');
+            $handlers->handle(JsonSerializable::class, static fn (): string => 'Interface handler!');
+        });
+        $router->run();
+
+        $this->expectOutputString('Interface handler!');
+    }
+
+    public function test_a_class_handler_beats_an_interface_handler(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $router = new Router(static function (Routes $routes, Handlers $handlers): void {
+            $routes->get('expected/uri', static fn (): string => throw new class('failed') extends RuntimeException implements JsonSerializable {
+                public function jsonSerialize(): string
+                {
+                    return 'unused';
+                }
+            });
+
+            $handlers->handle(JsonSerializable::class, static fn (): string => 'Interface handler!');
+            $handlers->handle(RuntimeException::class, static fn (): string => 'Runtime handler!');
+        });
+        $router->run();
+
+        $this->expectOutputString('Runtime handler!');
+    }
+
+    public function test_the_built_in_404_handler_still_wins_over_a_user_catch_all(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/unknown';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $router = new Router(static function (Handlers $handlers): void {
+            $handlers->handle(Exception::class, static fn (): string => 'Exception handler!');
+            $handlers->handle(Throwable::class, static fn (): string => 'Throwable handler!');
+        });
+        $router->run();
+
+        self::assertSame(['HTTP/1.0 404 Not Found'], array_column($this->headers(), 'header'));
+    }
+
+    public function test_an_error_with_only_an_exception_handler_falls_back_to_the_built_in_500(): void
+    {
+        $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $router = new Router(static function (Routes $routes, Handlers $handlers): void {
+            $routes->get('expected/uri', FakeControllerWithError::class);
+
+            $handlers->handle(Exception::class, static fn (Exception $exception): string => 'Exception handler!');
+        });
+        $router->run();
+
+        $this->expectOutputString('');
+        self::assertSame(['HTTP/1.1 500 Internal Server Error'], array_column($this->headers(), 'header'));
+    }
+
+    public function test_an_exception_handler_beats_the_throwable_one_for_an_exception(): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/expected/uri';
         $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
