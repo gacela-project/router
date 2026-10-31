@@ -139,6 +139,39 @@ final class RouterParamTest extends TestCase
         $router->run();
     }
 
+    public function test_a_closure_controller_receives_its_path_params(): void
+    {
+        $_SERVER['REQUEST_URI'] = '/users/7';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $this->expectOutputString('user 7');
+
+        $router = new Router(static function (Routes $routes): void {
+            $routes->get('users/{id}', static fn (int $id): string => "user {$id}");
+        });
+        $router->run();
+    }
+
+    public function test_closures_with_different_signatures_do_not_share_one(): void
+    {
+        $router = new Router(static function (Routes $routes): void {
+            $routes->get('users/{id}', static fn (int $id): string => "user {$id}");
+            $routes->get('posts/{slug}', static fn (string $slug): string => "post {$slug}");
+        });
+
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+        $outputs = [];
+        foreach (['/users/7', '/posts/hello'] as $uri) {
+            $_SERVER['REQUEST_URI'] = $uri;
+
+            ob_start();
+            $router->run();
+            $outputs[] = (string)ob_get_clean();
+        }
+
+        self::assertSame(['user 7', 'post hello'], $outputs);
+    }
+
     #[DataProvider('intProvider')]
     public function test_pass_int_params_to_the_action(string $int): void
     {
