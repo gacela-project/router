@@ -10,6 +10,7 @@
 
 ### Fixed
 
+- Static segments of a route that also has a `{param}` are matched literally. They went into the route regex unquoted, so `v1.0/{id}` matched `/v1X0/5`, and `api(v1)/{id}` or `a+b/{id}` never matched their own path. Routes with no `{param}` were never affected
 - A route ending in an optional parameter only matches at a segment boundary. `custom/{id?}` used to match `/customers` (binding `id = ers`) and `/custom5`, shadowing any route registered after it, and now matches only `/custom` and `/custom/{id}`. A route made only of optionals still matches `/`
 - `JsonResponse` keeps a `Content-Type` header the caller passes, whatever its case or parameters, instead of sending its own `Content-Type: application/json` after it and overwriting it. `content-type: application/json; charset=utf-8` used to be replaced by the bare default
 - A `REQUEST_URI` such as `//evil.example/admin` no longer resolves to the `/admin` route. A uri starting with `/` is now read as sent, up to `?` or `#`, instead of going through `parse_url()`, which took the leading `//` for a host and let the request slip past path rules enforced by a front proxy. Absolute-form uris still go through `parse_url()`, and a path of only slashes still resolves to `/`
