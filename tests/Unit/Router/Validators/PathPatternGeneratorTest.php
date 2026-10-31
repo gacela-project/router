@@ -57,4 +57,16 @@ final class PathPatternGeneratorTest extends TestCase
 
         self::assertSame('#^(?:/?|(?:/([^\/]+))?(?:/([^\/]+))?)$#', $pattern);
     }
+
+    public function test_regex_metacharacters_in_a_static_segment_are_quoted(): void
+    {
+        self::assertSame('#^/v1\.0/([^\/]+)$#', PathPatternGenerator::generate('v1.0/{id}'));
+        self::assertSame('#^/a\+b/([^\/]+)$#', PathPatternGenerator::generate('a+b/{id}'));
+        self::assertSame('#^/api\(v1\)/([^\/]+)$#', PathPatternGenerator::generate('api(v1)/{id}'));
+    }
+
+    public function test_the_pattern_delimiter_in_a_static_segment_is_quoted(): void
+    {
+        self::assertSame('#^/a\#b/([^\/]+)$#', PathPatternGenerator::generate('a#b/{id}'));
+    }
 }

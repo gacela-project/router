@@ -167,6 +167,37 @@ final class RoutesMatchingTest extends TestCase
         );
     }
 
+    #[DataProvider('literalStaticSegmentProvider')]
+    public function test_a_static_segment_of_a_dynamic_route_matches_literally(
+        string $path,
+        string $uri,
+        bool $matches,
+    ): void {
+        $routes = new Routes();
+        $routes->get($path, FakeController::class, 'basicAction');
+
+        $route = $routes->findMatching(self::request(Request::METHOD_GET, $uri));
+
+        self::assertSame($matches, $route !== null);
+    }
+
+    public static function literalStaticSegmentProvider(): Generator
+    {
+        yield 'dot, itself' => ['v1.0/{id}', '/v1.0/5', true];
+        yield 'dot, another character' => ['v1.0/{id}', '/v1X0/5', false];
+        yield 'plus, itself' => ['a+b/{id}', '/a+b/5', true];
+        yield 'plus, repeated first letter' => ['a+b/{id}', '/aab/5', false];
+        yield 'parens, itself' => ['api(v1)/{id}', '/api(v1)/5', true];
+        yield 'parens, as a group' => ['api(v1)/{id}', '/apiv1/5', false];
+        yield 'star, itself' => ['x*/{id}', '/x*/5', true];
+        yield 'star, as a quantifier' => ['x*/{id}', '/xxx/5', false];
+        yield 'question mark, not optional' => ['wha?/{id}', '/wh/5', false];
+        yield 'question mark, never in a request path' => ['wha?/{id}', '/wha/5', false];
+        yield 'pipe, itself' => ['a|b/{id}', '/a|b/5', true];
+        yield 'pipe, as an alternation' => ['a|b/{id}', '/a/5', false];
+        yield 'hash, never in a request path' => ['a#b/{id}', '/a#b/5', false];
+    }
+
     public function test_no_match_returns_null(): void
     {
         $routes = new Routes();

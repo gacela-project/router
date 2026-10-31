@@ -25,7 +25,7 @@ final class PathPatternGenerator
                 // '/custom/5' match but '/customers' and '/custom5' do not.
                 $pattern .= '(?:/([^\/]+))?';
             } else {
-                $pattern .= '/' . $part;
+                $pattern .= '/' . preg_quote($part, '#');
             }
         }
 

@@ -42,7 +42,7 @@ segments (e.g. `a//b`).
 
 Segments:
 
-- **Static** — `users/active`
+- **Static** — `users/active`. Matched literally, so `v1.0/{id}` does not match `/v1X0/5`.
 - **Mandatory parameter** — `{name}`
 - **Optional parameter** — `{name?}`
 
