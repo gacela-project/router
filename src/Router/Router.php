@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Gacela\Router;
 
 use Closure;
-use Exception;
 use Gacela\Container\Container;
 use Gacela\Router\Configure\Bindings;
 use Gacela\Router\Configure\Handlers;
@@ -136,8 +135,10 @@ final class Router implements RouterInterface
     }
 
     /**
-     * A handler registered for Exception::class is free to type-hint Exception,
-     * so an Error must never be routed to it. Errors fall back to Throwable.
+     * The most specific registered handler: the throwable's own class, then each
+     * parent class, then the interfaces it implements, and Throwable last, which
+     * always has one. An Error has no Exception among its parents, so it never
+     * reaches a handler registered for Exception, which may type-hint Exception.
      *
      * @return callable|class-string
      */
@@ -145,11 +146,33 @@ final class Router implements RouterInterface
     {
         $handlers = $this->handlers->getAllHandlers();
 
-        $fallback = $throwable instanceof Exception
-            ? Exception::class
-            : Throwable::class;
+        foreach (self::handlerCandidates($throwable) as $class) {
+            if (isset($handlers[$class])) {
+                return $handlers[$class];
+            }
+        }
 
-        return $handlers[$throwable::class] ?? $handlers[$fallback];
+        return $handlers[Throwable::class];
+    }
+
+    /**
+     * Most specific first, without Throwable itself: it is the fallback.
+     *
+     * @return list<class-string>
+     */
+    private static function handlerCandidates(Throwable $throwable): array
+    {
+        // Both return false only for a class that does not exist, never for an instance.
+        /** @var array<class-string, class-string> $parents */
+        $parents = class_parents($throwable);
+        /** @var array<class-string, class-string> $interfaces */
+        $interfaces = class_implements($throwable);
+
+        return [
+            $throwable::class,
+            ...array_values($parents),
+            ...array_values(array_diff($interfaces, [Throwable::class])),
+        ];
     }
 
     /**

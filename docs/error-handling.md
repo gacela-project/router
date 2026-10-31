@@ -12,16 +12,24 @@ $handlers->handle(TypeError::class, static fn (TypeError $e): string => "Bad typ
 
 ## How a handler is chosen
 
-1. The handler registered for the thrown throwable's exact class, or
-2. the fallback handler: `Exception::class` when an exception was thrown,
-   `Throwable::class` when an `Error` was.
+The most specific handler wins. The router looks, in order, for a handler registered for:
 
-Four handlers are registered out of the box:
+1. the thrown throwable's exact class,
+2. each of its parent classes, nearest first,
+3. the interfaces it implements, in the order PHP lists them,
+4. `Throwable`, which always has one.
+
+A handler for a base class therefore also catches its subclasses:
+
+```php
+$handlers->handle(RuntimeException::class, MyRuntimeHandler::class);   // also UnexpectedValueException, ...
+```
+
+Three handlers are registered out of the box:
 
 - `NotFound404Exception` → `NotFound404ExceptionHandler`
 - `MethodNotAllowed405Exception` → `MethodNotAllowed405ExceptionHandler`
-- `Exception` (fallback for exceptions) → `FallbackExceptionHandler`
-- `Throwable` (fallback for errors) → `FallbackExceptionHandler`
+- `Throwable` (catch-all) → `FallbackExceptionHandler`
 
 So an unmatched route (which throws `NotFound404Exception`) produces a 404 response
 without any configuration, and an uncaught `TypeError` produces a 500 rather than
@@ -55,9 +63,10 @@ $handlers->handle(
 );
 ```
 
-An `Error` never falls back to the `Exception::class` handler. A handler registered
-there is free to type-hint `Exception`, so handing it an `Error` would fail inside
-the handler itself. Register `Throwable::class` if you want one true catch-all:
+An `Error` never reaches a handler registered for `Exception::class`, since it is not an
+`Exception`. That handler is free to type-hint `Exception`, so handing it an `Error` would
+fail inside the handler itself. Register `Throwable::class` to catch everything that has no
+closer handler, replacing the built-in 500:
 
 ```php
 $handlers->handle(Throwable::class, static fn (Throwable $t): string => "Oops: {$t->getMessage()}");
