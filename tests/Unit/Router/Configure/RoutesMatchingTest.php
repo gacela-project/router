@@ -7,6 +7,8 @@ namespace GacelaTest\Unit\Router\Configure;
 use Gacela\Router\Configure\Routes;
 use Gacela\Router\Entities\Request;
 use GacelaTest\Feature\Router\Fixtures\FakeController;
+use Generator;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 use function GacelaTest\countedPregMatchCalls;
@@ -120,6 +122,49 @@ final class RoutesMatchingTest extends TestCase
         // built '#^/a.c$#', where it was a wildcard and matched '/abc' too.
         self::assertNotNull($routes->findMatching(self::request(Request::METHOD_GET, '/a.c')));
         self::assertNull($routes->findMatching(self::request(Request::METHOD_GET, '/abc')));
+    }
+
+    #[DataProvider('optionalBoundaryProvider')]
+    public function test_a_trailing_optional_only_matches_at_a_segment_boundary(
+        string $path,
+        string $uri,
+        bool $matches,
+    ): void {
+        $routes = new Routes();
+        $routes->get($path, FakeController::class, 'basicAction');
+
+        $route = $routes->findMatching(self::request(Request::METHOD_GET, $uri));
+
+        self::assertSame($matches, $route !== null);
+    }
+
+    public static function optionalBoundaryProvider(): Generator
+    {
+        yield 'bare path' => ['custom/{id?}', '/custom', true];
+        yield 'with the optional' => ['custom/{id?}', '/custom/5', true];
+        yield 'prefix of a longer word' => ['custom/{id?}', '/customers', false];
+        yield 'digit glued to the prefix' => ['custom/{id?}', '/custom5', false];
+        yield 'too many segments' => ['custom/{id?}', '/custom/5/6', false];
+        yield 'two optionals, none' => ['a/{one?}/{two?}', '/a', true];
+        yield 'two optionals, one' => ['a/{one?}/{two?}', '/a/1', true];
+        yield 'two optionals, both' => ['a/{one?}/{two?}', '/a/1/2', true];
+        yield 'two optionals, glued' => ['a/{one?}/{two?}', '/ab', false];
+        yield 'only optionals, root' => ['{a?}/{b?}', '/', true];
+        yield 'only optionals, one' => ['{a?}/{b?}', '/x', true];
+        yield 'only optionals, both' => ['{a?}/{b?}', '/x/y', true];
+        yield 'only optionals, too many' => ['{a?}/{b?}', '/x/y/z', false];
+    }
+
+    public function test_a_longer_word_than_an_optional_route_is_not_a_known_path(): void
+    {
+        $routes = new Routes();
+        $routes->get('custom/{id?}', FakeController::class, 'basicAction');
+
+        self::assertSame([], $routes->allowedMethodsFor(self::request(Request::METHOD_DELETE, '/customers')));
+        self::assertSame(
+            [Request::METHOD_GET, Request::METHOD_HEAD],
+            $routes->allowedMethodsFor(self::request(Request::METHOD_DELETE, '/custom')),
+        );
     }
 
     public function test_no_match_returns_null(): void

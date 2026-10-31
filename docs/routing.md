@@ -49,6 +49,9 @@ Segments:
 All optional parameters must come after every mandatory one, otherwise the path is
 rejected.
 
+An optional parameter is a whole segment: `archive/{year?}` matches `/archive` and
+`/archive/2026`, but not `/archives` or `/archive2026`.
+
 ```php
 $routes->get('users/{id}', UserController::class, 'show');
 $routes->get('archive/{year?}', ArchiveController::class, 'list');
