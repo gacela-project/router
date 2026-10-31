@@ -31,6 +31,21 @@ final class RouteGroupTest extends HeaderTestCase
         $router->run();
     }
 
+    public function test_a_group_prefix_may_hold_a_param_that_reaches_the_action(): void
+    {
+        $_SERVER['REQUEST_URI'] = '/tenants/acme/info';
+        $_SERVER['REQUEST_METHOD'] = Request::METHOD_GET;
+
+        $this->expectOutputString('tenant acme');
+
+        $router = new Router(static function (Routes $routes): void {
+            $routes->group('tenants/{tenant}', static function (Routes $routes): void {
+                $routes->get('info', static fn (string $tenant): string => "tenant {$tenant}");
+            });
+        });
+        $router->run();
+    }
+
     public function test_the_unprefixed_path_no_longer_matches(): void
     {
         $_SERVER['REQUEST_URI'] = 'https://example.org/users';

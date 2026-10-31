@@ -42,14 +42,19 @@ $routes->get('users/list', UserController::class, 'all'); // UserController::all
 ## Path patterns
 
 Paths are matched without a leading slash. `'/'` is the home path. A path is invalid
-(throws `MalformedPathException`) when it has a leading or trailing slash, or empty
-segments (e.g. `a//b`).
+(throws `MalformedPathException`) when it has a leading or trailing slash, empty
+segments (such as `a//b`), or a malformed parameter (see below).
 
 Segments:
 
 - **Static**: `users/active`. Matched literally, so `v1.0/{id}` does not match `/v1X0/5`.
 - **Mandatory parameter**: `{name}`
 - **Optional parameter**: `{name?}`
+
+A segment is either plain text or exactly one parameter. The name must be a valid PHP
+argument name: letters, digits and underscores, not starting with a digit. `v{version}`,
+`{id}.json`, `{a}-{b}`, `{}` and `{id` throw `MalformedPathException`, since the text around
+a brace would otherwise be ignored and the segment would match anything.
 
 All optional parameters must come after every mandatory one, otherwise the path is
 rejected.

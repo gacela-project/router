@@ -40,6 +40,9 @@ final class PathValidatorTest extends TestCase
         yield 'single optional param' => ['users/{id?}'];
         yield 'multiple optional params' => ['archive/{year?}/{month?}'];
         yield 'only optional param' => ['{id?}'];
+        yield 'underscore in a param name' => ['users/{user_id}'];
+        yield 'upper case and digits in a param name' => ['users/{userId2}'];
+        yield 'a leading underscore in a param name' => ['users/{_id}'];
 
         yield 'mandatory then optional' => ['posts/{id}/comments/{commentId?}'];
         yield 'complex path with mixed params' => ['api/v1/users/{userId}/posts/{postId}/comments/{commentId?}'];
@@ -85,5 +88,17 @@ final class PathValidatorTest extends TestCase
         yield 'multiple optional then mandatory' => ['archive/{year?}/{month?}/{day}'];
         yield 'static after optional' => ['users/{id?}/posts'];
         yield 'static after multiple optional' => ['archive/{year?}/latest'];
+
+        yield 'text before a param' => ['v{version}/{id}'];
+        yield 'text after a param' => ['{id}.json'];
+        yield 'two params in one segment' => ['{a}-{b}'];
+        yield 'an empty param name' => ['users/{}'];
+        yield 'an empty optional param name' => ['users/{?}'];
+        yield 'an unclosed brace' => ['users/{id'];
+        yield 'an unopened brace' => ['users/id}'];
+        yield 'a param name starting with a digit' => ['users/{1x}'];
+        yield 'a hyphen in a param name' => ['users/{user-id}'];
+        yield 'nested braces' => ['users/{{id}}'];
+        yield 'a space in a param name' => ['users/{my id}'];
     }
 }
