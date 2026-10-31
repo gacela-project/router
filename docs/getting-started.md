@@ -6,11 +6,11 @@
 composer require gacela-project/router
 ```
 
-Requires PHP `>=8.1`. The only runtime dependency is `gacela-project/container`.
+Requires PHP `>=8.3`. The only runtime dependency is `gacela-project/container`.
 
 ## A minimal app
 
-Point your web server at a single entry file (e.g. `public/index.php`):
+Point your web server at one entry file, such as `public/index.php`:
 
 ```php
 <?php
@@ -58,6 +58,8 @@ Then open <http://localhost:8081>. See [`example/example.php`](../example/exampl
 
 ## Next
 
-- [Routing](routing.md)
-- [Responses](responses.md)
-- [Middleware](middleware.md)
+- [Routing](routing.md): paths, parameters and controllers
+- [Responses](responses.md): what an action can return
+- [Request](request.md): reading query and form values
+- [Middleware](middleware.md): code that runs around every request
+- [Error handling](error-handling.md): custom 404, 405 and error pages

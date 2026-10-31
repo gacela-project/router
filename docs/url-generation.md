@@ -16,8 +16,8 @@ $routes->get('admin', AdminController::class)
     ->name('admin.index');
 ```
 
-Names are optional. An unnamed route works exactly as before, it just cannot be
-looked up.
+Names are optional. An unnamed route works as before. You cannot
+look it up by name.
 
 ## Generating a URL
 

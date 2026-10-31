@@ -62,7 +62,7 @@ $routes->get('/', HomeController::class)->middleware('web');
 
 ## Resolution and order
 
-- A middleware can be given as an **instance** or as a **`class-string`** — a class
+- A middleware can be given as an **instance** or as a **`class-string`**. A class
   string is resolved through the container when the pipeline runs.
 - A per-route `->middleware('name')` referencing a defined group expands to that
   group's middlewares.

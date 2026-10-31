@@ -2,7 +2,7 @@
 
 The package ships a `RouterGacelaConfig` adapter that registers the router in the
 [Gacela](https://gacela-project.com/) container. It binds both `Router` and
-`RouterInterface` to a single shared `Router` instance, using `addBindingIf` — so if
+`RouterInterface` to a single shared `Router` instance, using `addBindingIf`. If
 your application already bound one of them, your binding wins.
 
 ## Bootstrapping
@@ -51,5 +51,5 @@ and each one adds its routes to the same router before `run()` is called.
 ## Overriding the binding
 
 Since the adapter uses `addBindingIf`, binding your own `RouterInterface`/`Router`
-before the adapter runs keeps your instance in place — handy for tests or a
+before the adapter runs keeps your instance in place. This helps in tests or with a
 customised router subclass.
