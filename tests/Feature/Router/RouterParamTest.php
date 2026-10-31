@@ -15,8 +15,6 @@ use PHPUnit\Framework\TestCase;
 
 final class RouterParamTest extends TestCase
 {
-    private const PROVIDER_TRIES = 10;
-
     public function test_pass_many_params_to_the_action(): void
     {
         $params = ['foo', 'bar', 'baz'];
@@ -63,10 +61,11 @@ final class RouterParamTest extends TestCase
 
     public static function stringProvider(): Generator
     {
-        for ($try = 0; $try < self::PROVIDER_TRIES; ++$try) {
-            $randomString = 'word-' . mt_rand();
-            yield $randomString => ['string' => $randomString];
-        }
+        yield 'word' => ['string' => 'word'];
+        yield 'zero, which is falsy' => ['string' => '0'];
+        yield 'upper case' => ['string' => 'UPPER'];
+        yield 'with dashes' => ['string' => 'with-some-dashes'];
+        yield 'digits only' => ['string' => '12345'];
     }
 
     public function test_do_not_pass_optional_string_params_to_the_action(): void
@@ -156,10 +155,11 @@ final class RouterParamTest extends TestCase
 
     public static function intProvider(): Generator
     {
-        for ($try = 0; $try < self::PROVIDER_TRIES; ++$try) {
-            $randomInt = (string)random_int(1, 9999);
-            yield "#{$randomInt}" => ['int' => $randomInt];
-        }
+        yield 'zero, which is falsy' => ['int' => '0'];
+        yield 'one' => ['int' => '1'];
+        yield 'negative' => ['int' => '-5'];
+        yield 'four digits' => ['int' => '9999'];
+        yield 'the largest int' => ['int' => (string)PHP_INT_MAX];
     }
 
     #[DataProvider('floatProvider')]
@@ -178,10 +178,10 @@ final class RouterParamTest extends TestCase
 
     public static function floatProvider(): Generator
     {
-        for ($try = 0; $try < self::PROVIDER_TRIES; ++$try) {
-            $randomFloat = (string)mt_rand();
-            yield "#{$randomFloat}" => ['float' => $randomFloat];
-        }
+        yield 'zero, which is falsy' => ['float' => '0'];
+        yield 'a whole number' => ['float' => '100'];
+        yield 'a fraction' => ['float' => '1.5'];
+        yield 'negative' => ['float' => '-2.25'];
     }
 
     #[DataProvider('boolProvider')]
