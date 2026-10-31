@@ -18,7 +18,7 @@ final class PathValidator
             return false;
         }
 
-        return self::hasValidParameterOrder($path);
+        return self::hasOnlyWholeSegmentParams($path) && self::hasValidParameterOrder($path);
     }
 
     private static function hasValidFormat(string $path): bool
@@ -50,6 +50,25 @@ final class PathValidator
         }
 
         return false;
+    }
+
+    /**
+     * A brace belongs to a segment that is exactly one parameter. Anything else,
+     * such as 'v{version}' or '{id', would be matched as a wildcard that ignores
+     * the text around the braces.
+     */
+    private static function hasOnlyWholeSegmentParams(string $path): bool
+    {
+        foreach (explode('/', $path) as $part) {
+            $isParam = preg_match(RouteParams::MANDATORY_PARAM_PATTERN, $part)
+                || preg_match(RouteParams::OPTIONAL_PARAM_PATTERN, $part);
+
+            if (!$isParam && strpbrk($part, '{}') !== false) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**

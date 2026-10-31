@@ -18,8 +18,11 @@ use function is_subclass_of;
 
 final class RouteParams
 {
-    public const MANDATORY_PARAM_PATTERN = '#({.*[^?]})#';
-    public const OPTIONAL_PARAM_PATTERN = '#(/?{.*\?})#';
+    /** A whole segment: '{id}'. The name is what a PHP argument can be called. */
+    public const MANDATORY_PARAM_PATTERN = '#^\{[A-Za-z_][A-Za-z0-9_]*\}$#';
+
+    /** A whole segment: '{id?}'. */
+    public const OPTIONAL_PARAM_PATTERN = '#^\{[A-Za-z_][A-Za-z0-9_]*\?\}$#';
 
     /**
      * Signatures never change within a process, so each controller action is

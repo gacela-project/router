@@ -6,6 +6,7 @@ namespace GacelaTest\Feature\Router;
 
 use Gacela\Router\Configure\Routes;
 use Gacela\Router\Entities\Request;
+use Gacela\Router\Exceptions\MalformedPathException;
 use Gacela\Router\Exceptions\UrlGenerationException;
 use Gacela\Router\Router;
 use Gacela\Router\UrlGenerator;
@@ -68,12 +69,12 @@ final class NamedRouteTest extends TestCase
         self::assertSame('/a', (new UrlGenerator($routes))->generate('optionals', ['two' => 2]));
     }
 
-    public function test_a_segment_with_unbalanced_braces_stays_literal(): void
+    public function test_a_segment_with_unbalanced_braces_is_refused_at_registration(): void
     {
-        $routes = new Routes();
-        $routes->get('a/{b', FakeController::class, 'basicAction')->name('literal');
+        $this->expectException(MalformedPathException::class);
+        $this->expectExceptionMessage("Malformed path: 'a/{b'.");
 
-        self::assertSame('/a/{b', (new UrlGenerator($routes))->generate('literal'));
+        (new Routes())->get('a/{b', FakeController::class, 'basicAction');
     }
 
     public function test_unnamed_routes_registered_first_do_not_stop_the_lookup(): void

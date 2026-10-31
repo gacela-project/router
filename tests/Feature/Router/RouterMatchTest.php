@@ -96,6 +96,27 @@ final class RouterMatchTest extends TestCase
         $router->run();
     }
 
+    #[DataProvider('malformedParamSegmentProvider')]
+    public function test_throw_malformed_path_exception_due_a_segment_that_is_not_exactly_one_param(string $path): void
+    {
+        $this->expectException(MalformedPathException::class);
+        $this->expectExceptionMessage("Malformed path: '{$path}'.");
+
+        $router = new Router(static function (Routes $routes) use ($path): void {
+            $routes->get($path, FakeController::class);
+        });
+        $router->run();
+    }
+
+    public static function malformedParamSegmentProvider(): Generator
+    {
+        yield 'text before the param' => ['v{version}/{id}'];
+        yield 'text after the param' => ['{id}.json'];
+        yield 'two params in a segment' => ['{a}-{b}'];
+        yield 'no name' => ['users/{}'];
+        yield 'unclosed' => ['users/{id'];
+    }
+
     public function test_throw_malformed_path_exception_due_mandatory_argument_after_optional_argument(): void
     {
         $this->expectException(MalformedPathException::class);
