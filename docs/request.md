@@ -6,7 +6,10 @@ builds it once per `run()` and passes the same instance through route matching.
 
 ## Injecting it into a controller
 
-Type-hint `Request` in your controller constructor and it is injected automatically:
+Type-hint `Request` in your controller constructor and it is injected automatically. It is
+the request of the current `run()`, so a router built once and run per request (a worker
+process) never hands a controller an earlier one. Binding your own `Request` with
+`$bindings->bind(Request::class, ...)` takes precedence:
 
 ```php
 use Gacela\Router\Entities\Request;

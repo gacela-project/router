@@ -47,7 +47,10 @@ final class Route
         $params = (new RouteParams($this, $request))->getAll();
 
         if (!is_object($this->controller)) {
-            $creator = new Container($bindings->getAllBindings());
+            // The request of this run, unless the user bound their own. Building it
+            // here keeps a long-lived router from handing every controller the
+            // request that existed when the router was constructed.
+            $creator = new Container($bindings->getAllBindings() + [Request::class => $request]);
             /** @var object $controller */
             $controller = $creator->get($this->controller);
             $response = $controller->{$this->action}(...$params);
