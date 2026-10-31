@@ -41,7 +41,10 @@ final class UrlGenerator
                 continue;
             }
 
-            if (!isset($params[$param])) {
+            // An empty value is as good as none: '/users/' would never match the route.
+            $value = isset($params[$param]) ? self::encodedSegment($name, $param, $params[$param]) : '';
+
+            if ($value === '') {
                 if (!str_ends_with($segment, '?}')) {
                     throw UrlGenerationException::missingParam($name, $param);
                 }
@@ -51,7 +54,7 @@ final class UrlGenerator
                 break;
             }
 
-            $segments[] = self::stringify($name, $param, $params[$param]);
+            $segments[] = $value;
         }
 
         // The root path is stored as '', which explodes to a single empty
@@ -102,16 +105,19 @@ final class UrlGenerator
         return trim($segment, '{?}');
     }
 
-    private static function stringify(string $name, string $param, mixed $value): string
+    /**
+     * Percent-encoded, so a '/' or a space in a value stays inside its segment.
+     */
+    private static function encodedSegment(string $name, string $param, mixed $value): string
     {
         if ($value instanceof BackedEnum) {
-            return (string)$value->value;
+            return rawurlencode((string)$value->value);
         }
 
         if (!is_scalar($value) || is_bool($value)) {
             throw UrlGenerationException::unsupportedParamType($name, $param, get_debug_type($value));
         }
 
-        return (string)$value;
+        return rawurlencode((string)$value);
     }
 }

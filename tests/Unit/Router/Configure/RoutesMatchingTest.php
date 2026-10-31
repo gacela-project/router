@@ -198,6 +198,15 @@ final class RoutesMatchingTest extends TestCase
         yield 'hash, never in a request path' => ['a#b/{id}', '/a#b/5', false];
     }
 
+    public function test_an_encoded_slash_does_not_split_a_segment(): void
+    {
+        $routes = new Routes();
+        $routes->get('hello/{a}/{b}', FakeController::class, 'basicAction');
+
+        self::assertNull($routes->findMatching(self::request(Request::METHOD_GET, '/hello/a%2Fb')));
+        self::assertNotNull($routes->findMatching(self::request(Request::METHOD_GET, '/hello/a/b')));
+    }
+
     public function test_no_match_returns_null(): void
     {
         $routes = new Routes();

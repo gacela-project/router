@@ -68,7 +68,7 @@ final class RouteParams
             $value = $pathParamValues[$position] ?? null;
 
             if ($key !== null && $value !== null) {
-                $pathParams[trim($key, '{?}')] = $value;
+                $pathParams[trim($key, '{?}')] = rawurldecode($value);
             }
         }
 
