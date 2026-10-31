@@ -21,12 +21,19 @@ final class PathPatternGenerator
             if (preg_match(RouteParams::MANDATORY_PARAM_PATTERN, $part)) {
                 $pattern .= '/([^\/]+)';
             } elseif (preg_match(RouteParams::OPTIONAL_PARAM_PATTERN, $part)) {
-                $pattern .= '/?([^\/]+)?';
+                // The slash lives inside the optional group, so '/custom' and
+                // '/custom/5' match but '/customers' and '/custom5' do not.
+                $pattern .= '(?:/([^\/]+))?';
             } else {
                 $pattern .= '/' . $part;
             }
         }
 
-        return '#^/' . ltrim($pattern, '/') . '$#';
+        // Nothing fixed comes first, so the root has to match on its own too.
+        if (str_starts_with($pattern, '(')) {
+            return '#^(?:/?|' . $pattern . ')$#';
+        }
+
+        return '#^' . $pattern . '$#';
     }
 }

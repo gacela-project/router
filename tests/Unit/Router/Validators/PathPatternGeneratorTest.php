@@ -34,7 +34,7 @@ final class PathPatternGeneratorTest extends TestCase
     {
         $pattern = PathPatternGenerator::generate('users/{id?}');
 
-        self::assertSame('#^/users/?([^\/]+)?$#', $pattern);
+        self::assertSame('#^/users(?:/([^\/]+))?$#', $pattern);
     }
 
     public function test_multiple_mandatory_parameters(): void
@@ -48,6 +48,13 @@ final class PathPatternGeneratorTest extends TestCase
     {
         $pattern = PathPatternGenerator::generate('posts/{id}/comments/{commentId?}');
 
-        self::assertSame('#^/posts/([^\/]+)/comments/?([^\/]+)?$#', $pattern);
+        self::assertSame('#^/posts/([^\/]+)/comments(?:/([^\/]+))?$#', $pattern);
+    }
+
+    public function test_only_optional_parameters_also_match_the_root(): void
+    {
+        $pattern = PathPatternGenerator::generate('{a?}/{b?}');
+
+        self::assertSame('#^(?:/?|(?:/([^\/]+))?(?:/([^\/]+))?)$#', $pattern);
     }
 }
