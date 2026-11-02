@@ -4,8 +4,8 @@ description: PHP conventions for router implementation and examples.
 globs: ["src/**", "example/**"]
 ---
 
-Use declare(strict_types=1), Gacela\Router namespaces under src/Router/, and sibling naming. Let .php-cs-fixer.dist.php define formatting. Keep PHP 8.3 compatibility; Composer's platform override is not a runtime check.
+Use `declare(strict_types=1)`, `Gacela\Router` namespaces under `src/Router/`, and sibling naming. `.php-cs-fixer.dist.php` defines formatting. Keep PHP 8.3 compatible; Composer's platform override is not a runtime check.
 
-Keep route registration in Configure/, request and response behavior in Entities/, path rules in Validators/, and orchestration in Router. Preserve standalone use when changing Config/RouterGacelaConfig.php; framework integration must stay optional.
+Route registration lives in `Configure/`, request and response behaviour in `Entities/`, path rules in `Validators/`, orchestration in `Router`. Changing `Config/RouterGacelaConfig.php` must keep standalone use working; framework integration stays optional.
 
-For routing changes, consult .agnostic-ai/references/http-contract.md and verify affected behavior. Avoid adding per-request reflection or full route scans without checking existing caches and method indexes. Keep header() calls compatible with the namespaced capture in tests/Feature/header.php.
+For routing changes, check `.agnostic-ai/references/http-contract.md` and verify the affected behaviour. Before adding per-request reflection or a full route scan, check the existing caches and method indexes. Keep `header()` calls compatible with the namespaced capture in `tests/Feature/header.php`.

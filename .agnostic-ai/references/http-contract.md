@@ -1,6 +1,6 @@
 # HTTP behavior checklist
 
-Paths are relative to the repository root. This describes the current implementation; verify it when changing behavior. Select checks for the affected boundary.
+Describes the current implementation; verify it before changing behaviour. Paths are relative to the repository root.
 
 | Boundary | Behavior to preserve or change explicitly | Evidence |
 | --- | --- | --- |

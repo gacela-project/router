@@ -1,11 +1,11 @@
 ---
 name: router-gh-issues
-description: Work through a queue of open Gacela Router issues.
+description: Use only when asked to work through a queue of open Gacela Router issues (--limit N, --label LABEL, --dry-run).
 disable-model-invocation: true
 ---
 
-Accept --limit N, --label LABEL and --dry-run. Fetch open issues unassigned or assigned to the current user, following pagination. Deduplicate by number, order oldest first and show the queue. Dry-run stops here.
+Fetch open issues unassigned or assigned to the current user (paginate, deduplicate), oldest first, and show the queue. `--dry-run` stops here.
 
-Process sequentially with router-gh-issue. Recheck assignments before each issue; skip issues assigned to someone else. Preserve local work. Stop and report unresolved validation failures or blocked prerequisites.
+Process sequentially with `router-gh-issue`. Recheck assignment before each issue; skip issues assigned to someone else. Keep local work. Stop and report unresolved validation failures or blocked prerequisites.
 
-Leave reviewable PRs unless merging is authorized. When authorized, wait for required CI and finish cleanup before continuing.
+Leave PRs for review unless merging is authorized; then wait for required CI and clean up before the next issue.
